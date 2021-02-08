@@ -34,7 +34,6 @@ optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
 model = Model(inputs=x_input, outputs=x)
 model.compile(optimizer=optimizer, loss=cost_function)
 model.fit(x=x_data, y=y_data, batch_size=1, epochs=100)
-
 model.summary()
 
 output = model.predict(x_data)
