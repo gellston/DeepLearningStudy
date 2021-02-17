@@ -7,9 +7,13 @@
  ***미정*** <br/>
 
 ###  Chapter 
-1. Linear Regression.
-2. Logistic Regression.
+1. Linear Regression. - 완료
+2. Logistic Regression. - 완료
 3. Softmax Regression.
+4. XOR 문제 
+5. ANN
+6. CNN
+
 
 <br/>
 
