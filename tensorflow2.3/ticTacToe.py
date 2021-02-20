@@ -11,17 +11,18 @@ from __future__ import absolute_import, division, print_function
 # import the pandas library and refer to it as `pd`
 import pandas as pd
 
+
+
+
 # define the game state as a list of lists with 3x3 grid cells
 # initialize the cells to a blank space character
-state = [
-    [" "," "," "],
-    [" "," "," "],
-    [" "," "," "]
-]
+state = [[" "," "," "],
+         [" "," "," "],
+         [" "," "," "]]
 
-def reset_game():
-    for i in range(3):
-        for j in range(3):
+def reset_game(row, col):
+    for i in range(row):
+        for j in range(col):
             state[i][j] = " "
 
 # define a function to check if a mark is valid
@@ -47,69 +48,105 @@ def mark_o(row, col):
 def show_grid():
     # use the pandas dataframe to help format the matrix
     print(pd.DataFrame(state))
-    print("\n")
+
     
 def get_winner():
 
-    for i in range(3):
-        count_p1 = 0
-        count_p2 = 0
-        for j in range(3):
-            if state[i][j] == 'o' :
-                count_p1 += 1
-            if state[i][j] == 'x':
-                count_p2 += 1
+    player1_count = 0
+    player2_count = 0
 
-        if count_p1 == 3 :
-            print('p1 win')
-            return
-        if count_p2 == 3 :
-            print('p2 win')
+    for row in range(3):
+        for col in range(3):
+            if state[row][col] == 'x':
+                player1_count+=1
+
+            if state[row][col] == 'o':
+                player2_count+=1
+
+            if player1_count == 3:
+                print('x')
+                return
+
+            if player2_count == 3:
+                print('o')
+                return
+
+    player1_count = 0
+    player2_count = 0
+
+    for col in range(3):
+        for row in range(3):
+
+            if state[row][col] == 'x':
+                player1_count+=1
+
+            if state[row][col] == 'o':
+                player2_count+=1
+
+            if player1_count == 3:
+                print('x')
+                return
+
+            if player2_count == 3:
+                print('o')
+                return
+
+    player1_count = 0
+    player2_count = 0
+
+    for d in range(3):
+        if state[d][d] == 'x':
+            player1_count += 1
+
+        if state[d][d] == 'o':
+            player2_count += 1
+
+        if player1_count == 3:
+            print('x')
             return
 
-    for i in range(3):
-        count_p1 = 0
-        count_p2 = 0
-        for j in range(3):
-            if state[j][i] == 'o' :
-                count_p1 += 1
-            if state[j][i] == 'x':
-                count_p2 += 1
-
-        if count_p1 == 3:
-            print('p1 win')
-            return
-        if count_p2 == 3:
-            print('p2 win')
+        if player2_count == 3:
+            print('o')
             return
 
-    if (state[0][0] == 'o' and state[1][1] == 'o' and state[2][2] == 'o') or (state[2][0] == 'o' and state[1][1] == 'o' and state[0][2] == 'o'):
-        print('p1 win')
+    if state[0][2] == 'x' and state[1][1] == 'x' and state[2][0] == 'x' :
+        print('x')
         return
 
-    if (state[0][0] == 'x' and state[1][1] == 'x' and state[2][2] == 'x') or (state[2][0] == 'x' and state[1][1] == 'x' and state[0][2] == 'x'):
-        print('p2 win')
+    if state[0][2] == 'o' and state[1][1] == 'o' and state[2][0] == 'o':
+        print('o')
         return
+
+    print(' ')
+
+
 
 def is_tie():
-  pass # replace this line for HW-01
+    count = 0
+    for row in range(3):
+        for col in range(3):
+            if state[row][col] == " ":
+                count += 1
+
+    if count == 0:
+        return True
+    else:
+        return False
+
 
 #%% example game sequence
 
-mark_x(1, 1)
-show_grid()
-get_winner()
 
-mark_o(0, 2)
-show_grid()
-get_winner()
+print('test')
 
-mark_x(0, 0)
-show_grid()
-get_winner()
 
-mark_x(2, 2)
-show_grid()
-get_winner()
+
+
+
+
+
+
+
+
 
 
