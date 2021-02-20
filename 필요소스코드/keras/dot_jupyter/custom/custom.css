@@ -1,0 +1,40 @@
+.CodeMirror, .CodeMirror-dialog, .CodeMirror-search-field, .terminal-app, .terminal, .code_cell
+{
+    font-family: consolas;
+    font-size: 17pt;
+    line-height: 150%;
+}
+
+.container { width:70% !important; }
+//.container { width:100% !important; }
+
+/* Tunes the space between cells */
+div.cell
+{
+    margin-top:1em;
+    margin-bottom:1em;
+}
+
+/* Main titles bigger, centered */
+div.text_cell_render h1
+{
+    font-size: 2.2em;
+    line-height:1.4em;
+    text-align:center;
+}
+
+/*  Parts names nearer from text */
+div.text_cell_render h2
+{
+    margin-bottom: -0.4em;
+}
+
+/* Customize text cells */
+div.text_cell_render
+{
+    //font-family: 'Times New Roman';
+    font-size:1.5em;
+    line-height:1.4em;
+    padding-left:3em;
+    padding-right:3em;
+}

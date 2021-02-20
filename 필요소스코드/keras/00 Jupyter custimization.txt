@@ -1,0 +1,52 @@
+시작 디렉토리 설정
+
+C:\Users\username\.jupyter 폴더안에 jupyter_notebook_config.py 를 넣고 아래 항목을 수정한다.
+## The directory to use for notebooks and kernels.
+c.NotebookApp.notebook_dir = 'D:/desired/path'
+
+노트북 셀 모양 설정
+
+C:\Users\username\.jupyter 폴더안에 custom 이라는 폴더를 만든다. custom 폴더 안에 다음과 같은 내용의 custom.css 파일을 만든다.
+
+.CodeMirror pre, .CodeMirror-dialog, .CodeMirror-search-field, .terminal-app, .terminal, .code_cell
+{
+    font-family: consolas;
+    font-size: 11pt;
+    line-height: 150%;
+}
+
+.container { width:70% !important; }
+//.container { width:100% !important; }
+
+/* Tunes the space between cells */
+div.cell
+{
+    margin-top:1em;
+    margin-bottom:1em;
+}
+
+/* Main titles bigger, centered */
+div.text_cell_render h1
+{
+    font-size: 2.2em;
+    line-height:1.4em;
+    text-align:center;
+}
+
+/*  Parts names nearer from text */
+div.text_cell_render h2
+{
+    margin-bottom: -0.4em;
+}
+
+/* Customize text cells */
+div.text_cell_render
+{
+    //font-family: 'Times New Roman';
+    font-size:1.5em;
+    line-height:1.4em;
+    padding-left:3em;
+    padding-right:3em;
+}
+
+필요하지 않은 항목은 /**/ 나 // 로 코멘트 처리하거나 항목의 값을 자신의 취향에 맞게 조절하고 저장한 후 주피터가 실행되는 브라우저의 새로 고침 버튼을 눌러 반영시킨다.

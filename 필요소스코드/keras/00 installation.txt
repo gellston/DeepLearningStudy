@@ -1,0 +1,69 @@
+< 가상 환경 설치 >
+
+Python 3.5 - 3.7 사용
+mkdir venv
+cd venv
+venv 폴더안에 다음의 내용으로 activate.cmd 파일을 생성한다.
+@echo off
+%1\Scripts\activate
+virtualenv computer-vision
+activate computer-vision
+
+< Before TensorFlow 2 >
+
+CUDA Toolkit 10.0 설치
+cudnn-10.0-windows10-x64-v7.5.1.10.zip 다운받고 압축 해제
+bin, include, lib 안에있는 파일들을 각각 시스템 변수 CUDA_PATH가 정의하는 디렉토리의 bin, include, lib 로 복사
+
+activate computer-vision
+pip install tensorflow-gpu
+pip install keras
+python 을 실행하고
+import tensorflow 를 실행해서 에러가 없는지 확인
+exit() 으로 파이썬에서 나온다.
+에러가 있는 경우 cudnn64_7.dll 이 들어있는 cudnn 압축푼 파일의 bin 경로를 환경변수 path 에 추가해주고
+cmd 창을 닫았다가 다시 열고 python 에서 import tensorflow 에서 에러가 없는 확인한다.
+
+텐서플로우가가 GPU를 인식하는지 확인하는 방법
+
+import tensorflow as tf 
+print(tf.test.is_built_with_cuda())
+print(tf.test.is_gpu_available(cuda_only=False, min_cuda_compute_capability=None))
+모두 True 가 나오면 된다.
+
+다음과 같이도 테스트할 수 있다.
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+혹은
+from keras import backend
+print(backend.tensorflow_backend._get_available_gpus())
+
+device 항목에 GPU 가 있으면 설치가 제대로 된 것이다.
+
+텐서플로우 워닝 보이지 않게 하는 방법
+가상환경 computer-vision 안의 Lib\site-packages\tensorflow\__init__.py 의 맨 밑에 다음을 추가
+logging.set_verbosity(logging.ERROR)
+_os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
+
+< TensorFlow 2.1 >
+
+NVidia GPU driver 418 이상으로 업데이트
+CUDA 10.1 설치
+cuDNN 7.6 다운 받고 압축 해제한 후 특정 폴더에 옮기기 (예) C: 루트
+cudnn 의 cuda\bin 을 path 에 추가
+
+activate computer-vision
+pip install tensorflow
+
+
+< Jupyter >
+
+activate computer-vision
+pip install jupyter
+jupyter notebook
+
+
+< Google colab >
+
+로컬 컴퓨터에 설치를 하지 않고 Gooble Colab 에서 Jypiter notebook 을 사용할 수도 있다.
