@@ -1,52 +1,38 @@
-import tensorflow as tf
-from tensorflow.keras import Model
-from tensorflow.keras import Input
-from tensorflow.keras.layers import Dense
+import numpy as np
+from model.SimpleDense import SimpleDense
+from tensorflow.keras.models import model_from_json
 
-class Linear(tf.keras.layers.Layer):
-  def __init__(self, units=32):
-    super(Linear, self).__init__()
-    self.w_init_value = tf.random_normal_initializer()
-    self.b_init_value = tf.zeros_initializer()
-    self.w = tf.Variable(initial_value=self.w_init_value(shape=([units])), trainable=True)
-    self.b = tf.Variable(initial_value=self.b_init_value(shape=([units])), trainable=True)
+x_data = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]).reshape(10, 1)
+y_data = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]).reshape(10, 1)
 
-  def call(self, inputs):
-    return inputs * self.w + self.b
+model = SimpleDense(learning_rate=0.001)
 
-x_data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
-y_data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+for step in range(500):
+  print("============================================")
+  print("current step = ", step)
+  loss_score = model.train_one_batch(x_data, y_data)
+  output = model.predict(np.array([1]))
+  print('result = ')
+  print(output)
+  print("============================================")
+  print('loss score = ', loss_score)
 
-x_input = Input(shape=(1), name='input')
-y_output = Linear(1)(x_input)
+#model.get_model().save("C:\\Github\\DeepLearningStudy\\trained_model\\")
 
-def loss_function(logits, y):
-  loss = tf.reduce_mean(tf.square(logits - y))
-  return loss
+# Save the weights
+model.get_model().save_weights("C:\\Github\\DeepLearningStudy\\trained_model\\SimpleDense.h5")
 
-
-optimizer = tf.keras.optimizers.Adam(learning_rate=0.02)
-model = Model(inputs=x_input, outputs=y_output)
-model.summary()
-
-
-data_length = len(x_data)
-epoch_length = 100
-
-for epoch in range(epoch_length):
-  average_loss = 0
-  for step in range(data_length):
-    with tf.GradientTape() as tape:
-      logits = model(x_data[step], training=True)
-      loss = loss_function(logits, y_data[step])
-    average_loss += loss.numpy() / data_length
-    gradients = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-  print('average loss = ', average_loss)
-  print('epoch = ', epoch)
-  for step in range(data_length):
-    print('data index = ', step, ', input=', x_data[step], ', output=', model(x_data[step], training=False).numpy())
+# Save the model architecture as json
+with open("C:\\Github\\DeepLearningStudy\\trained_model\\SimpleDense.json", "w") as fp:
+  fp.write(model.get_model().to_json(indent="\t"))
 
 
 
+# Reconfigure model in json file
+with open("C:\\Github\\DeepLearningStudy\\trained_model\\SimpleDense.json", "r") as fp:
+  load_test_model = model_from_json(fp.read())
 
+# Load weights to new model
+load_test_model.load_weights("C:\\Github\\DeepLearningStudy\\trained_model\\SimpleDense.h5")
+
+print('script end')
