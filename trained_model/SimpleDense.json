@@ -13,9 +13,9 @@
 					"dtype": "float32",
 					"sparse": false,
 					"ragged": false,
-					"name": "input_node"
+					"name": "x_input_node"
 				},
-				"name": "input_node",
+				"name": "x_input_node",
 				"inbound_nodes": []
 			},
 			{
@@ -47,7 +47,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"input_node",
+							"x_input_node",
 							0,
 							0,
 							{}
@@ -58,7 +58,7 @@
 		],
 		"input_layers": [
 			[
-				"input_node",
+				"x_input_node",
 				0,
 				0
 			]
