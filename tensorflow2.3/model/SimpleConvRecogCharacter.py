@@ -1,38 +1,42 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import ReLU
 from tensorflow.keras.layers import Softmax
-from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import MaxPool2D
 from tensorflow.keras import Model
+from tensorflow.keras.layers import GlobalAveragePooling2D
+from tensorflow.keras.layers import BatchNormalization
 
 
-class SimpleDenseRecogCharacter:
-    def __init__(self, learning_rate=0.001):
+class SimpleConvRecogCharacter:
+    def __init__(self, learning_rate=0.003):
         x_input = tf.keras.Input(shape=(28, 28, 1), name="x_input_node")
-        x = Flatten(input_shape=(28, 28))(x_input)
-        x = Dense(256)(x)
-        x = Dropout(0.2)(x)
+        x = Conv2D(32, (3,3))(x_input)
+        x = BatchNormalization()(x)
         x = ReLU()(x)
-        x = Dense(128)(x)
-        x = Dropout(0.2)(x)
+        x = MaxPool2D((2,2))(x)
+        x = Conv2D(32, (3,3))(x)
+        #x = BatchNormalization()(x)
         x = ReLU()(x)
-        x = Dense(64)(x)
-        x = Dropout(0.2)(x)
+        x = MaxPool2D((2,2))(x)
+        x = Conv2D(64, (3, 3))(x)
+        #x = BatchNormalization()(x)
         x = ReLU()(x)
-        x = Dense(10)(x)
+        x = Conv2D(10, (3, 3))(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = GlobalAveragePooling2D()(x)
         x = Softmax()(x)
         self.model = Model(inputs=x_input, outputs=x)
-        self.optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
         self.model.summary()
-
 
     def train_one_batch(self, x_input, y_label):
         with tf.GradientTape() as tape:
             output = self.model(x_input, training=True)
             loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=output, labels=y_label))
-            gradients = tape.gradient(loss, self.model.trainable_variables)
-            self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+        gradients = tape.gradient(loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
         return loss.numpy()
 
 
@@ -50,3 +54,4 @@ class SimpleDenseRecogCharacter:
 
     def get_model(self):
         return self.model
+
