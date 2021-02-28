@@ -20,10 +20,7 @@
 * CUDA 설치 : https://developer.nvidia.com/cuda-10.2-download-archive
 * CuDNN 설치 : https://developer.nvidia.com/compute/machine-learning/cudnn/secure/8.0.5/10.2_20201106/cudnn-10.2-windows10-x64-v8.0.5.39.zip
 * python 설치 : https://www.python.org/downloads/release/python-377/
-
-
-<br/>
-
+* 콘솔을 이용한 업데이트 
 ```console
 pip install tensorflow==2.3.1      # CPU
 pip install tensorflow-gpu==2.3.1  # GPU
