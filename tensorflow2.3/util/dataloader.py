@@ -54,7 +54,9 @@ class dataloader:
             else:
                 color_flag = cv2.IMREAD_GRAYSCALE
 
+            #print(path)
             image = cv2.imread(path, color_flag).astype(np.uint8)
+            image = cv2.resize(image, (shape[0], shape[1]))
             npImage = np.array(image)
             npImage = npImage / dev
             npImage = npImage.flatten().reshape(shape)
@@ -84,3 +86,6 @@ class dataloader:
 
     def sample_count(self):
         return self.size
+
+    def shuffle(self):
+        shuffle(self.fullPaths)
