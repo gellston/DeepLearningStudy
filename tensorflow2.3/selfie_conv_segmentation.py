@@ -13,7 +13,7 @@ learning_rate = 0.003
 batch_size = 10
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)
-target_accuracy = 0.95
+target_accuracy = 0.97
 
 model = SelfieSegmentation(learning_rate=learning_rate)
 tf.keras.utils.plot_model(model.get_model(), to_file='C:\\Github\\DeepLearningStudy\\trained_model\\SelfieSegmentation.png', show_shapes=True, show_layer_names=True)
@@ -40,6 +40,8 @@ for epoch in range(200):
     if average_accuracy > target_accuracy:
         break;
 
+
+tf.saved_model.save(model.get_model(), "C:\\Github\\DeepLearningStudy\\trained_model\\SelfieSegmentation")
 
 # Save the weights
 model.get_model().save_weights("C:\\Github\\DeepLearningStudy\\trained_model\\SelfieSegmentation.h5")

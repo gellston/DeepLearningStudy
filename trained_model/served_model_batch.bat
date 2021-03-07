@@ -1,0 +1,1 @@
+saved_model_cli show --dir C:\Github\DeepLearningStudy\trained_model\SelfieSegmentation\ --tag_set serve --signature_def serving_default
