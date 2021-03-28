@@ -10,6 +10,7 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import GlobalAveragePooling2D
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import SeparableConv2D
+from tensorflow.keras.layers import SpatialDropout2D
 
 
 class StampClassification:
@@ -17,22 +18,30 @@ class StampClassification:
         x_input = tf.keras.Input(shape=(35, 35, 3), name="x_input_node")
         x = SeparableConv2D(32, (3, 3), padding='same')(x_input)
         x = BatchNormalization()(x)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = self.residual_layer(x, 32)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = MaxPool2D()(x)
         x = SeparableConv2D(32, (3, 3), padding='same')(x)
         x = BatchNormalization()(x)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = self.residual_layer(x, 32)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = MaxPool2D()(x)
         x = SeparableConv2D(128, (3, 3), padding='same')(x)
         x = BatchNormalization()(x)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = self.residual_layer(x, 128)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = MaxPool2D()(x)
         x = SeparableConv2D(128, (3, 3), padding='same')(x)
         x = BatchNormalization()(x)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = self.residual_layer(x, 128)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = SeparableConv2D(2, (3, 3), padding='same')(x)
         x = BatchNormalization()(x)
-
+        x = SpatialDropout2D(rate=0.2)(x)
         x = GlobalAveragePooling2D()(x)
         x = Softmax()(x)
 
@@ -43,6 +52,7 @@ class StampClassification:
     def residual_layer(self, x_input, filters=32):
         x = SeparableConv2D(kernel_size=(3, 3), filters=filters, padding='same', use_bias=False)(x_input)
         x = BatchNormalization()(x)
+        x = SpatialDropout2D(rate=0.2)(x)
         x = PReLU()(x)
         skip = x + x_input
         return skip

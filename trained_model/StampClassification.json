@@ -136,6 +136,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "SeparableConv2D",
 				"config": {
 					"name": "separable_conv2d_1",
@@ -196,7 +218,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization",
+							"spatial_dropout2d",
 							0,
 							0,
 							{}
@@ -251,6 +273,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_1",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_1",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_1",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "PReLU",
 				"config": {
 					"name": "p_re_lu",
@@ -268,7 +312,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_1",
+							"spatial_dropout2d_1",
 							0,
 							0,
 							{}
@@ -287,7 +331,7 @@
 						"op": "AddV2",
 						"input": [
 							"p_re_lu/add",
-							"batch_normalization/cond/Identity"
+							"spatial_dropout2d/cond/Identity"
 						],
 						"attr": {
 							"T": {
@@ -307,7 +351,29 @@
 							{}
 						],
 						[
-							"batch_normalization",
+							"spatial_dropout2d",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_2",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_2",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2",
 							0,
 							0,
 							{}
@@ -336,7 +402,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2",
+							"spatial_dropout2d_2",
 							0,
 							0,
 							{}
@@ -460,6 +526,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_3",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_3",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "SeparableConv2D",
 				"config": {
 					"name": "separable_conv2d_3",
@@ -520,7 +608,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_2",
+							"spatial_dropout2d_3",
 							0,
 							0,
 							{}
@@ -575,6 +663,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_4",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_4",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_3",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "PReLU",
 				"config": {
 					"name": "p_re_lu_1",
@@ -592,7 +702,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_3",
+							"spatial_dropout2d_4",
 							0,
 							0,
 							{}
@@ -611,7 +721,7 @@
 						"op": "AddV2",
 						"input": [
 							"p_re_lu_1/add",
-							"batch_normalization_2/cond/Identity"
+							"spatial_dropout2d_3/cond/Identity"
 						],
 						"attr": {
 							"T": {
@@ -631,7 +741,29 @@
 							{}
 						],
 						[
-							"batch_normalization_2",
+							"spatial_dropout2d_3",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_5",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_5",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2_1",
 							0,
 							0,
 							{}
@@ -660,7 +792,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2_1",
+							"spatial_dropout2d_5",
 							0,
 							0,
 							{}
@@ -784,6 +916,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_6",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_6",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "SeparableConv2D",
 				"config": {
 					"name": "separable_conv2d_5",
@@ -844,7 +998,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_4",
+							"spatial_dropout2d_6",
 							0,
 							0,
 							{}
@@ -899,6 +1053,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_7",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_7",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_5",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "PReLU",
 				"config": {
 					"name": "p_re_lu_2",
@@ -916,7 +1092,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_5",
+							"spatial_dropout2d_7",
 							0,
 							0,
 							{}
@@ -935,7 +1111,7 @@
 						"op": "AddV2",
 						"input": [
 							"p_re_lu_2/add",
-							"batch_normalization_4/cond/Identity"
+							"spatial_dropout2d_6/cond/Identity"
 						],
 						"attr": {
 							"T": {
@@ -955,7 +1131,29 @@
 							{}
 						],
 						[
-							"batch_normalization_4",
+							"spatial_dropout2d_6",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_8",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_8",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2_2",
 							0,
 							0,
 							{}
@@ -984,7 +1182,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2_2",
+							"spatial_dropout2d_8",
 							0,
 							0,
 							{}
@@ -1108,6 +1306,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_9",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_9",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_6",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "SeparableConv2D",
 				"config": {
 					"name": "separable_conv2d_7",
@@ -1168,7 +1388,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_6",
+							"spatial_dropout2d_9",
 							0,
 							0,
 							{}
@@ -1223,6 +1443,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_10",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_10",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_7",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "PReLU",
 				"config": {
 					"name": "p_re_lu_3",
@@ -1240,7 +1482,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_7",
+							"spatial_dropout2d_10",
 							0,
 							0,
 							{}
@@ -1259,7 +1501,7 @@
 						"op": "AddV2",
 						"input": [
 							"p_re_lu_3/add",
-							"batch_normalization_6/cond/Identity"
+							"spatial_dropout2d_9/cond/Identity"
 						],
 						"attr": {
 							"T": {
@@ -1279,7 +1521,29 @@
 							{}
 						],
 						[
-							"batch_normalization_6",
+							"spatial_dropout2d_9",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_11",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_11",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2_3",
 							0,
 							0,
 							{}
@@ -1348,7 +1612,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2_3",
+							"spatial_dropout2d_11",
 							0,
 							0,
 							{}
@@ -1403,6 +1667,28 @@
 				]
 			},
 			{
+				"class_name": "SpatialDropout2D",
+				"config": {
+					"name": "spatial_dropout2d_12",
+					"trainable": true,
+					"dtype": "float32",
+					"rate": 0.2,
+					"noise_shape": null,
+					"seed": null
+				},
+				"name": "spatial_dropout2d_12",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
 				"class_name": "GlobalAveragePooling2D",
 				"config": {
 					"name": "global_average_pooling2d",
@@ -1414,7 +1700,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_8",
+							"spatial_dropout2d_12",
 							0,
 							0,
 							{}

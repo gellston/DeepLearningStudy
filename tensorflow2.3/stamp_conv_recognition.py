@@ -12,7 +12,7 @@ learning_rate = 0.0009
 batch_size = 500
 sample_size = loader_train.sample_count()
 total_batch = int(sample_size / batch_size)
-target_accuracy = 0.9999
+target_accuracy = 0.9997
 
 model = StampClassification(learning_rate=learning_rate)
 tf.keras.utils.plot_model(model.get_model(), to_file='C:\\Github\\DeepLearningStudy\\trained_model\\StampClassification.png', show_shapes=True, show_layer_names=True)
