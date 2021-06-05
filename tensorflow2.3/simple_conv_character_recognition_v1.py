@@ -9,7 +9,7 @@ loader_train = dataloader('C://Github//DeepLearningStudy//dataset//digits-train'
 
 
 learning_rate = 0.001
-batch_size = 1000
+batch_size = 50
 sample_size = loader_train.sample_count()
 total_batch = int(sample_size / batch_size)
 target_accuracy = 0.99
@@ -21,7 +21,7 @@ for epoch in range(200):
     average_cost = 0
     average_accuracy = 0
     for batch in range(total_batch):
-        inputs_train, outputs_train = loader_train.load([28, 28, 1], 1.0, batch_size, False)
+        inputs_train, outputs_train = loader_train.load([28, 28, 1], [1, 1, 10], 1.0, batch_size, False)
         if inputs_train is None or outputs_train is None:
             break
 

@@ -36,7 +36,7 @@ class dataloader:
         self.size = len(self.fullPaths)
         self.currentIndex = 0
 
-    def load(self, shape, dev, batch, is_color=True):
+    def load(self, shape1, shape2, dev, batch, is_color=True):
 
         images = []
         labels = []
@@ -56,10 +56,10 @@ class dataloader:
 
             #print(path)
             image = cv2.imread(path, color_flag).astype(np.uint8)
-            image = cv2.resize(image, (shape[0], shape[1]))
+            image = cv2.resize(image, (shape1[0], shape1[1]))
             npImage = np.array(image)
             npImage = npImage / dev
-            npImage = npImage.flatten().reshape(shape)
+            npImage = npImage.flatten().reshape(shape1)
             npImage = np.array(npImage, dtype=np.uint8)
             images.append(npImage)
 
@@ -67,7 +67,8 @@ class dataloader:
             for index2 in range(self.labelCount):
                 if self.labelNames[index2][0] in path:
                     label[self.labelNames[index2][1]] = 1
-                    labels.append(label)
+                    npLabel = np.array(label).flatten().reshape(shape2)
+                    labels.append(npLabel)
 
             if index + self.currentIndex >= self.size:
                 break
