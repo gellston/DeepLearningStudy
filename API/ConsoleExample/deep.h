@@ -34,7 +34,7 @@ namespace hv::v1::deep{
 		~segmentation();
 
 		void import(std::string path);
-		std::shared_ptr<float> run(unsigned char* input_buffer, int width, int height, int channel, int label);
+		void run(unsigned char* input_buffer, unsigned char* output_buffer, int width, int height, int channel, int label);
 
 		const char* tf_version();
 	};

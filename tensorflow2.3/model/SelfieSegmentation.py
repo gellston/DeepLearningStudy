@@ -10,7 +10,7 @@ from tensorflow.keras.layers import BatchNormalization
 class SelfieSegmentation:
 
     def __init__(self, learning_rate=0.003):
-        x_input = tf.keras.Input(shape=(256, 256, 3), name="x_input_node")
+        x_input = tf.keras.Input(shape=(256, 256, 3), name="x_input_node", dtype='float32')
         x = Conv2D(kernel_size=(3, 3), filters=64, padding='same', use_bias=False)(x_input)
         down_layer1 = self.residual_layer(x, filters=64)
         down_layer1 = self.residual_layer(down_layer1, filters=64)

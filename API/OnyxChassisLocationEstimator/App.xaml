@@ -1,0 +1,9 @@
+﻿<Application x:Class="OnyxChassisLocationEstimator.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="View/MainWindowView.xaml"
+             xmlns:viewmodel="clr-namespace:OnyxChassisLocationEstimator.ViewModel">
+    <Application.Resources>
+        <viewmodel:ViewModelLocator x:Key="ViewModelLocator"></viewmodel:ViewModelLocator>
+    </Application.Resources>
+</Application>

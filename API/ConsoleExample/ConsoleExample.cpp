@@ -12,24 +12,24 @@ int main()
 
     hv::v1::deep::segmentation segmentation;
 
-    segmentation.import("C://Github//DeepLearningStudy//trained_model//SelfieSegmentation//");
+    segmentation.import("C://Github//DeepLearningStudy//trained_model//OnyxSegmentation//");
 
 
-    cv::Mat original = cv::imread("C://Github//DeepLearningStudy//test_image//00001.jpg");
-    cv::Mat resized_input_image = cv::Mat(256, 256, CV_8UC1);
-    cv::Mat resized_output_probability = cv::Mat(256, 256, CV_32FC1);
-    cv::Mat resized_output_threshold = cv::Mat(cv::Size(256, 256), CV_32FC1);
+    cv::Mat original = cv::imread("C://Users//gellston//Desktop//OnyxAugmentation//1_202106291149473//source.jpg",cv::IMREAD_GRAYSCALE);
+    cv::Mat resized_input_image = cv::Mat(512, 512, CV_8UC1);
+    cv::Mat resized_output_probability = cv::Mat(512, 512, CV_32FC1);
+    cv::Mat resized_output_threshold = cv::Mat(cv::Size(512, 512), CV_32FC1);
 
-    cv::resize(original, resized_input_image, cv::Size(256, 256));
+    cv::resize(original, resized_input_image, cv::Size(512, 512));
 
 
-    auto output = segmentation.run(resized_input_image.data, 256, 256, 3, 1);
+    segmentation.run(resized_input_image.data, resized_output_probability.data, 512, 512, 1, 1);
 
-    memcpy(resized_output_probability.data, output.get(), 256 * 256 * 1 * sizeof(float));
+   // memcpy(resized_output_probability.data, output.get(), 512 * 512 * 1 * sizeof(float));
 
-    resized_output_probability = resized_output_probability * 255;
+    resized_output_probability = resized_output_probability * 512;
 
-    cv::threshold(resized_output_probability, resized_output_threshold, 210, 255, cv::THRESH_BINARY);
+    cv::threshold(resized_output_probability, resized_output_threshold, 240, 255, cv::THRESH_BINARY);
 
 
     cv::imshow("original", original);

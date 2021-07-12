@@ -1,0 +1,76 @@
+﻿<dx:ThemedWindow 
+    x:Class="OnyxChassisLocationEstimator.View.MainWindowView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    Title="OnyxChassisLocationEstimator" Height="450" Width="800"
+    DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=MainWindowViewModel}"
+    dx:ThemeManager.ThemeName="VS2019Dark"
+    xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+    xmlns:uc="clr-namespace:OnyxChassisLocationEstimator.UC"
+    xmlns:converter="clr-namespace:OnyxChassisLocationEstimator.Converter">
+    <dx:ThemedWindow.Resources>
+        <converter:InverseBooleanConverter x:Key="InverseBooleanConverter"></converter:InverseBooleanConverter>
+    </dx:ThemedWindow.Resources>
+    <DockPanel>
+        <dx:UniformStackPanel DockPanel.Dock="Top"
+                              Height="40"
+                              ChildSpacing="0" 
+                              Orientation="Horizontal">
+            <Button ToolTip="이미지 열기"
+                    Width="80"
+                    Command="{Binding OpenImageCommand}"
+                    IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBooleanConverter}}">
+                <Image Source="{dx:DXImage 'SvgImages/DiagramIcons/LoadImage.svg'}"></Image>
+            </Button>
+            <Button ToolTip="분석 시작"
+                    Width="80"
+                    Command="{Binding StartAnalyzeCommand}"
+                    IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBooleanConverter}}">
+                <Image Source="{dx:DXImage 'SvgImages/XAF/Action_Debug_Start.svg'}"></Image>
+            </Button>
+            <Button ToolTip="결과 폴더 열기"
+                    Width="80"
+                    Command="{Binding OpenResultFolderCommand}">
+                <Image Source="{dx:DXImage 'SvgImages/Actions/Up.svg'}"></Image>
+            </Button>
+            <TextBox Text="{Binding TopCameraResolution, Mode=TwoWay}"
+                     ToolTip="상부 카메라 분해능"
+                     HorizontalContentAlignment="Center"
+                     VerticalContentAlignment="Center"
+                     FontSize="15"
+                     IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBooleanConverter}}"></TextBox>
+        </dx:UniformStackPanel>
+
+        <ProgressBar Height="40" 
+                     IsIndeterminate="{Binding IsRunning}"
+                     DockPanel.Dock="Bottom"></ProgressBar>
+
+        <dxg:GridControl EnableSmartColumnsGeneration="False"
+                         SelectionMode="Row"
+                         AutoGenerateColumns="None"
+                         ShowAllTableValuesInFilterPopup="True"
+                         Width="500"
+                         DockPanel.Dock="Right"
+                         ItemsSource="{Binding ImageFileCollection}"
+                         SelectedItem="{Binding SelectedImageFile}">
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn FieldName="파일 이름" IsSmart="False" Width="*" Binding="{Binding Path=FileName }"/>
+                <dxg:GridColumn FieldName="파일 경로" IsSmart="False" Width="*" Binding="{Binding Path=FilePath }"/>
+            </dxg:GridControl.Columns>
+
+            <dxg:GridControl.View>
+                <dxg:TableView AllowPerPixelScrolling="True" 
+                               ShowTotalSummary="False"
+                               AllowGrouping="True"
+                               AllowScrollToFocusedRow="False">
+                </dxg:TableView>
+
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+        <uc:ImageCanvasViewer Image="{Binding CurrentImage}"
+                              DrawObjectsCollection="{Binding ResultDrawObjectCollection}"></uc:ImageCanvasViewer>
+
+    </DockPanel>
+</dx:ThemedWindow>

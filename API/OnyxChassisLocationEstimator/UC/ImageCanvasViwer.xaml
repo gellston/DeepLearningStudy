@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="OnyxChassisLocationEstimator.UC.ImageCanvasViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:OnyxChassisLocationEstimator"
+             xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="view"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:model="clr-namespace:OnyxChassisLocationEstimator.Model">
+
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                  VerticalScrollBarVisibility="Auto"
+                  Name="OutScrollViewer"
+                  PreviewMouseWheel="OutScrollViewer_PreviewMouseWheel">
+        <ScrollViewer.Background>
+            <VisualBrush TileMode="Tile"
+                         Viewport="0,0,50,50" ViewportUnits="Absolute" 
+                         Viewbox="0,0,50,50" ViewboxUnits="Absolute">
+                <VisualBrush.Visual>
+                    <Rectangle Stroke="White" 
+                               StrokeThickness="1" 
+                               Height="50" 
+                               Width="50"
+                               StrokeDashArray="1 1"/>
+                </VisualBrush.Visual>
+            </VisualBrush>
+        </ScrollViewer.Background>
+        <ItemsControl ItemsSource="{Binding ElementName=view, Path=DrawObjectsCollection, Mode=OneWay}">
+            <ItemsControl.Resources>
+                <DataTemplate DataType="{x:Type model:DrawImageObject}">
+                    <Image Source="{Binding Image}" 
+                           Width="{Binding Width}"
+                           Height="{Binding Height}"></Image>
+                </DataTemplate>
+            </ItemsControl.Resources>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas Width="{Binding ElementName=view, Path=CanvasWidth, Mode=OneWay}" 
+                            Height="{Binding ElementName=view, Path=CanvasHeight, Mode=OneWay}"
+                            Name="ChildCanvas" 
+                            MouseMove="ChildCanvas_MouseMove"
+                            MouseLeftButtonDown="ChildCanvas_MouseLeftButtonDown"
+                            MouseLeftButtonUp="ChildCanvas_MouseLeftButtonUp"
+                            RenderTransformOrigin="0.5,0.5"
+                            ClipToBounds="True"
+                            IsItemsHost="True">
+                        <Canvas.Background>
+                            <ImageBrush x:Name="ImageBackground" 
+                                        ImageSource="{Binding ElementName=view, Path=Image, Mode=OneWay, TargetNullValue={dx:DXImage 'SvgImages/Icon Builder/Security_Warning.svg'},  FallbackValue={dx:DXImage 'SvgImages/Icon Builder/Security_Warning.svg'}}"></ImageBrush>
+                        </Canvas.Background>
+                        <Canvas.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="{Binding ElementName=view, Path=Zoom, Mode=OneWay, TargetNullValue=1, FallbackValue=1}"
+                                                ScaleY="{Binding ElementName=view, Path=Zoom, Mode=OneWay, TargetNullValue=1, FallbackValue=1}"/>
+                                <TranslateTransform X="{Binding ElementName=view, Path=TranslationX, Mode=OneWay, TargetNullValue=1, FallbackValue=1}" 
+                                                    Y="{Binding ElementName=view, Path=TranslationY, Mode=OneWay, TargetNullValue=1, FallbackValue=1}"/>
+                            </TransformGroup>
+                        </Canvas.RenderTransform>
+                    </Canvas>
+                </ItemsPanelTemplate>
+                
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                    <Setter Property="Canvas.Left" Value="{Binding X}"></Setter>
+                    <Setter Property="Canvas.Top" Value="{Binding Y}"></Setter>
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OnyxChassisLocationEstimator": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

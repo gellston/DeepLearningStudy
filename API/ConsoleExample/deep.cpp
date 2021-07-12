@@ -90,11 +90,11 @@ void hv::v1::deep::segmentation::import(std::string path) {
 
 }
 
-std::shared_ptr<float> hv::v1::deep::segmentation::run(unsigned char* input_buffer, int width, int height, int channel, int label) {
+void hv::v1::deep::segmentation::run(unsigned char* input_buffer, unsigned char * output_buffer, int width, int height, int channel, int label) {
 
-	std::shared_ptr<float> output((float*)malloc(sizeof(float) * width * height * label));
-
-	memset(output.get(), 0, sizeof(float) * width * height * label);
+	//std::shared_ptr<float> output((float*)malloc(sizeof(float) * width * height * label));
+//
+	///memset(output.get(), 0, sizeof(float) * width * height * label);
 
 	std::vector<TF_Output> input_vec;
 	std::vector<TF_Output> output_vec;
@@ -153,10 +153,10 @@ std::shared_ptr<float> hv::v1::deep::segmentation::run(unsigned char* input_buff
 		}
 
 		const auto data = static_cast<float*>(TF_TensorData(output_tensors[0]));
-		memcpy(output.get(), data, sizeof(float) * width * height * label);
+		memcpy(output_buffer, data, sizeof(float) * width * height * label);
 
-		return output;
-
+		//return output;
+		return;
 	}
 	catch (std::exception e) {
 		std::cout << e.what() << std::endl;
