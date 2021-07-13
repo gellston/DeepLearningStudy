@@ -777,7 +777,8 @@ namespace OnyxChassisLocationEstimator.ViewModel
 
                                 resized8Bit_output_top_line_threshold.SaveImage(TopROIOnyxPath);
                                 resized8Bit_output_bottom_line_threshold.SaveImage(BottomROIOnyxPath);
-
+                                resized8Bit_output_top_chassis_line_threshold.SaveImage(TopROIChassisPath);
+                                resized8Bit_output_bottom_chassis_line_threshold.SaveImage(BottomROIChassisPath);
                                 //resized8Bit_output_bottom_chassis_line_threshold.SaveImage(BottomROIChassisCannyPath);
                                 //resized8Bit_output_top_chassis_line_threshold.SaveImage(TopROIChassisCannyPath);
                                 
