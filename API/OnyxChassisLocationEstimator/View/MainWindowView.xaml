@@ -34,6 +34,12 @@
                     Command="{Binding OpenResultFolderCommand}">
                 <Image Source="{dx:DXImage 'SvgImages/Actions/Up.svg'}"></Image>
             </Button>
+            <Button ToolTip="이미지 리스트 초기화"
+                    Width="80"
+                    Command="{Binding ClearImageCommand}"
+                    IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBooleanConverter}}">
+                <Image Source="{dx:DXImage 'SvgImages/Icon Builder/Actions_Clear.svg'}"></Image>
+            </Button>
             <TextBox Text="{Binding TopCameraResolution, Mode=TwoWay}"
                      ToolTip="상부 카메라 분해능"
                      HorizontalContentAlignment="Center"

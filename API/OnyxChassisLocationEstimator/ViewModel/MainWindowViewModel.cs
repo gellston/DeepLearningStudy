@@ -55,6 +55,22 @@ namespace OnyxChassisLocationEstimator.ViewModel
         }
 
 
+        public ICommand ClearImageCommand
+        {
+            get => new RelayCommand(() =>
+            {
+
+                try
+                {
+                    this.ImageFileCollection.Clear();
+
+                }catch(Exception e)
+                {
+                    Helper.DialogHelper.ShowToastErrorMessage("이미지 리스트 초기화 실패", e.Message);
+                }
+            });
+        }
+
 
         public ICommand OpenImageCommand
         {
@@ -62,6 +78,8 @@ namespace OnyxChassisLocationEstimator.ViewModel
             {
                 try
                 {
+                    this.ImageFileCollection.Clear();
+
                     var folderName =  Helper.DialogHelper.OpenFolder();
 
                     var files = Directory.GetFiles(folderName, "*.*", SearchOption.AllDirectories)
