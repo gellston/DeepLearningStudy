@@ -36,7 +36,9 @@ namespace hv::v1::deep {
 
 		void import(std::string path);
 		void run(unsigned char* input_buffer, unsigned char* output_buffer, int width, int height, int channel, int label);
-
+		float train(unsigned char* input_buffer, int input_width, int input_height, int input_channel,
+				   unsigned char* output_buffer, int output_width, int output_height, int output_channel,
+				   int batch_size);
 	};
 
 

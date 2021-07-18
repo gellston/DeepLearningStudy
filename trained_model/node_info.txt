@@ -1,0 +1,88 @@
+C:\Users\wantr>saved_model_cli show --all --dir C:\Github\DeepLearningStudy\trained_model\ModuleExample\ --tag_set serve --signature_def serving_default
+2021-07-18 11:15:40.835022: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudart64_101.dll
+
+MetaGraphDef with tag-set: 'serve' contains the following SignatureDefs:
+
+signature_def['__saved_model_init_op']:
+  The given SavedModel SignatureDef contains the following input(s):
+  The given SavedModel SignatureDef contains the following output(s):
+    outputs['__saved_model_init_op'] tensor_info:
+        dtype: DT_INVALID
+        shape: unknown_rank
+        name: NoOp
+  Method name is:
+
+signature_def['accuracy']:
+  The given SavedModel SignatureDef contains the following input(s):
+    inputs['x_input'] tensor_info:
+        dtype: DT_FLOAT
+        shape: (-1, 256, 256, 3)
+        name: accuracy_x_input:0
+    inputs['y_label'] tensor_info:
+        dtype: DT_FLOAT
+        shape: (-1, 256, 256, 1)
+        name: accuracy_y_label:0
+  The given SavedModel SignatureDef contains the following output(s):
+    outputs['output_0'] tensor_info:
+        dtype: DT_FLOAT
+        shape: ()
+        name: StatefulPartitionedCall:0
+  Method name is: tensorflow/serving/predict
+
+signature_def['prediction']:
+  The given SavedModel SignatureDef contains the following input(s):
+    inputs['x'] tensor_info:
+        dtype: DT_FLOAT
+        shape: (-1, 256, 256, 3)
+        name: prediction_x:0
+  The given SavedModel SignatureDef contains the following output(s):
+    outputs['output_0'] tensor_info:
+        dtype: DT_FLOAT
+        shape: (-1, 256, 256, 1)
+        name: StatefulPartitionedCall_1:0
+  Method name is: tensorflow/serving/predict
+
+signature_def['train']:
+  The given SavedModel SignatureDef contains the following input(s):
+    inputs['x_input'] tensor_info:
+        dtype: DT_FLOAT
+        shape: (-1, 256, 256, 3)
+        name: train_x_input:0
+    inputs['y_label'] tensor_info:
+        dtype: DT_FLOAT
+        shape: (-1, 256, 256, 1)
+        name: train_y_label:0
+  The given SavedModel SignatureDef contains the following output(s):
+    outputs['output_0'] tensor_info:
+        dtype: DT_FLOAT
+        shape: ()
+        name: StatefulPartitionedCall_2:0
+  Method name is: tensorflow/serving/predict
+
+Defined Functions:
+  Function Name: '__call__'
+    Option #1
+      Callable with:
+        Argument #1
+          x: TensorSpec(shape=(None, 256, 256, 3), dtype=tf.float32, name='x')
+
+  Function Name: 'accracy_on_batch'
+    Option #1
+      Callable with:
+        Argument #1
+          x_input: TensorSpec(shape=(None, 256, 256, 3), dtype=tf.float32, name='x_input')
+        Argument #2
+          y_label: TensorSpec(shape=(None, 256, 256, 1), dtype=tf.float32, name='y_label')
+
+  Function Name: 'train_one_batch'
+    Option #1
+      Callable with:
+        Argument #1
+          x_input: TensorSpec(shape=(None, 256, 256, 3), dtype=tf.float32, name='x_input')
+        Argument #2
+          y_label: TensorSpec(shape=(None, 256, 256, 1), dtype=tf.float32, name='y_label')
+
+C:\Users\wantr>
+
+
+

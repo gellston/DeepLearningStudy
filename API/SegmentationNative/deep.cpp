@@ -135,11 +135,95 @@ void hv::v1::deep::segmentation::import(std::string path) {
 
 }
 
+float hv::v1::deep::segmentation::train(unsigned char* source_buffer, int source_width, int source_height, int source_channel,
+										unsigned char* label_buffer, int label_width, int label_height, int label_channel,
+										int batch_size){
+
+
+	std::vector<TF_Output> input_vec;
+	std::vector<TF_Output> output_vec;
+
+
+	std::vector<TF_Tensor*> input_tensors;
+	std::vector<TF_Tensor*> output_tensors(1);
+
+	hv::v1::raii input_destructor([&] {
+		for (TF_Tensor* tensor : input_tensors) {
+			TF_DeleteTensor(tensor);
+		}
+		});
+
+	hv::v1::raii output_destructor([&] {
+		for (TF_Tensor* tensor : output_tensors) {
+			TF_DeleteTensor(tensor);
+		}
+		});
+
+
+	input_vec.push_back({ TF_GraphOperationByName(this->_pimpl->graph, "train_x_input"), 0 });
+	input_vec.push_back({ TF_GraphOperationByName(this->_pimpl->graph, "train_y_label"), 0 });
+	output_vec.push_back({ TF_GraphOperationByName(this->_pimpl->graph, "StatefulPartitionedCall_2"), 0 });
+
+
+	unsigned int source_size = source_width * source_height * source_channel * batch_size;
+	std::vector<float> source_data;
+	source_data.resize(source_size);
+	float* source_data_ptr = source_data.data();
+	for (int index = 0; index < source_size; index++) {
+		source_data_ptr[index] = source_buffer[index];
+	}
+	int64_t source_dims[] = { batch_size, source_height, source_width, source_channel };
+
+
+
+	unsigned int label_size = label_width * label_height * label_channel * batch_size;
+	std::vector<float> label_data;
+	label_data.resize(label_size);
+	float* label_data_ptr = label_data.data();
+	for (int index = 0; index < label_size; index++) {
+		label_data_ptr[index] = label_buffer[index];
+	}
+	int64_t label_dims[] = { batch_size, label_height, label_width, label_channel };
+
+
+
+	//auto const deallocator = [](void*, std::size_t, void*) {}; // unused deallocator because of RAII
+
+	input_tensors.push_back(TF_NewTensor(TF_FLOAT, source_dims, 4, source_data_ptr, source_size * sizeof(float), deallocator, 0));
+	input_tensors.push_back(TF_NewTensor(TF_FLOAT, label_dims, 4, label_data_ptr, label_size * sizeof(float), deallocator, 0));
+
+	try {
+		TF_SessionRun(this->_pimpl->session,
+			this->_pimpl->run_options,
+			input_vec.data(), input_tensors.data(), input_tensors.size(),
+			output_vec.data(), output_tensors.data(), output_vec.size(),
+			nullptr, 0,
+			nullptr,
+			this->_pimpl->status);
+
+
+		if (TF_GetCode(this->_pimpl->status) != TF_OK) {
+			throw std::exception("invalid status");
+		}
+
+		const auto data = static_cast<float*>(TF_TensorData(output_tensors[0]));
+		
+		return data[0];
+	}
+	catch (std::exception e) {
+		std::cout << e.what() << std::endl;
+		throw std::exception("run model failed.");
+	}
+
+
+
+
+	throw std::exception("run model failed.");
+
+}
+
 void hv::v1::deep::segmentation::run(unsigned char* input_buffer, unsigned char* output_buffer, int width, int height, int channel, int label) {
 
-	//std::shared_ptr<float> output((float*)malloc(sizeof(float) * width * height * label));
-//
-	///memset(output.get(), 0, sizeof(float) * width * height * label);
 
 	std::vector<TF_Output> input_vec;
 	std::vector<TF_Output> output_vec;
@@ -173,6 +257,8 @@ void hv::v1::deep::segmentation::run(unsigned char* input_buffer, unsigned char*
 	for (int index = 0; index < input_size; index++) {
 		input_data_ptr[index] = input_buffer[index];
 	}
+
+	
 
 	int64_t in_dims[] = { 1, height, width, channel };
 

@@ -1,1 +1,1 @@
-saved_model_cli show --dir C:\Github\DeepLearningStudy\trained_model\ChassisRoundSegmentation\ --tag_set serve --signature_def serving_default
+saved_model_cli show --all --dir C:\Github\DeepLearningStudy\trained_model\ModuleExample\ --tag_set serve --signature_def serving_default
