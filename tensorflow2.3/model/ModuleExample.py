@@ -61,7 +61,7 @@ class ModuleExample(tf.Module):
         self.model = Model(inputs=x_input, outputs=output)
         self.model.summary()
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.003)
 
     @tf.function(input_signature=[tf.TensorSpec([None, 256, 256, 3], tf.float32)])
     def __call__(self, x):

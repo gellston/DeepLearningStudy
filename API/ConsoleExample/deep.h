@@ -3,30 +3,31 @@
 #ifndef HV_DEEP
 #define HV_DEEP
 
-#include "raii.h"
-
-
-
 #include <memory>
 #include <string>
-#include <tensorflow/c/c_api.h>
 
-namespace hv::v1::deep{
-	
-	class segmentation {
+
+#if HVVAPI
+#define HVAPI_EXPORT __declspec(dllexport)
+//#define HVAPI_TEMPLATE_EXPORT
+#else
+#define HVAPI_EXPORT __declspec(dllimport)
+//#define HVAPI_TEMPLATE_EXPORT extern
+#endif
+
+
+
+
+namespace hv::v1::deep {
+	class pimpl;
+}
+
+namespace hv::v1::deep {
+
+	class HVAPI_EXPORT segmentation {
 	private:
-		std::shared_ptr<hv::v1::raii> raii_destructor;
-
-		TF_Buffer* run_options;
-		TF_SessionOptions* session_options;
-		TF_Graph* graph;
-		TF_Status* status;
-		TF_Session* session;
-
-
-		//TF_Operation* input_op;
-		//TF_Operation* output_op;
-
+		std::shared_ptr<pimpl> _pimpl;
+		std::string model_path;
 		bool is_loaded;
 
 	public:
@@ -34,11 +35,19 @@ namespace hv::v1::deep{
 		~segmentation();
 
 		void import(std::string path);
-		void run(unsigned char* input_buffer, unsigned char* output_buffer, int width, int height, int channel, int label);
-
-		const char* tf_version();
+		void run(float* input_buffer, float* output_buffer, int width, int height, int channel, int label);
+		float train(float* input_buffer, int input_width, int input_height, int input_channel,
+			float* output_buffer, int output_width, int output_height, int output_channel,
+			int batch_size);
+		float accuracy(float* input_buffer, int input_width, int input_height, int input_channel,
+			float* output_buffer, int output_width, int output_height, int output_channel,
+			int batch_size);
 	};
 
+
+
 }
+
+
 
 #endif // !HV_DEEP
