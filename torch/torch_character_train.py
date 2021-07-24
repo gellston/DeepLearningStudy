@@ -21,6 +21,13 @@ print('==== model info ====')
 print(model)
 print('====================')
 
+## no Train Model Save
+model.eval()
+trace_input = torch.rand(1, 784).to(DEVICE, dtype=torch.float32)
+traced_script_module = torch.jit.trace(model, trace_input)
+traced_script_module.save("C://Github//DeepLearningStudy//trained_model//NoTrainCharacterClassification.pt")
+## no Train Model Save
+
 loader_train = dataloader('C://Github//DeepLearningStudy//dataset//digits-train')
 
 learning_rate = 0.001
@@ -29,7 +36,7 @@ sample_size = loader_train.sample_count()
 total_batch = int(sample_size / batch_size)
 target_accuracy = 0.95
 
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 cost = torch.nn.CrossEntropyLoss()
 
 
