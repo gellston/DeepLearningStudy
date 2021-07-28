@@ -15,7 +15,7 @@ loader_train = opendl_segmentation_dataloader('C://Users//gellston//Desktop//Fin
 loader_test = opendl_segmentation_dataloader('C://Users//gellston//Desktop//FinalOnyxAugmentation//')
 
 learning_rate = 0.003
-batch_size = 3
+batch_size = 4
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)
 target_accuracy = 0.995

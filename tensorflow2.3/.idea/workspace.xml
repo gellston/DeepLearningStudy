@@ -35,12 +35,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="-172" />
-    <option name="y" value="3" />
-    <option name="width" value="1698" />
-    <option name="height" value="1001" />
-  </component>
   <component name="ProjectId" id="1o3WLtt3XDicH3hpFtLc6WUcU7A" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -59,7 +53,7 @@
       <recent name="C:\Github\DeepLearningStudy\tensorflow2.3" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.module_c_api_example">
+  <component name="RunManager" selected="Python.pcb_conv_segmentation">
     <configuration name="ModuleExample" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="tensorflow2.0" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -144,7 +138,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="onyx_round_conv_segmentation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="pcb_conv_segmentation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="tensorflow2.0" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -156,7 +150,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/onyx_round_conv_segmentation.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pcb_conv_segmentation.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -167,11 +161,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.pcb_conv_segmentation" />
+        <item itemvalue="Python.chassis_line_conv_segmentation" />
         <item itemvalue="Python.module_c_api_example" />
         <item itemvalue="Python.ModuleExample" />
         <item itemvalue="Python.chassis_round_conv_segmentation" />
-        <item itemvalue="Python.onyx_round_conv_segmentation" />
-        <item itemvalue="Python.chassis_line_conv_segmentation" />
       </list>
     </recent_temporary>
   </component>
@@ -223,21 +217,29 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2498" y="294" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1626828210956" />
-    <state width="1899" height="347" key="GridCell.Tab.0.bottom" timestamp="1626067492969">
+    <state width="1300" height="441" key="GridCell.Tab.0.bottom" timestamp="1627515180695">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1300" height="441" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1627515180695" />
+    <state width="1899" height="242" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1627476557398" />
     <state width="1899" height="347" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1626067492969" />
-    <state width="1899" height="347" key="GridCell.Tab.0.center" timestamp="1626067492969">
+    <state width="1300" height="441" key="GridCell.Tab.0.center" timestamp="1627515180694">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1300" height="441" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1627515180694" />
+    <state width="1899" height="242" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1627476557397" />
     <state width="1899" height="347" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1626067492969" />
-    <state width="1899" height="347" key="GridCell.Tab.0.left" timestamp="1626067492969">
+    <state width="1300" height="441" key="GridCell.Tab.0.left" timestamp="1627515180694">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1300" height="441" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1627515180694" />
+    <state width="1899" height="242" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1627476557397" />
     <state width="1899" height="347" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1626067492969" />
-    <state width="1899" height="347" key="GridCell.Tab.0.right" timestamp="1626067492969">
+    <state width="1300" height="441" key="GridCell.Tab.0.right" timestamp="1627515180694">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1300" height="441" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1627515180694" />
+    <state width="1899" height="242" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1627476557397" />
     <state width="1899" height="347" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1626067492969" />
     <state width="1899" height="339" key="GridCell.Tab.1.bottom" timestamp="1624972104877">
       <screen x="0" y="0" width="1920" height="1040" />

@@ -33,7 +33,7 @@ class opendl_segmentation_dataloader:
                 return (None, None)
 
             image_path = self.input_images_paths[self.currentIndex + index][0]
-            image = cv2.imread(image_path, flags=cv2.IMREAD_GRAYSCALE).astype(np.float32)
+            image = cv2.imread(image_path, flags=cv2.IMREAD_COLOR).astype(np.float32)
             npImage = np.array(image)
             npImage = npImage / devide1
             npImage = npImage.flatten().reshape(shape1)
