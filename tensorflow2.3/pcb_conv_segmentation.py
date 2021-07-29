@@ -5,7 +5,7 @@ import cv2
 
 
 from model.PCBDefectSegmentation import PCBDefectSegmentation
-from model.PCBDefectSegmentationV3 import PCBDefectSegmentationV3
+from model.PCBDefectSegmentationV5 import PCBDefectSegmentationV5
 from tensorflow.keras.models import model_from_json
 from util.opendl_segmentation_dataloader import opendl_segmentation_dataloader
 
@@ -13,16 +13,16 @@ from util.opendl_segmentation_dataloader import opendl_segmentation_dataloader
 print(tf.__version__)
 
 
-loader_train = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final//')
-loader_test = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final//')
+loader_train = opendl_segmentation_dataloader('C://Users//wantr//Desktop//PCB_Augmentation_Final//')
+loader_test = opendl_segmentation_dataloader('C://Users//wantr//Desktop//PCB_Augmentation_Final//')
 
 learning_rate = 0.003
 batch_size = 2
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)
-target_accuracy = 0.97
+target_accuracy = 0.95
 
-model = PCBDefectSegmentationV3(learning_rate=learning_rate)
+model = PCBDefectSegmentationV5(learning_rate=learning_rate)
 tf.keras.utils.plot_model(model.get_model(), to_file='C:\\Github\\DeepLearningStudy\\trained_model\\PCBDefectSegmentation.png', show_shapes=True, show_layer_names=True)
 for epoch in range(1000):
     average_cost = 0

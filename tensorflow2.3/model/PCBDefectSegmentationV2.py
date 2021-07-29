@@ -22,34 +22,54 @@ tf.config.experimental.set_memory_growth(gpu[0], True)
 class PCBDefectSegmentationV2:
 
     def __init__(self, learning_rate=0.003):
-        global_filter_size1 = 6
-        global_filter_size2 = 12
-        global_filter_size3 = 24
-        global_filter_size4 = 32
+        global_filter_size1 = 5
+        global_filter_size2 = 20
+        global_filter_size3 = 30
+        global_filter_size4 = 40
         global_subtraction_size = 1
-        global_final_filter_size = 3
+        global_final_filter_size = 4
 
 
         x_input = tf.keras.Input(shape=(1024, 1024, 3), name="x_input_node")
         x = SeparableConv2D(kernel_size=3, filters=global_filter_size1, use_bias=False, padding='same', dilation_rate=1)(x_input) #1024 x1
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
         x = self.residual_layer(x , kernel_size=3, filters=global_filter_size1, dilation=1)
-        x = self.residual_layer(x , kernel_size=3, filters=global_filter_size1, dilation=1)
-        x = MaxPool2D(pool_size=2, strides=2)(x)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size1, dilation=1)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size1, dilation=1)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size1, dilation=1)
+        first = self.residual_layer(x , kernel_size=3, filters=global_filter_size1, dilation=1)
+        x = MaxPool2D(pool_size=2, strides=2)(first)
         x = SeparableConv2D(kernel_size=3, filters=global_filter_size2, use_bias=False, padding='same', dilation_rate=1)(x) #512 x2
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
         x = self.residual_layer(x , kernel_size=3, filters=global_filter_size2, dilation=2)
-        x = self.residual_layer(x , kernel_size=3, filters=global_filter_size2, dilation=2)
-        x = MaxPool2D(pool_size=2, strides=2)(x)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size2, dilation=2)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size2, dilation=2)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size2, dilation=2)
+        second = self.residual_layer(x , kernel_size=3, filters=global_filter_size2, dilation=2)
+        x = MaxPool2D(pool_size=2, strides=2)(second)
         x = SeparableConv2D(kernel_size=3, filters=global_filter_size3, use_bias=False, padding='same', dilation_rate=1)(x) #256 x4
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
         x = self.residual_layer(x , kernel_size=3, filters=global_filter_size3, dilation=3)
-        x = self.residual_layer(x , kernel_size=3, filters=global_filter_size3, dilation=3)
-        x = MaxPool2D(pool_size=2, strides=2)(x)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size3, dilation=3)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size3, dilation=3)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size3, dilation=3)
+        third = self.residual_layer(x , kernel_size=3, filters=global_filter_size3, dilation=3)
+        x = MaxPool2D(pool_size=2, strides=2)(third)
         x = SeparableConv2D(kernel_size=3, filters=global_filter_size4, use_bias=False, padding='same', dilation_rate=1)(x) #128 x8
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
         x = self.residual_layer(x , kernel_size=3, filters=global_filter_size4, dilation=4)
         x = self.residual_layer(x , kernel_size=3, filters=global_filter_size4, dilation=4)
-        first = x #### 전체 Feature 모듈에 들어가는 Feature Extraction Map
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size4, dilation=4)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size4, dilation=4)
+        x = self.residual_layer(x, kernel_size=3, filters=global_filter_size4, dilation=4)
+        forth = x #### 전체 Feature 모듈에 들어가는 Feature Extraction Map
 
 
-        down_samplex2 = AveragePooling2D(pool_size=2, strides=2)(first)
+        #down_samplex2 = AveragePooling2D(pool_size=2, strides=2)(first)
         #x = self.residual_layer(down_samplex2, filters=global_filter_size2, dilation=2)
         #x = self.residual_layer(x, filters=global_filter_size2, dilation=2)
         #x = self.residual_layer(x, filters=global_filter_size2, dilation=2)
@@ -57,7 +77,7 @@ class PCBDefectSegmentationV2:
 
 
 
-        down_samplex4 = AveragePooling2D(pool_size=4, strides=4)(first)
+        #down_samplex4 = AveragePooling2D(pool_size=4, strides=4)(first)
         #x = self.residual_layer(down_samplex4, filters=global_filter_size3, dilation=3)
         #x = self.residual_layer(x, filters=global_filter_size3, dilation=3)
         #x = self.residual_layer(x, filters=global_filter_size3, dilation=3)
@@ -65,35 +85,52 @@ class PCBDefectSegmentationV2:
 
 
 
-        down_samplex8 = AveragePooling2D(pool_size=8, strides=8)(first)
+        #down_samplex8 = AveragePooling2D(pool_size=8, strides=8)(first)
         #x = self.residual_layer(down_samplex8, filters=global_filter_size4, dilation=4)
         #x = self.residual_layer(x, filters=global_filter_size4, dilation=4)
         #x = self.residual_layer(x, filters=global_filter_size4, dilation=4)
 
+        down_samplex1 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(first)
+        down_samplex1 = BatchNormalization()(down_samplex1)
+        down_samplex1 = ReLU()(down_samplex1)
+        down_samplex2 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(second)
+        down_samplex2 = BatchNormalization()(down_samplex2)
+        down_samplex2 = ReLU()(down_samplex2)
+        down_samplex4 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(third)
+        down_samplex4 = BatchNormalization()(down_samplex4)
+        down_samplex4 = ReLU()(down_samplex4)
+        down_samplex8 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(forth)
+        down_samplex8 = BatchNormalization()(down_samplex8)
+        down_samplex8 = ReLU()(down_samplex8)
 
 
-        down_samplex2 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(down_samplex2)
-        down_samplex4 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(down_samplex4)
-        down_samplex8 = Conv2D(kernel_size=1, filters=global_subtraction_size, use_bias=False)(down_samplex8)
-
-
+        down_samplex1 = down_samplex1
         down_samplex2 = UpSampling2D(size=(2, 2))(down_samplex2)
         down_samplex4 = UpSampling2D(size=(4, 4))(down_samplex4)
         down_samplex8 = UpSampling2D(size=(8, 8))(down_samplex8)
 
 
 
-        concat = tf.concat([down_samplex2, down_samplex4, down_samplex8, first], -1) # 128 x8
+        concat = tf.concat([down_samplex2, down_samplex4, down_samplex8, down_samplex1], -1) # 128 x8
         print('final concat layer info = ', concat)
         final = SeparableConv2D(kernel_size=(3, 3), filters=global_final_filter_size, padding='same', use_bias=False)(concat)
-        final = self.residual_layer(final, kernel_size=3, filters=global_final_filter_size, dilation=4)
-        final = UpSampling2D(size=(8, 8))(final)
+        final = BatchNormalization()(final)
+        final = ReLU()(final)
+        dilation0 = self.residual_layer(final, kernel_size=3, filters=global_final_filter_size)
+        dilation0 = self.residual_layer(dilation0, kernel_size=3, filters=global_final_filter_size)
+        dilation1 = self.residual_layer(final, kernel_size=3, filters=global_final_filter_size, dilation=1)
+        dilation1 = self.residual_layer(dilation1, kernel_size=3, filters=global_final_filter_size, dilation=1)
+        dilation2 = self.residual_layer(final, kernel_size=3, filters=global_final_filter_size, dilation=2)
+        dilation2 = self.residual_layer(dilation2, kernel_size=3, filters=global_final_filter_size, dilation=2)
+        dilation3 = self.residual_layer(final, kernel_size=3, filters=global_final_filter_size, dilation=3)
+        dilation3 = self.residual_layer(dilation3, kernel_size=3, filters=global_final_filter_size, dilation=3)
+        dilation4 = self.residual_layer(final, kernel_size=3, filters=global_final_filter_size, dilation=4)
+        dilation4 = self.residual_layer(dilation4, kernel_size=3, filters=global_final_filter_size, dilation=4)
 
-        #final = self.residual_layer(final, filters=global_final_filter_size, dilation=1, kernel_size=3)
-        #final = self.residual_layer(final, filters=global_final_filter_size, dilation=1)
-        #final = self.residual_layer(final, filters=global_final_filter_size, dilation=1)
-        #final = self.residual_layer(final, filters=global_final_filter_size, dilation=1)
-        final = SeparableConv2D(kernel_size=(3, 3), filters=1, padding='same', use_bias=False)(final)
+        summation = dilation1 + dilation2 + dilation3 + dilation4 + dilation0
+
+
+        final = SeparableConv2D(kernel_size=(3, 3), filters=1, padding='same', use_bias=False)(summation)
         final = BatchNormalization()(final)
 
         print('final = ' ,final)
@@ -137,12 +174,12 @@ class PCBDefectSegmentationV2:
         return tf.reduce_mean(o)
 
     def residual_layer(self, x_input, filters=32, dilation=1, kernel_size=3):
-        layer1 = BatchNormalization()(x_input)
-        x = SeparableConv2D(kernel_size=(kernel_size, kernel_size), filters=filters, padding='same', use_bias=False, dilation_rate=dilation)(layer1)
+        ##layer1 = BatchNormalization()(x_input)
+        x = SeparableConv2D(kernel_size=(kernel_size, kernel_size), filters=filters, padding='same', use_bias=False, dilation_rate=dilation)(x_input)
         x = BatchNormalization()(x)
         x = ReLU()(x)
         #x = SpatialDropout2D(0.3)(x)
-        skip = x + layer1
+        skip = x + x_input
 
         return skip
 
