@@ -11,6 +11,7 @@ from tensorflow.keras.layers import ReLU
 from tensorflow.keras.layers import Conv2DTranspose
 from tensorflow.keras.layers import AveragePooling2D
 
+
 gpu = tf.config.experimental.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(gpu[0], True)
 
@@ -117,7 +118,7 @@ class PCBDefectSegmentationV5:
         with tf.GradientTape() as tape:
             output = self.model(x_input, training=True)
             #lambda_weight = 0.3
-            loss = self.binary_focal_loss_fixed(y_label, output) #+ self.dice_loss(y_label, output)
+            loss = self.binary_focal_loss_fixed(y_label, output) + self.dice_loss(y_label, output)
             gradients = tape.gradient(loss, self.model.trainable_variables)
             self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
             return loss.numpy()
