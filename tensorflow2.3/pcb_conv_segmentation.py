@@ -5,7 +5,7 @@ import cv2
 
 
 from model.PCBDefectSegmentation import PCBDefectSegmentation
-from model.PCBDefectSegmentationV6 import PCBDefectSegmentationV6
+from model.PCBDefectSegmentationV7 import PCBDefectSegmentationV7
 from tensorflow.keras.models import model_from_json
 from util.opendl_segmentation_dataloader import opendl_segmentation_dataloader
 
@@ -13,22 +13,22 @@ from util.opendl_segmentation_dataloader import opendl_segmentation_dataloader
 print(tf.__version__)
 
 
-loader_train = opendl_segmentation_dataloader('C://Users//wantr//Desktop//PCB_Augmentation_Final//')
-loader_test = opendl_segmentation_dataloader('C://Users//wantr//Desktop//PCB_Augmentation_Final//')
+loader_train = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final_512_Rotation//')
+loader_test = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final_512_Rotation//')
 
-learning_rate = 0.003
-batch_size = 2
+learning_rate = 0.1
+batch_size = 4
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)
-target_accuracy = 0.95
+target_accuracy = 0.94
 
-model = PCBDefectSegmentationV6(learning_rate=learning_rate)
+model = PCBDefectSegmentationV7(learning_rate=learning_rate)
 tf.keras.utils.plot_model(model.get_model(), to_file='C:\\Github\\DeepLearningStudy\\trained_model\\PCBDefectSegmentation.png', show_shapes=True, show_layer_names=True)
 for epoch in range(1000):
     average_cost = 0
     average_accuracy = 0
     for batch in range(total_batch):
-        inputs_train, outputs_train = loader_train.load([1024, 1024, 3], [1024, 1024, 1], 1, 255, batch_size)
+        inputs_train, outputs_train = loader_train.load([512, 512, 3], [512, 512, 1], 1, 255, batch_size)
         if inputs_train is None or outputs_train is None:
             break
 
@@ -40,7 +40,7 @@ for epoch in range(1000):
 
     loader_test.clear()
     loader_test.shuffle()
-    input_test, output_test = loader_test.load([1024, 1024, 3], [1024, 1024, 1], 1, 255, 1)
+    input_test, output_test = loader_test.load([512, 512, 3], [512, 512, 1], 1, 255, 1)
     output_test = model.predict(input_test)
     output_test = output_test[0] * 255;
     output_test = output_test.astype(np.uint8)
