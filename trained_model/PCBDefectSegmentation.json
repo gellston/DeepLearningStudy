@@ -8,8 +8,8 @@
 				"config": {
 					"batch_input_shape": [
 						null,
-						1024,
-						1024,
+						512,
+						512,
 						3
 					],
 					"dtype": "float32",
@@ -21,351 +21,12 @@
 				"inbound_nodes": []
 			},
 			{
-				"class_name": "TensorFlowOpLayer",
+				"class_name": "Conv2D",
 				"config": {
-					"name": "ResizeBilinear",
+					"name": "conv2d",
 					"trainable": true,
 					"dtype": "float32",
-					"node_def": {
-						"name": "ResizeBilinear",
-						"op": "ResizeBilinear",
-						"input": [
-							"x_input_node",
-							"ResizeBilinear/size"
-						],
-						"attr": {
-							"align_corners": {
-								"b": false
-							},
-							"half_pixel_centers": {
-								"b": true
-							},
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {
-						"1": [
-							512,
-							512
-						]
-					}
-				},
-				"name": "tf_op_layer_ResizeBilinear",
-				"inbound_nodes": [
-					[
-						[
-							"x_input_node",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "TensorFlowOpLayer",
-				"config": {
-					"name": "ResizeBilinear_1",
-					"trainable": true,
-					"dtype": "float32",
-					"node_def": {
-						"name": "ResizeBilinear_1",
-						"op": "ResizeBilinear",
-						"input": [
-							"x_input_node",
-							"ResizeBilinear_1/size"
-						],
-						"attr": {
-							"align_corners": {
-								"b": false
-							},
-							"half_pixel_centers": {
-								"b": true
-							},
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {
-						"1": [
-							256,
-							256
-						]
-					}
-				},
-				"name": "tf_op_layer_ResizeBilinear_1",
-				"inbound_nodes": [
-					[
-						[
-							"x_input_node",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "TensorFlowOpLayer",
-				"config": {
-					"name": "ResizeBilinear_2",
-					"trainable": true,
-					"dtype": "float32",
-					"node_def": {
-						"name": "ResizeBilinear_2",
-						"op": "ResizeBilinear",
-						"input": [
-							"x_input_node",
-							"ResizeBilinear_2/size"
-						],
-						"attr": {
-							"align_corners": {
-								"b": false
-							},
-							"half_pixel_centers": {
-								"b": true
-							},
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {
-						"1": [
-							128,
-							128
-						]
-					}
-				},
-				"name": "tf_op_layer_ResizeBilinear_2",
-				"inbound_nodes": [
-					[
-						[
-							"x_input_node",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_3",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						2,
-						2
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_3",
-				"inbound_nodes": [
-					[
-						[
-							"tf_op_layer_ResizeBilinear",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_6",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						3,
-						3
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_6",
-				"inbound_nodes": [
-					[
-						[
-							"tf_op_layer_ResizeBilinear_1",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_9",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						4,
-						4
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_9",
-				"inbound_nodes": [
-					[
-						[
-							"tf_op_layer_ResizeBilinear_2",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 8,
+					"filters": 16,
 					"kernel_size": [
 						3,
 						3
@@ -397,168 +58,13 @@
 					"bias_regularizer": null,
 					"activity_regularizer": null,
 					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
+					"bias_constraint": null
 				},
-				"name": "separable_conv2d",
+				"name": "conv2d",
 				"inbound_nodes": [
 					[
 						[
 							"x_input_node",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "BatchNormalization",
-				"config": {
-					"name": "batch_normalization_4",
-					"trainable": true,
-					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
-				},
-				"name": "batch_normalization_4",
-				"inbound_nodes": [
-					[
-						[
-							"separable_conv2d_3",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "BatchNormalization",
-				"config": {
-					"name": "batch_normalization_8",
-					"trainable": true,
-					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
-				},
-				"name": "batch_normalization_8",
-				"inbound_nodes": [
-					[
-						[
-							"separable_conv2d_6",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "BatchNormalization",
-				"config": {
-					"name": "batch_normalization_12",
-					"trainable": true,
-					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
-				},
-				"name": "batch_normalization_12",
-				"inbound_nodes": [
-					[
-						[
-							"separable_conv2d_9",
 							0,
 							0,
 							{}
@@ -604,7 +110,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d",
+							"conv2d",
 							0,
 							0,
 							{}
@@ -613,270 +119,26 @@
 				]
 			},
 			{
-				"class_name": "SeparableConv2D",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "separable_conv2d_4",
+					"name": "Sigmoid",
 					"trainable": true,
 					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						2,
-						2
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
+					"node_def": {
+						"name": "Sigmoid",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
 						}
 					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
+					"constants": {}
 				},
-				"name": "separable_conv2d_4",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_4",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_7",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						3,
-						3
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_7",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_8",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_10",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						4,
-						4
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_10",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_12",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_1",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 8,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						1,
-						1
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_1",
+				"name": "tf_op_layer_Sigmoid",
 				"inbound_nodes": [
 					[
 						[
@@ -889,44 +151,37 @@
 				]
 			},
 			{
-				"class_name": "BatchNormalization",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "batch_normalization_5",
+					"name": "Mul",
 					"trainable": true,
 					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Mul",
+						"op": "Mul",
+						"input": [
+							"batch_normalization/cond/Identity",
+							"Sigmoid"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
+					"constants": {}
 				},
-				"name": "batch_normalization_5",
+				"name": "tf_op_layer_Mul",
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_4",
+							"batch_normalization",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid",
 							0,
 							0,
 							{}
@@ -935,44 +190,30 @@
 				]
 			},
 			{
-				"class_name": "BatchNormalization",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "batch_normalization_9",
+					"name": "Identity",
 					"trainable": true,
 					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Identity",
+						"op": "Identity",
+						"input": [
+							"Mul"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
+					"constants": {}
 				},
-				"name": "batch_normalization_9",
+				"name": "tf_op_layer_Identity",
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_7",
+							"tf_op_layer_Mul",
 							0,
 							0,
 							{}
@@ -981,44 +222,50 @@
 				]
 			},
 			{
-				"class_name": "BatchNormalization",
+				"class_name": "Conv2D",
 				"config": {
-					"name": "batch_normalization_13",
+					"name": "conv2d_1",
 					"trainable": true,
 					"dtype": "float32",
-					"axis": [
+					"filters": 16,
+					"kernel_size": [
+						3,
 						3
 					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						1,
+						1
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
 						"class_name": "Zeros",
 						"config": {}
 					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
 				},
-				"name": "batch_normalization_13",
+				"name": "conv2d_1",
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_10",
+							"tf_op_layer_Identity",
 							0,
 							0,
 							{}
@@ -1064,7 +311,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_1",
+							"conv2d_1",
 							0,
 							0,
 							{}
@@ -1073,270 +320,26 @@
 				]
 			},
 			{
-				"class_name": "SeparableConv2D",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "separable_conv2d_5",
+					"name": "Sigmoid_1",
 					"trainable": true,
 					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						2,
-						2
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
+					"node_def": {
+						"name": "Sigmoid_1",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_1/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
 						}
 					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
+					"constants": {}
 				},
-				"name": "separable_conv2d_5",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_5",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_8",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						3,
-						3
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_8",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_9",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_11",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 10,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						4,
-						4
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_11",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_13",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "SeparableConv2D",
-				"config": {
-					"name": "separable_conv2d_2",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 8,
-					"kernel_size": [
-						3,
-						3
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "same",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						1,
-						1
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": false,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null,
-					"depth_multiplier": 1,
-					"depthwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"pointwise_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"depthwise_regularizer": null,
-					"pointwise_regularizer": null,
-					"depthwise_constraint": null,
-					"pointwise_constraint": null
-				},
-				"name": "separable_conv2d_2",
+				"name": "tf_op_layer_Sigmoid_1",
 				"inbound_nodes": [
 					[
 						[
@@ -1349,44 +352,37 @@
 				]
 			},
 			{
-				"class_name": "BatchNormalization",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "batch_normalization_6",
+					"name": "Mul_1",
 					"trainable": true,
 					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Mul_1",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_1/cond/Identity",
+							"Sigmoid_1"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
+					"constants": {}
 				},
-				"name": "batch_normalization_6",
+				"name": "tf_op_layer_Mul_1",
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_5",
+							"batch_normalization_1",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_1",
 							0,
 							0,
 							{}
@@ -1395,44 +391,30 @@
 				]
 			},
 			{
-				"class_name": "BatchNormalization",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "batch_normalization_10",
+					"name": "Identity_1",
 					"trainable": true,
 					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Identity_1",
+						"op": "Identity",
+						"input": [
+							"Mul_1"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
+					"constants": {}
 				},
-				"name": "batch_normalization_10",
+				"name": "tf_op_layer_Identity_1",
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_8",
+							"tf_op_layer_Mul_1",
 							0,
 							0,
 							{}
@@ -1441,44 +423,162 @@
 				]
 			},
 			{
-				"class_name": "BatchNormalization",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "batch_normalization_14",
+					"name": "AddV2",
 					"trainable": true,
 					"dtype": "float32",
-					"axis": [
-						3
-					],
-					"momentum": 0.99,
-					"epsilon": 0.001,
-					"center": true,
-					"scale": true,
-					"beta_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "AddV2",
+						"op": "AddV2",
+						"input": [
+							"Identity_1",
+							"Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"gamma_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"moving_mean_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"moving_variance_initializer": {
-						"class_name": "Ones",
-						"config": {}
-					},
-					"beta_regularizer": null,
-					"gamma_regularizer": null,
-					"beta_constraint": null,
-					"gamma_constraint": null
+					"constants": {}
 				},
-				"name": "batch_normalization_14",
+				"name": "tf_op_layer_AddV2",
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_11",
+							"tf_op_layer_Identity_1",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Identity",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "AveragePooling2D",
+				"config": {
+					"name": "average_pooling2d",
+					"trainable": true,
+					"dtype": "float32",
+					"pool_size": [
+						2,
+						2
+					],
+					"padding": "valid",
+					"strides": [
+						2,
+						2
+					],
+					"data_format": "channels_last"
+				},
+				"name": "average_pooling2d",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_2",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 16,
+					"kernel_size": [
+						3,
+						3
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						1,
+						1
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_2",
+				"inbound_nodes": [
+					[
+						[
+							"average_pooling2d",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "ResizeBilinear",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "ResizeBilinear",
+						"op": "ResizeBilinear",
+						"input": [
+							"x_input_node",
+							"ResizeBilinear/size"
+						],
+						"attr": {
+							"half_pixel_centers": {
+								"b": true
+							},
+							"align_corners": {
+								"b": false
+							},
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {
+						"1": [
+							256,
+							256
+						]
+					}
+				},
+				"name": "tf_op_layer_ResizeBilinear",
+				"inbound_nodes": [
+					[
+						[
+							"x_input_node",
 							0,
 							0,
 							{}
@@ -1524,7 +624,51 @@
 				"inbound_nodes": [
 					[
 						[
-							"separable_conv2d_2",
+							"conv2d_2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "ResizeBilinear_1",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "ResizeBilinear_1",
+						"op": "ResizeBilinear",
+						"input": [
+							"x_input_node",
+							"ResizeBilinear_1/size"
+						],
+						"attr": {
+							"align_corners": {
+								"b": false
+							},
+							"T": {
+								"type": "DT_FLOAT"
+							},
+							"half_pixel_centers": {
+								"b": true
+							}
+						}
+					},
+					"constants": {
+						"1": [
+							128,
+							128
+						]
+					}
+				},
+				"name": "tf_op_layer_ResizeBilinear_1",
+				"inbound_nodes": [
+					[
+						[
+							"x_input_node",
 							0,
 							0,
 							{}
@@ -1535,19 +679,19 @@
 			{
 				"class_name": "Conv2D",
 				"config": {
-					"name": "conv2d_1",
+					"name": "conv2d_4",
 					"trainable": true,
 					"dtype": "float32",
-					"filters": 10,
+					"filters": 64,
 					"kernel_size": [
-						1,
-						1
+						3,
+						3
 					],
 					"strides": [
 						1,
 						1
 					],
-					"padding": "valid",
+					"padding": "same",
 					"data_format": "channels_last",
 					"dilation_rate": [
 						1,
@@ -1555,7 +699,7 @@
 					],
 					"groups": 1,
 					"activation": "linear",
-					"use_bias": true,
+					"use_bias": false,
 					"kernel_initializer": {
 						"class_name": "GlorotUniform",
 						"config": {
@@ -1572,11 +716,43 @@
 					"kernel_constraint": null,
 					"bias_constraint": null
 				},
-				"name": "conv2d_1",
+				"name": "conv2d_4",
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_6",
+							"tf_op_layer_ResizeBilinear",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_2",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_2",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_2/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_2",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_2",
 							0,
 							0,
 							{}
@@ -1587,19 +763,19 @@
 			{
 				"class_name": "Conv2D",
 				"config": {
-					"name": "conv2d_2",
+					"name": "conv2d_8",
 					"trainable": true,
 					"dtype": "float32",
-					"filters": 10,
+					"filters": 64,
 					"kernel_size": [
-						1,
-						1
+						3,
+						3
 					],
 					"strides": [
 						1,
 						1
 					],
-					"padding": "valid",
+					"padding": "same",
 					"data_format": "channels_last",
 					"dilation_rate": [
 						1,
@@ -1607,7 +783,7 @@
 					],
 					"groups": 1,
 					"activation": "linear",
-					"use_bias": true,
+					"use_bias": false,
 					"kernel_initializer": {
 						"class_name": "GlorotUniform",
 						"config": {
@@ -1624,11 +800,656 @@
 					"kernel_constraint": null,
 					"bias_constraint": null
 				},
-				"name": "conv2d_2",
+				"name": "conv2d_8",
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_10",
+							"tf_op_layer_ResizeBilinear_1",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "BatchNormalization",
+				"config": {
+					"name": "batch_normalization_4",
+					"trainable": true,
+					"dtype": "float32",
+					"axis": [
+						3
+					],
+					"momentum": 0.99,
+					"epsilon": 0.001,
+					"center": true,
+					"scale": true,
+					"beta_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"gamma_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"moving_mean_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"moving_variance_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"beta_regularizer": null,
+					"gamma_regularizer": null,
+					"beta_constraint": null,
+					"gamma_constraint": null
+				},
+				"name": "batch_normalization_4",
+				"inbound_nodes": [
+					[
+						[
+							"conv2d_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_2",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_2",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_2/cond/Identity",
+							"Sigmoid_2"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_2",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_2",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "BatchNormalization",
+				"config": {
+					"name": "batch_normalization_8",
+					"trainable": true,
+					"dtype": "float32",
+					"axis": [
+						3
+					],
+					"momentum": 0.99,
+					"epsilon": 0.001,
+					"center": true,
+					"scale": true,
+					"beta_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"gamma_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"moving_mean_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"moving_variance_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"beta_regularizer": null,
+					"gamma_regularizer": null,
+					"beta_constraint": null,
+					"gamma_constraint": null
+				},
+				"name": "batch_normalization_8",
+				"inbound_nodes": [
+					[
+						[
+							"conv2d_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_4",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_4",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_4/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_4",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_2",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_2",
+						"op": "Identity",
+						"input": [
+							"Mul_2"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_2",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_8",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_8",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_8/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_8",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_4",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_4",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_4/cond/Identity",
+							"Sigmoid_4"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_4",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_4",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "AddV2_1",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "AddV2_1",
+						"op": "AddV2",
+						"input": [
+							"Identity_2",
+							"average_pooling2d/AvgPool"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_AddV2_1",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_2",
+							0,
+							0,
+							{}
+						],
+						[
+							"average_pooling2d",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_8",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_8",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_8/cond/Identity",
+							"Sigmoid_8"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_8",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_8",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_4",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_4",
+						"op": "Identity",
+						"input": [
+							"Mul_4"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_4",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_8",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_8",
+						"op": "Identity",
+						"input": [
+							"Mul_8"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_8",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "AveragePooling2D",
+				"config": {
+					"name": "average_pooling2d_1",
+					"trainable": true,
+					"dtype": "float32",
+					"pool_size": [
+						2,
+						2
+					],
+					"padding": "valid",
+					"strides": [
+						2,
+						2
+					],
+					"data_format": "channels_last"
+				},
+				"name": "average_pooling2d_1",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2_1",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_5",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 64,
+					"kernel_size": [
+						5,
+						5
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						2,
+						2
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_5",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_6",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 64,
+					"kernel_size": [
+						7,
+						7
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						2,
+						2
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_6",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_9",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 64,
+					"kernel_size": [
+						5,
+						5
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						2,
+						2
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_9",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_10",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 64,
+					"kernel_size": [
+						3,
+						3
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						2,
+						2
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_10",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_8",
 							0,
 							0,
 							{}
@@ -1642,16 +1463,16 @@
 					"name": "conv2d_3",
 					"trainable": true,
 					"dtype": "float32",
-					"filters": 10,
+					"filters": 16,
 					"kernel_size": [
-						1,
-						1
+						3,
+						3
 					],
 					"strides": [
 						1,
 						1
 					],
-					"padding": "valid",
+					"padding": "same",
 					"data_format": "channels_last",
 					"dilation_rate": [
 						1,
@@ -1659,7 +1480,7 @@
 					],
 					"groups": 1,
 					"activation": "linear",
-					"use_bias": true,
+					"use_bias": false,
 					"kernel_initializer": {
 						"class_name": "GlorotUniform",
 						"config": {
@@ -1680,215 +1501,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_14",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "Conv2D",
-				"config": {
-					"name": "conv2d",
-					"trainable": true,
-					"dtype": "float32",
-					"filters": 8,
-					"kernel_size": [
-						1,
-						1
-					],
-					"strides": [
-						1,
-						1
-					],
-					"padding": "valid",
-					"data_format": "channels_last",
-					"dilation_rate": [
-						1,
-						1
-					],
-					"groups": 1,
-					"activation": "linear",
-					"use_bias": true,
-					"kernel_initializer": {
-						"class_name": "GlorotUniform",
-						"config": {
-							"seed": null
-						}
-					},
-					"bias_initializer": {
-						"class_name": "Zeros",
-						"config": {}
-					},
-					"kernel_regularizer": null,
-					"bias_regularizer": null,
-					"activity_regularizer": null,
-					"kernel_constraint": null,
-					"bias_constraint": null
-				},
-				"name": "conv2d",
-				"inbound_nodes": [
-					[
-						[
-							"batch_normalization_2",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "TensorFlowOpLayer",
-				"config": {
-					"name": "AddV2_1",
-					"trainable": true,
-					"dtype": "float32",
-					"node_def": {
-						"name": "AddV2_1",
-						"op": "AddV2",
-						"input": [
-							"conv2d_1/BiasAdd",
-							"batch_normalization_4/cond/Identity"
-						],
-						"attr": {
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {}
-				},
-				"name": "tf_op_layer_AddV2_1",
-				"inbound_nodes": [
-					[
-						[
-							"conv2d_1",
-							0,
-							0,
-							{}
-						],
-						[
-							"batch_normalization_4",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "TensorFlowOpLayer",
-				"config": {
-					"name": "AddV2_2",
-					"trainable": true,
-					"dtype": "float32",
-					"node_def": {
-						"name": "AddV2_2",
-						"op": "AddV2",
-						"input": [
-							"conv2d_2/BiasAdd",
-							"batch_normalization_8/cond/Identity"
-						],
-						"attr": {
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {}
-				},
-				"name": "tf_op_layer_AddV2_2",
-				"inbound_nodes": [
-					[
-						[
-							"conv2d_2",
-							0,
-							0,
-							{}
-						],
-						[
-							"batch_normalization_8",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "TensorFlowOpLayer",
-				"config": {
-					"name": "AddV2_3",
-					"trainable": true,
-					"dtype": "float32",
-					"node_def": {
-						"name": "AddV2_3",
-						"op": "AddV2",
-						"input": [
-							"conv2d_3/BiasAdd",
-							"batch_normalization_12/cond/Identity"
-						],
-						"attr": {
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {}
-				},
-				"name": "tf_op_layer_AddV2_3",
-				"inbound_nodes": [
-					[
-						[
-							"conv2d_3",
-							0,
-							0,
-							{}
-						],
-						[
-							"batch_normalization_12",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "TensorFlowOpLayer",
-				"config": {
-					"name": "AddV2",
-					"trainable": true,
-					"dtype": "float32",
-					"node_def": {
-						"name": "AddV2",
-						"op": "AddV2",
-						"input": [
-							"conv2d/BiasAdd",
-							"batch_normalization/cond/Identity"
-						],
-						"attr": {
-							"T": {
-								"type": "DT_FLOAT"
-							}
-						}
-					},
-					"constants": {}
-				},
-				"name": "tf_op_layer_AddV2",
-				"inbound_nodes": [
-					[
-						[
-							"conv2d",
-							0,
-							0,
-							{}
-						],
-						[
-							"batch_normalization",
+							"average_pooling2d_1",
 							0,
 							0,
 							{}
@@ -1899,7 +1512,7 @@
 			{
 				"class_name": "BatchNormalization",
 				"config": {
-					"name": "batch_normalization_7",
+					"name": "batch_normalization_5",
 					"trainable": true,
 					"dtype": "float32",
 					"axis": [
@@ -1930,11 +1543,11 @@
 					"beta_constraint": null,
 					"gamma_constraint": null
 				},
-				"name": "batch_normalization_7",
+				"name": "batch_normalization_5",
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2_1",
+							"conv2d_5",
 							0,
 							0,
 							{}
@@ -1945,7 +1558,7 @@
 			{
 				"class_name": "BatchNormalization",
 				"config": {
-					"name": "batch_normalization_11",
+					"name": "batch_normalization_6",
 					"trainable": true,
 					"dtype": "float32",
 					"axis": [
@@ -1976,11 +1589,11 @@
 					"beta_constraint": null,
 					"gamma_constraint": null
 				},
-				"name": "batch_normalization_11",
+				"name": "batch_normalization_6",
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2_2",
+							"conv2d_6",
 							0,
 							0,
 							{}
@@ -1991,7 +1604,7 @@
 			{
 				"class_name": "BatchNormalization",
 				"config": {
-					"name": "batch_normalization_15",
+					"name": "batch_normalization_9",
 					"trainable": true,
 					"dtype": "float32",
 					"axis": [
@@ -2022,11 +1635,57 @@
 					"beta_constraint": null,
 					"gamma_constraint": null
 				},
-				"name": "batch_normalization_15",
+				"name": "batch_normalization_9",
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2_3",
+							"conv2d_9",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "BatchNormalization",
+				"config": {
+					"name": "batch_normalization_10",
+					"trainable": true,
+					"dtype": "float32",
+					"axis": [
+						3
+					],
+					"momentum": 0.99,
+					"epsilon": 0.001,
+					"center": true,
+					"scale": true,
+					"beta_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"gamma_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"moving_mean_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"moving_variance_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"beta_regularizer": null,
+					"gamma_regularizer": null,
+					"beta_constraint": null,
+					"gamma_constraint": null
+				},
+				"name": "batch_normalization_10",
+				"inbound_nodes": [
+					[
+						[
+							"conv2d_10",
 							0,
 							0,
 							{}
@@ -2072,7 +1731,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_AddV2",
+							"conv2d_3",
 							0,
 							0,
 							{}
@@ -2081,24 +1740,30 @@
 				]
 			},
 			{
-				"class_name": "PReLU",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "p_re_lu_1",
+					"name": "Sigmoid_5",
 					"trainable": true,
 					"dtype": "float32",
-					"alpha_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Sigmoid_5",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_5/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"alpha_regularizer": null,
-					"alpha_constraint": null,
-					"shared_axes": null
+					"constants": {}
 				},
-				"name": "p_re_lu_1",
+				"name": "tf_op_layer_Sigmoid_5",
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_7",
+							"batch_normalization_5",
 							0,
 							0,
 							{}
@@ -2107,24 +1772,30 @@
 				]
 			},
 			{
-				"class_name": "PReLU",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "p_re_lu_2",
+					"name": "Sigmoid_6",
 					"trainable": true,
 					"dtype": "float32",
-					"alpha_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Sigmoid_6",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_6/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"alpha_regularizer": null,
-					"alpha_constraint": null,
-					"shared_axes": null
+					"constants": {}
 				},
-				"name": "p_re_lu_2",
+				"name": "tf_op_layer_Sigmoid_6",
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_11",
+							"batch_normalization_6",
 							0,
 							0,
 							{}
@@ -2133,24 +1804,30 @@
 				]
 			},
 			{
-				"class_name": "PReLU",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "p_re_lu_3",
+					"name": "Sigmoid_9",
 					"trainable": true,
 					"dtype": "float32",
-					"alpha_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Sigmoid_9",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_9/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"alpha_regularizer": null,
-					"alpha_constraint": null,
-					"shared_axes": null
+					"constants": {}
 				},
-				"name": "p_re_lu_3",
+				"name": "tf_op_layer_Sigmoid_9",
 				"inbound_nodes": [
 					[
 						[
-							"batch_normalization_15",
+							"batch_normalization_9",
 							0,
 							0,
 							{}
@@ -2159,20 +1836,58 @@
 				]
 			},
 			{
-				"class_name": "PReLU",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "p_re_lu",
+					"name": "Sigmoid_10",
 					"trainable": true,
 					"dtype": "float32",
-					"alpha_initializer": {
-						"class_name": "Zeros",
-						"config": {}
+					"node_def": {
+						"name": "Sigmoid_10",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_10/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
 					},
-					"alpha_regularizer": null,
-					"alpha_constraint": null,
-					"shared_axes": null
+					"constants": {}
 				},
-				"name": "p_re_lu",
+				"name": "tf_op_layer_Sigmoid_10",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_10",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_3",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_3",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_3/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_3",
 				"inbound_nodes": [
 					[
 						[
@@ -2185,27 +1900,37 @@
 				]
 			},
 			{
-				"class_name": "AveragePooling2D",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "average_pooling2d_1",
+					"name": "Mul_5",
 					"trainable": true,
 					"dtype": "float32",
-					"pool_size": [
-						2,
-						2
-					],
-					"padding": "same",
-					"strides": [
-						1,
-						1
-					],
-					"data_format": "channels_last"
+					"node_def": {
+						"name": "Mul_5",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_5/cond/Identity",
+							"Sigmoid_5"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
 				},
-				"name": "average_pooling2d_1",
+				"name": "tf_op_layer_Mul_5",
 				"inbound_nodes": [
 					[
 						[
-							"p_re_lu_1",
+							"batch_normalization_5",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_5",
 							0,
 							0,
 							{}
@@ -2214,27 +1939,37 @@
 				]
 			},
 			{
-				"class_name": "AveragePooling2D",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "average_pooling2d_2",
+					"name": "Mul_6",
 					"trainable": true,
 					"dtype": "float32",
-					"pool_size": [
-						2,
-						2
-					],
-					"padding": "same",
-					"strides": [
-						1,
-						1
-					],
-					"data_format": "channels_last"
+					"node_def": {
+						"name": "Mul_6",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_6/cond/Identity",
+							"Sigmoid_6"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
 				},
-				"name": "average_pooling2d_2",
+				"name": "tf_op_layer_Mul_6",
 				"inbound_nodes": [
 					[
 						[
-							"p_re_lu_2",
+							"batch_normalization_6",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_6",
 							0,
 							0,
 							{}
@@ -2243,27 +1978,37 @@
 				]
 			},
 			{
-				"class_name": "AveragePooling2D",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "average_pooling2d_3",
+					"name": "Mul_9",
 					"trainable": true,
 					"dtype": "float32",
-					"pool_size": [
-						2,
-						2
-					],
-					"padding": "same",
-					"strides": [
-						1,
-						1
-					],
-					"data_format": "channels_last"
+					"node_def": {
+						"name": "Mul_9",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_9/cond/Identity",
+							"Sigmoid_9"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
 				},
-				"name": "average_pooling2d_3",
+				"name": "tf_op_layer_Mul_9",
 				"inbound_nodes": [
 					[
 						[
-							"p_re_lu_3",
+							"batch_normalization_9",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_9",
 							0,
 							0,
 							{}
@@ -2272,27 +2017,943 @@
 				]
 			},
 			{
-				"class_name": "AveragePooling2D",
+				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "average_pooling2d",
+					"name": "Mul_10",
 					"trainable": true,
 					"dtype": "float32",
-					"pool_size": [
-						2,
-						2
+					"node_def": {
+						"name": "Mul_10",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_10/cond/Identity",
+							"Sigmoid_10"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_10",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_10",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_10",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_3",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_3",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_3/cond/Identity",
+							"Sigmoid_3"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_3",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_3",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_3",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_5",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_5",
+						"op": "Identity",
+						"input": [
+							"Mul_5"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_5",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_5",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_6",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_6",
+						"op": "Identity",
+						"input": [
+							"Mul_6"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_6",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_6",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_9",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_9",
+						"op": "Identity",
+						"input": [
+							"Mul_9"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_9",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_9",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_10",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_10",
+						"op": "Identity",
+						"input": [
+							"Mul_10"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_10",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_10",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_3",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_3",
+						"op": "Identity",
+						"input": [
+							"Mul_3"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_3",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_3",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "AddV2_3",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "AddV2_3",
+						"op": "AddV2",
+						"input": [
+							"Identity_5",
+							"Identity_4"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_AddV2_3",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_5",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Identity_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "AddV2_4",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "AddV2_4",
+						"op": "AddV2",
+						"input": [
+							"Identity_6",
+							"Identity_4"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_AddV2_4",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_6",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Identity_4",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "AddV2_5",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "AddV2_5",
+						"op": "AddV2",
+						"input": [
+							"Identity_9",
+							"Identity_8"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_AddV2_5",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_9",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Identity_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "AddV2_6",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "AddV2_6",
+						"op": "AddV2",
+						"input": [
+							"Identity_10",
+							"Identity_8"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_AddV2_6",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_10",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Identity_8",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "AddV2_2",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "AddV2_2",
+						"op": "AddV2",
+						"input": [
+							"Identity_3",
+							"average_pooling2d_1/AvgPool"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_AddV2_2",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Identity_3",
+							0,
+							0,
+							{}
+						],
+						[
+							"average_pooling2d_1",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "concat",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "concat",
+						"op": "ConcatV2",
+						"input": [
+							"AddV2_3",
+							"AddV2_4",
+							"AddV2_1",
+							"concat/axis"
+						],
+						"attr": {
+							"N": {
+								"i": "3"
+							},
+							"T": {
+								"type": "DT_FLOAT"
+							},
+							"Tidx": {
+								"type": "DT_INT32"
+							}
+						}
+					},
+					"constants": {
+						"3": -1
+					}
+				},
+				"name": "tf_op_layer_concat",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2_3",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_AddV2_4",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_AddV2_1",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "concat_1",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "concat_1",
+						"op": "ConcatV2",
+						"input": [
+							"AddV2_5",
+							"AddV2_6",
+							"AddV2_2",
+							"concat_1/axis"
+						],
+						"attr": {
+							"Tidx": {
+								"type": "DT_INT32"
+							},
+							"T": {
+								"type": "DT_FLOAT"
+							},
+							"N": {
+								"i": "3"
+							}
+						}
+					},
+					"constants": {
+						"3": -1
+					}
+				},
+				"name": "tf_op_layer_concat_1",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_AddV2_5",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_AddV2_6",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_AddV2_2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_7",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 10,
+					"kernel_size": [
+						3,
+						3
 					],
-					"padding": "same",
 					"strides": [
 						1,
 						1
 					],
-					"data_format": "channels_last"
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						1,
+						1
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
 				},
-				"name": "average_pooling2d",
+				"name": "conv2d_7",
 				"inbound_nodes": [
 					[
 						[
-							"p_re_lu",
+							"tf_op_layer_concat",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_11",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 10,
+					"kernel_size": [
+						3,
+						3
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						1,
+						1
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_11",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_concat_1",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "BatchNormalization",
+				"config": {
+					"name": "batch_normalization_7",
+					"trainable": true,
+					"dtype": "float32",
+					"axis": [
+						3
+					],
+					"momentum": 0.99,
+					"epsilon": 0.001,
+					"center": true,
+					"scale": true,
+					"beta_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"gamma_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"moving_mean_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"moving_variance_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"beta_regularizer": null,
+					"gamma_regularizer": null,
+					"beta_constraint": null,
+					"gamma_constraint": null
+				},
+				"name": "batch_normalization_7",
+				"inbound_nodes": [
+					[
+						[
+							"conv2d_7",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "BatchNormalization",
+				"config": {
+					"name": "batch_normalization_11",
+					"trainable": true,
+					"dtype": "float32",
+					"axis": [
+						3
+					],
+					"momentum": 0.99,
+					"epsilon": 0.001,
+					"center": true,
+					"scale": true,
+					"beta_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"gamma_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"moving_mean_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"moving_variance_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"beta_regularizer": null,
+					"gamma_regularizer": null,
+					"beta_constraint": null,
+					"gamma_constraint": null
+				},
+				"name": "batch_normalization_11",
+				"inbound_nodes": [
+					[
+						[
+							"conv2d_11",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_7",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_7",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_7/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_7",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_7",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_11",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_11",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_11/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_11",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_11",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_7",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_7",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_7/cond/Identity",
+							"Sigmoid_7"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_7",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_7",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_7",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_11",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_11",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_11/cond/Identity",
+							"Sigmoid_11"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_11",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_11",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_11",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_7",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_7",
+						"op": "Identity",
+						"input": [
+							"Mul_7"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_7",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_7",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_11",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_11",
+						"op": "Identity",
+						"input": [
+							"Mul_11"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_11",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_11",
 							0,
 							0,
 							{}
@@ -2317,7 +2978,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"average_pooling2d_1",
+							"tf_op_layer_Identity_7",
 							0,
 							0,
 							{}
@@ -2342,32 +3003,7 @@
 				"inbound_nodes": [
 					[
 						[
-							"average_pooling2d_2",
-							0,
-							0,
-							{}
-						]
-					]
-				]
-			},
-			{
-				"class_name": "UpSampling2D",
-				"config": {
-					"name": "up_sampling2d_2",
-					"trainable": true,
-					"dtype": "float32",
-					"size": [
-						8,
-						8
-					],
-					"data_format": "channels_last",
-					"interpolation": "nearest"
-				},
-				"name": "up_sampling2d_2",
-				"inbound_nodes": [
-					[
-						[
-							"average_pooling2d_3",
+							"tf_op_layer_Identity_11",
 							0,
 							0,
 							{}
@@ -2378,18 +3014,17 @@
 			{
 				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "concat",
+					"name": "concat_2",
 					"trainable": true,
 					"dtype": "float32",
 					"node_def": {
-						"name": "concat",
+						"name": "concat_2",
 						"op": "ConcatV2",
 						"input": [
-							"average_pooling2d/AvgPool",
 							"up_sampling2d/resize/ResizeNearestNeighbor",
 							"up_sampling2d_1/resize/ResizeNearestNeighbor",
-							"up_sampling2d_2/resize/ResizeNearestNeighbor",
-							"concat/axis"
+							"AddV2",
+							"concat_2/axis"
 						],
 						"attr": {
 							"Tidx": {
@@ -2399,23 +3034,17 @@
 								"type": "DT_FLOAT"
 							},
 							"N": {
-								"i": "4"
+								"i": "3"
 							}
 						}
 					},
 					"constants": {
-						"4": -1
+						"3": -1
 					}
 				},
-				"name": "tf_op_layer_concat",
+				"name": "tf_op_layer_concat_2",
 				"inbound_nodes": [
 					[
-						[
-							"average_pooling2d",
-							0,
-							0,
-							{}
-						],
 						[
 							"up_sampling2d",
 							0,
@@ -2429,7 +3058,7 @@
 							{}
 						],
 						[
-							"up_sampling2d_2",
+							"tf_op_layer_AddV2",
 							0,
 							0,
 							{}
@@ -2440,7 +3069,208 @@
 			{
 				"class_name": "Conv2D",
 				"config": {
-					"name": "conv2d_4",
+					"name": "conv2d_12",
+					"trainable": true,
+					"dtype": "float32",
+					"filters": 10,
+					"kernel_size": [
+						3,
+						3
+					],
+					"strides": [
+						1,
+						1
+					],
+					"padding": "same",
+					"data_format": "channels_last",
+					"dilation_rate": [
+						1,
+						1
+					],
+					"groups": 1,
+					"activation": "linear",
+					"use_bias": false,
+					"kernel_initializer": {
+						"class_name": "GlorotUniform",
+						"config": {
+							"seed": null
+						}
+					},
+					"bias_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"kernel_regularizer": null,
+					"bias_regularizer": null,
+					"activity_regularizer": null,
+					"kernel_constraint": null,
+					"bias_constraint": null
+				},
+				"name": "conv2d_12",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_concat_2",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "BatchNormalization",
+				"config": {
+					"name": "batch_normalization_12",
+					"trainable": true,
+					"dtype": "float32",
+					"axis": [
+						3
+					],
+					"momentum": 0.99,
+					"epsilon": 0.001,
+					"center": true,
+					"scale": true,
+					"beta_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"gamma_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"moving_mean_initializer": {
+						"class_name": "Zeros",
+						"config": {}
+					},
+					"moving_variance_initializer": {
+						"class_name": "Ones",
+						"config": {}
+					},
+					"beta_regularizer": null,
+					"gamma_regularizer": null,
+					"beta_constraint": null,
+					"gamma_constraint": null
+				},
+				"name": "batch_normalization_12",
+				"inbound_nodes": [
+					[
+						[
+							"conv2d_12",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Sigmoid_12",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Sigmoid_12",
+						"op": "Sigmoid",
+						"input": [
+							"batch_normalization_12/cond/Identity"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Sigmoid_12",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_12",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Mul_12",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Mul_12",
+						"op": "Mul",
+						"input": [
+							"batch_normalization_12/cond/Identity",
+							"Sigmoid_12"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Mul_12",
+				"inbound_nodes": [
+					[
+						[
+							"batch_normalization_12",
+							0,
+							0,
+							{}
+						],
+						[
+							"tf_op_layer_Sigmoid_12",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "TensorFlowOpLayer",
+				"config": {
+					"name": "Identity_12",
+					"trainable": true,
+					"dtype": "float32",
+					"node_def": {
+						"name": "Identity_12",
+						"op": "Identity",
+						"input": [
+							"Mul_12"
+						],
+						"attr": {
+							"T": {
+								"type": "DT_FLOAT"
+							}
+						}
+					},
+					"constants": {}
+				},
+				"name": "tf_op_layer_Identity_12",
+				"inbound_nodes": [
+					[
+						[
+							"tf_op_layer_Mul_12",
+							0,
+							0,
+							{}
+						]
+					]
+				]
+			},
+			{
+				"class_name": "Conv2D",
+				"config": {
+					"name": "conv2d_13",
 					"trainable": true,
 					"dtype": "float32",
 					"filters": 1,
@@ -2460,7 +3290,7 @@
 					],
 					"groups": 1,
 					"activation": "linear",
-					"use_bias": true,
+					"use_bias": false,
 					"kernel_initializer": {
 						"class_name": "GlorotUniform",
 						"config": {
@@ -2477,11 +3307,11 @@
 					"kernel_constraint": null,
 					"bias_constraint": null
 				},
-				"name": "conv2d_4",
+				"name": "conv2d_13",
 				"inbound_nodes": [
 					[
 						[
-							"tf_op_layer_concat",
+							"tf_op_layer_Identity_12",
 							0,
 							0,
 							{}
@@ -2492,14 +3322,14 @@
 			{
 				"class_name": "TensorFlowOpLayer",
 				"config": {
-					"name": "Sigmoid",
+					"name": "Sigmoid_13",
 					"trainable": true,
 					"dtype": "float32",
 					"node_def": {
-						"name": "Sigmoid",
+						"name": "Sigmoid_13",
 						"op": "Sigmoid",
 						"input": [
-							"conv2d_4/BiasAdd"
+							"conv2d_13/Conv2D"
 						],
 						"attr": {
 							"T": {
@@ -2509,11 +3339,11 @@
 					},
 					"constants": {}
 				},
-				"name": "tf_op_layer_Sigmoid",
+				"name": "tf_op_layer_Sigmoid_13",
 				"inbound_nodes": [
 					[
 						[
-							"conv2d_4",
+							"conv2d_13",
 							0,
 							0,
 							{}
@@ -2531,7 +3361,7 @@
 		],
 		"output_layers": [
 			[
-				"tf_op_layer_Sigmoid",
+				"tf_op_layer_Sigmoid_13",
 				0,
 				0
 			]

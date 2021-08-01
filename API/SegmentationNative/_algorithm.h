@@ -1,5 +1,7 @@
 #pragma once
 
+/*
+
 #ifndef HV_ALGORITHM
 #define HV_ALGORITHM
 
@@ -63,3 +65,4 @@ namespace hv::v1::algorithm {
 
 
 #endif // !HV_DEEP
+*/

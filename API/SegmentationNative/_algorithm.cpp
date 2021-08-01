@@ -1,4 +1,4 @@
-
+/*
 
 #include "_algorithm.h"
 #include <vector>
@@ -750,3 +750,5 @@ bool hv::v1::algorithm::algorithm::findLine(unsigned char* buffer, int image_wid
 double hv::v1::algorithm::algorithm::getAlignmentDegreeFromDegree(double _inSrcDegree, double _inBaseDegree) {
 	return GetAlignmentDegreeFromDegree(_inSrcDegree, _inBaseDegree);
 }
+
+*/

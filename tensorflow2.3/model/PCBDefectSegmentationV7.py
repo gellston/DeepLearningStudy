@@ -17,8 +17,8 @@ class PCBDefectSegmentationV7:
 
     def __init__(self, learning_rate=0.003):
         global_filter_size1 = 16
-        global_filter_size2 = 32
-        global_filter_size3 = 32
+        global_filter_size2 = 64
+        global_filter_size3 = 64
         global_filter_partial_final = 10
         global_filter_final = 10
 
@@ -44,11 +44,11 @@ class PCBDefectSegmentationV7:
         x1 = Conv2D(kernel_size=(3, 3), filters=global_filter_size2, padding='same', use_bias=False)(x1) #256
         x1 = BatchNormalization()(x1)
         x1 = swish(x=x1)
-        x1_1 = self.residual_layer(x1, filters=global_filter_size2, dilation=1, kernel_size=3)
-        x1_2 = self.residual_layer(x1, filters=global_filter_size2, dilation=2, kernel_size=3)
+        #x1_1 = self.residual_layer(x1, filters=global_filter_size2, dilation=1, kernel_size=3)
+        #x1_2 = self.residual_layer(x1, filters=global_filter_size2, dilation=2, kernel_size=3)
         x1_3 = self.residual_layer(x1, filters=global_filter_size2, dilation=2, kernel_size=5)
         x1_4 = self.residual_layer(x1, filters=global_filter_size2, dilation=2, kernel_size=7)
-        x1_final = tf.concat([x1_1, x1_2, x1_3, x1_4, second], -1) # 256
+        x1_final = tf.concat([ x1_3, x1_4, second], -1) # 256
         x1_final = Conv2D(kernel_size=(3, 3), filters=global_filter_partial_final, padding='same', use_bias=False)(x1_final) #256
         x1_final = BatchNormalization()(x1_final)
         x1_final = swish(x=x1_final)
@@ -59,9 +59,9 @@ class PCBDefectSegmentationV7:
         x2 = BatchNormalization()(x2)
         x2 = swish(x=x2)
         x2_1 = self.residual_layer(x2, filters=global_filter_size3, dilation=2, kernel_size=5)
-        x2_2 = self.residual_layer(x2, filters=global_filter_size3, dilation=1, kernel_size=3)
+        #x2_2 = self.residual_layer(x2, filters=global_filter_size3, dilation=1, kernel_size=3)
         x2_3 = self.residual_layer(x2, filters=global_filter_size3, dilation=2, kernel_size=3)
-        x2_final = tf.concat([x2_1, x2_2, x2_3, third], -1) # 128
+        x2_final = tf.concat([x2_1, x2_3, third], -1) # 128
         x2_final = Conv2D(kernel_size=(3, 3), filters=global_filter_partial_final, padding='same', use_bias=False)(x2_final) #128
         x2_final = BatchNormalization()(x2_final)
         x2_final = swish(x=x2_final)
@@ -77,13 +77,13 @@ class PCBDefectSegmentationV7:
         total_final = BatchNormalization()(total_final)
         total_final = swish(x=total_final)
 
-        total_final = Conv2D(kernel_size=(3, 3), filters=5, padding='same', use_bias=False)(total_final)
-        total_final = BatchNormalization()(total_final)
-        total_final = swish(x=total_final)
+        #total_final = Conv2D(kernel_size=(3, 3), filters=5, padding='same', use_bias=False)(total_final)
+        #total_final = BatchNormalization()(total_final)
+        #total_final = swish(x=total_final)
 
 
         total_final = Conv2D(kernel_size=(3, 3), filters=1, padding='same', use_bias=False)(total_final)
-        total_final = BatchNormalization()(total_final)
+        #total_final = BatchNormalization()(total_final)
 
         output = tf.sigmoid(total_final, name='output')
 
@@ -93,13 +93,37 @@ class PCBDefectSegmentationV7:
         self.optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
         self.model.summary()
 
-
-
-    def jacard_coef_loss(self, y_true, y_pred):
-        y_true_f = K.flatten(y_true)
-        y_pred_f = K.flatten(y_pred)
-        intersection = K.sum(y_true_f * y_pred_f)
-        return -((intersection + 1.0) / (K.sum(y_true_f) + K.sum(y_pred_f) - intersection + 1.0))
+    def jaccard_distance(self, y_true, y_pred, smooth=100):
+        """Jaccard distance for semantic segmentation.
+        Also known as the intersection-over-union loss.
+        This loss is useful when you have unbalanced numbers of pixels within an image
+        because it gives all classes equal weight. However, it is not the defacto
+        standard for image segmentation.
+        For example, assume you are trying to predict if
+        each pixel is cat, dog, or background.
+        You have 80% background pixels, 10% dog, and 10% cat.
+        If the model predicts 100% background
+        should it be be 80% right (as with categorical cross entropy)
+        or 30% (with this loss)?
+        The loss has been modified to have a smooth gradient as it converges on zero.
+        This has been shifted so it converges on 0 and is smoothed to avoid exploding
+        or disappearing gradient.
+        Jaccard = (|X & Y|)/ (|X|+ |Y| - |X & Y|)
+                = sum(|A*B|)/(sum(|A|)+sum(|B|)-sum(|A*B|))
+        # Arguments
+            y_true: The ground truth tensor.
+            y_pred: The predicted tensor
+            smooth: Smoothing factor. Default is 100.
+        # Returns
+            The Jaccard distance between the two tensors.
+        # References
+            - [What is a good evaluation measure for semantic segmentation?](
+               http://www.bmva.org/bmvc/2013/Papers/paper0032/paper0032.pdf)
+        """
+        intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
+        sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
+        jac = (intersection + smooth) / (sum_ - intersection + smooth)
+        return (1 - jac) * smooth
 
 
     def dice_loss(self, y_true, y_pred):
@@ -141,7 +165,8 @@ class PCBDefectSegmentationV7:
     def train_one_batch(self, x_input, y_label):
         with tf.GradientTape() as tape:
             output = self.model(x_input, training=True)
-            loss = self.binary_focal_loss_fixed(y_label, output) + self.dice_loss(y_label, output)
+            #loss = self.jaccard_distance(y_label, output) #+ self.dice_loss(y_label, output)
+            loss =  self.binary_focal_loss_fixed(y_label, output)
             gradients = tape.gradient(loss, self.model.trainable_variables)
             self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
             return loss.numpy()

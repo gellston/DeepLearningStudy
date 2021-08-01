@@ -63,12 +63,23 @@ hv::v1::deep::segmentation::segmentation() : _pimpl(new pimpl()){
 	this->_pimpl->status = TF_NewStatus();
 	this->_pimpl->session = nullptr;
 
-	//hv::v1::raii* raii = new hv::v1::raii([&] {
 
 
-	//	});
+	double percentage = 1;
 
-	//this->_pimpl->raii_destructor = std::shared_ptr<hv::v1::raii>(raii);
+	// create a byte-array for the serialized ProtoConfig, set the mandatory bytes (first three and last four)
+	uint8_t config[15] = { 0x32, 0xb, 0x9, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x20, 0x1, 0x38, 0x1 };
+
+	// convert the desired percentage into a byte-array
+	uint8_t* bytes = reinterpret_cast<uint8_t*>(&percentage);
+
+	// put it to the config byte-array, from 3 to 10:
+	for (int i = 0; i < sizeof(percentage); i++) {
+		config[i + 3] = bytes[i];
+	}
+
+	TF_SetConfig(this->_pimpl->session_options, (void*)config, 15, this->_pimpl->status);
+
 
 }
 

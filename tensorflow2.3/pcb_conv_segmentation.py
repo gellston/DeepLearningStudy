@@ -1,23 +1,20 @@
 import numpy as np
 import tensorflow as tf
-import pydotplus
 import cv2
 
 
-from model.PCBDefectSegmentation import PCBDefectSegmentation
 from model.PCBDefectSegmentationV7 import PCBDefectSegmentationV7
-from tensorflow.keras.models import model_from_json
 from util.opendl_segmentation_dataloader import opendl_segmentation_dataloader
 
 
 print(tf.__version__)
 
 
-loader_train = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final_512_Rotation//')
-loader_test = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final_512_Rotation//')
+loader_train = opendl_segmentation_dataloader('C://Users//\wantr//Desktop//PCB_Augmentation_Final_512_Rotation//')
+loader_test = opendl_segmentation_dataloader('C://Users//\wantr//Desktop//PCB_Augmentation_Final_512_Rotation//')
 
-learning_rate = 0.1
-batch_size = 4
+learning_rate = 0.001
+batch_size = 5
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)
 target_accuracy = 0.94
@@ -37,6 +34,7 @@ for epoch in range(1000):
         average_cost += (cost / total_batch)
         average_accuracy += (accuracy / total_batch)
 
+    tf.saved_model.save(model.get_model(), "C:\\Github\\DeepLearningStudy\\trained_model\\PCBDefectSegmentation")
 
     loader_test.clear()
     loader_test.shuffle()
