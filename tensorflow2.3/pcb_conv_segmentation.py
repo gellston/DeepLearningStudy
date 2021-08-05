@@ -3,23 +3,23 @@ import tensorflow as tf
 import cv2
 
 
-from model.PCBDefectSegmentationV7 import PCBDefectSegmentationV7
+from model.PCBDefectSegmentationV8 import PCBDefectSegmentationV8
 from util.opendl_segmentation_dataloader import opendl_segmentation_dataloader
 
 
 print(tf.__version__)
 
 
-loader_train = opendl_segmentation_dataloader('C://Users//\wantr//Desktop//PCB_Augmentation_Final_512_Rotation//')
-loader_test = opendl_segmentation_dataloader('C://Users//\wantr//Desktop//PCB_Augmentation_Final_512_Rotation//')
+loader_train = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final_512_Rotation//')
+loader_test = opendl_segmentation_dataloader('C://Users//gellston//Desktop//PCB_Augmentation_Final_512_Rotation//')
 
 learning_rate = 0.001
 batch_size = 5
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)
-target_accuracy = 0.94
+target_accuracy = 0.96
 
-model = PCBDefectSegmentationV7(learning_rate=learning_rate)
+model = PCBDefectSegmentationV8(learning_rate=learning_rate)
 tf.keras.utils.plot_model(model.get_model(), to_file='C:\\Github\\DeepLearningStudy\\trained_model\\PCBDefectSegmentation.png', show_shapes=True, show_layer_names=True)
 for epoch in range(1000):
     average_cost = 0
