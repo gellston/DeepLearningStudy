@@ -5,6 +5,8 @@ import torch
 def train(model, optimizer, cost_function, batches, device):
     input = torch.from_numpy(batches[0]).to(device, dtype=torch.float32)
     label = torch.from_numpy(batches[1]).to(device, dtype=torch.long)
+    #print('input = ', input.size())
+    #print('label = ', label.size())
 
     # Cost
     model.train()

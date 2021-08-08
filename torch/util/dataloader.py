@@ -56,6 +56,7 @@ class dataloader:
 
             #print(path)
             image = cv2.imread(path, color_flag).astype(np.uint8)
+            ##print('image shape = ' , image.shape)
             #image = cv2.resize(image, (shape1[0], shape1[1]))
             npImage = np.array(image)
             npImage = npImage / dev
@@ -76,6 +77,7 @@ class dataloader:
         self.currentIndex += batch
         numpy_image = np.array(images)
         numpy_label = np.array(labels)
+        numpy_label = np.array(numpy_label).flatten().reshape(shape2)
 
         # print('current index =', self.currentIndex , '\n')
         return (numpy_image, numpy_label)
