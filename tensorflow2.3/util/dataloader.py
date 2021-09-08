@@ -41,7 +41,7 @@ class dataloader:
         images = []
         labels = []
 
-        for index in range(batch):
+        for index in range(int(batch)):
             if index + self.currentIndex >= self.size:
                 return (None, None)
 
@@ -67,8 +67,8 @@ class dataloader:
             for index2 in range(self.labelCount):
                 if self.labelNames[index2][0] in path:
                     label[self.labelNames[index2][1]] = 1
-                    npLabel = np.array(label).flatten().reshape(shape2)
-                    labels.append(npLabel)
+                    #npLabel = np.array(label).flatten().reshape(shape2)
+                    labels.append(label)
 
             if index + self.currentIndex >= self.size:
                 break
