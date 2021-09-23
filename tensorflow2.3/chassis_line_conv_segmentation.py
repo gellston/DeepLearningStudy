@@ -14,7 +14,7 @@ print(tf.__version__)
 loader_train = opendl_segmentation_dataloader('C://Users//gellston//Desktop//FinalChassisLine//')
 loader_test = opendl_segmentation_dataloader('C://Users//gellston//Desktop//FinalChassisLine//')
 
-learning_rate = 0.003
+learning_rate = 0.0001
 batch_size = 4
 sample_size = loader_train.size()
 total_batch = int(sample_size / batch_size)

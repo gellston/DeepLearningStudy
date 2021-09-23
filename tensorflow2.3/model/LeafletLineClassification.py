@@ -12,25 +12,58 @@ from tensorflow.keras.layers import GlobalAveragePooling2D
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import SeparableConv2D
 from tensorflow.keras.layers import SpatialDropout2D
+from tensorflow.keras.layers import Conv2D
+
+
+
+gpu = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpu[0], True)
 
 
 class LeafletLineClassification:
     def __init__(self, learning_rate=0.003):
         x_input = tf.keras.Input(shape=(100, 512, 3), name="x_input_node")
-        x = SeparableConv2D(kernel_size=(3, 3), filters=32, padding='same', use_bias=False)(x_input)
+        x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(x_input)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
-        x = self.residual_layer(x, 32)
-        x = MaxPool2D()(x)
-        x = self.residual_layer(x, 32)
-        x = MaxPool2D()(x)
-        x = self.residual_layer(x, 32)
-        x = MaxPool2D()(x)
-        x = self.residual_layer(x, 32)
-        x = MaxPool2D()(x)
-        x = self.residual_layer(x, 32)
-        x = SeparableConv2D(2, (3, 3), padding='same')(x)
+        x1 = PReLU()(x)
+
+        short_cut = MaxPool2D(pool_size=(2, 2))(x1)
+        x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(short_cut)
         x = BatchNormalization()(x)
+        x2 = PReLU()(x) + short_cut
+
+
+        short_cut = MaxPool2D(pool_size=(2, 2))(x2)
+        x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(short_cut)
+        x = BatchNormalization()(x)
+        x3 = PReLU()(x) + short_cut
+
+
+        short_cut = MaxPool2D(pool_size=(2, 2))(x3)
+        x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(short_cut)
+        x = BatchNormalization()(x)
+        x4 = PReLU()(x) + short_cut
+
+
+
+
+        #x = MaxPool2D(pool_size=(2, 3))(x)
+        #x = Conv2D(kernel_size=(5, 5), filters=32, padding='same', use_bias=False)(x)
+        #x = BatchNormalization()(x)
+        #x = PReLU()(x)
+
+        #x = MaxPool2D(pool_size=(2, 3))(x)
+        #x = Conv2D(kernel_size=(5, 5), filters=32, padding='same', use_bias=False)(x)
+        #x = BatchNormalization()(x)
+        #x = PReLU()(x)
+
+        x = Conv2D(kernel_size=(3, 3), filters=16, padding='same')(x4)
+        x = BatchNormalization()(x)
+        x = Conv2D(kernel_size=(3, 3), filters=8, padding='same')(x)
+        x = BatchNormalization()(x)
+        x = Conv2D(kernel_size=(3, 3), filters=2, padding='same')(x)
+        x = BatchNormalization()(x)
+        x = PReLU()(x)
         x = GlobalAveragePooling2D()(x)
         x = Softmax()(x)
 
@@ -39,7 +72,7 @@ class LeafletLineClassification:
         self.model.summary()
 
     def residual_layer(self, x_input, filters=32):
-        x = SeparableConv2D(kernel_size=(3, 3), filters=filters, padding='same', use_bias=False)(x_input)
+        x = Conv2D(kernel_size=(3, 3), filters=filters, padding='same', use_bias=False)(x_input)
         x = BatchNormalization()(x)
         x = ReLU()(x)
         skip = x + x_input
