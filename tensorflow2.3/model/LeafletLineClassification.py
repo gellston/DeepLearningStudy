@@ -13,6 +13,7 @@ from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import SeparableConv2D
 from tensorflow.keras.layers import SpatialDropout2D
 from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.activations import swish
 
 
 
@@ -27,35 +28,23 @@ class LeafletLineClassification:
         x = BatchNormalization()(x)
         x1 = PReLU()(x)
 
-        short_cut = MaxPool2D(pool_size=(2, 2))(x1)
+        short_cut = MaxPool2D(pool_size=(2, 3))(x1)
         x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(short_cut)
         x = BatchNormalization()(x)
         x2 = PReLU()(x) + short_cut
 
 
-        short_cut = MaxPool2D(pool_size=(2, 2))(x2)
+        short_cut = MaxPool2D(pool_size=(2, 3))(x2)
         x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(short_cut)
         x = BatchNormalization()(x)
         x3 = PReLU()(x) + short_cut
 
 
-        short_cut = MaxPool2D(pool_size=(2, 2))(x3)
+        short_cut = MaxPool2D(pool_size=(2, 3))(x3)
         x = Conv2D(kernel_size=(5, 5), filters=16, padding='same', use_bias=False, dilation_rate=2)(short_cut)
         x = BatchNormalization()(x)
         x4 = PReLU()(x) + short_cut
 
-
-
-
-        #x = MaxPool2D(pool_size=(2, 3))(x)
-        #x = Conv2D(kernel_size=(5, 5), filters=32, padding='same', use_bias=False)(x)
-        #x = BatchNormalization()(x)
-        #x = PReLU()(x)
-
-        #x = MaxPool2D(pool_size=(2, 3))(x)
-        #x = Conv2D(kernel_size=(5, 5), filters=32, padding='same', use_bias=False)(x)
-        #x = BatchNormalization()(x)
-        #x = PReLU()(x)
 
         x = Conv2D(kernel_size=(3, 3), filters=16, padding='same')(x4)
         x = BatchNormalization()(x)

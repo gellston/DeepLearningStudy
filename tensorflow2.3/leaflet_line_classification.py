@@ -8,8 +8,8 @@ from util.dataloader import dataloader
 loader_train = dataloader('C://Github//LeafletImageCropTool//Data//ClassificationExperiment')
 loader_train.shuffle()
 
-learning_rate = 0.001
-batch_size = 20
+learning_rate = 0.005
+batch_size = 40
 sample_size = loader_train.sample_count()
 total_batch = int(sample_size / batch_size)
 target_accuracy = 0.9997

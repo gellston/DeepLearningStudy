@@ -152,12 +152,12 @@
 					"dtype": "float32",
 					"pool_size": [
 						2,
-						2
+						3
 					],
 					"padding": "valid",
 					"strides": [
 						2,
-						2
+						3
 					],
 					"data_format": "channels_last"
 				},
@@ -344,12 +344,12 @@
 					"dtype": "float32",
 					"pool_size": [
 						2,
-						2
+						3
 					],
 					"padding": "valid",
 					"strides": [
 						2,
-						2
+						3
 					],
 					"data_format": "channels_last"
 				},
@@ -536,12 +536,12 @@
 					"dtype": "float32",
 					"pool_size": [
 						2,
-						2
+						3
 					],
 					"padding": "valid",
 					"strides": [
 						2,
-						2
+						3
 					],
 					"data_format": "channels_last"
 				},
