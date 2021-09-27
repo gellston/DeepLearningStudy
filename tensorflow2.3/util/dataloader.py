@@ -89,4 +89,27 @@ class dataloader:
         return self.size
 
     def shuffle(self):
+        self.fullPaths = []
+        self.labelNames = []
+        self.labelPaths = []
+        self.labelCount = 0
+
+        filelist = sorted(os.listdir(self.root))
+        for labelName in filelist:
+            if labelName == '.DS_Store': continue
+            temp = self.root + '/' + labelName
+            if os.path.isdir(temp):
+                self.labelPaths.append(temp)
+                self.labelNames.append([labelName.split('_')[1], self.labelCount])
+                self.labelCount = self.labelCount + 1
+
+        for index in range(self.labelCount):
+            path = self.labelPaths[index]
+            list = os.listdir(path)
+            for name in list:
+                if name == '.DS_Store': continue
+                self.fullPaths.append(path + '/' + name)
+
         shuffle(self.fullPaths)
+        self.size = len(self.fullPaths)
+        self.currentIndex = 0
