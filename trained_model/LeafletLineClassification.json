@@ -1063,12 +1063,12 @@
 			{
 				"class_name": "Softmax",
 				"config": {
-					"name": "softmax",
+					"name": "output",
 					"trainable": true,
 					"dtype": "float32",
 					"axis": -1
 				},
-				"name": "softmax",
+				"name": "output",
 				"inbound_nodes": [
 					[
 						[
@@ -1090,7 +1090,7 @@
 		],
 		"output_layers": [
 			[
-				"softmax",
+				"output",
 				0,
 				0
 			]

@@ -1,7 +1,7 @@
 ﻿// ConsoleExample.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 //
 
-#include <deep.h>
+#include <classification.h>
 
 
 #include <opencv2/opencv.hpp>
@@ -22,20 +22,17 @@ int main()
     double duringtime;
 
 
-    hv::v1::deep::segmentation segmentation;
+    deep::classification classification;
 
-    segmentation.import("C://Github//DeepLearningStudy//trained_model//PCBDefectSegmentation//");
+    classification.import("C://Github//DeepLearningStudy//trained_model//LeafletLineClassification//");
 
 
-    std::string original_path = "C://Github//DeepLearningStudy//dataset//PCB_Augmentation_Final//0_20210727204810163//source.jpg";
+    std::string original_path = "C://Github//LeafletImageCropTool//Data//ClassificationExperiment//0_pass//2_1.jpg";
 
 
     cv::Mat original = cv::imread(original_path, cv::IMREAD_COLOR);
-    cv::Mat resized_original;
 
-    cv::resize(original, resized_original, cv::Size(512, 512));
-    cv::Mat resized_label_probability = cv::Mat(512, 512, CV_32FC1);
-    cv::Mat grayScale = cv::Mat(512, 512, CV_8UC1);
+
 
     //프로그램이나 클래스 시작부분에
     QueryPerformanceFrequency(&Frequency);
@@ -44,22 +41,24 @@ int main()
     QueryPerformanceCounter(&BeginTime);
 
     int fps = 0;
+    float output[2];
+
+    
     while (true) {
 
         //cv::Mat resized_original_probability = cv::Mat(512, 512, CV_32FC3);
        
         //cv::Mat resized_label_threshold = cv::Mat(512, 512, CV_32FC1);
 
+        memset(output, 0, sizeof(float) * 2);
 
-        segmentation.run(resized_original.data, resized_label_probability.data, 512, 512, 3, 1);
-        cv::Mat output = resized_label_probability * 255;
-        cv::threshold(resized_label_probability, output, 128, 255, cv::ThresholdTypes::THRESH_BINARY);
-        
-        output.convertTo(grayScale, CV_8UC1);
+        classification.run(original.data, output, 512, 100, 3, 2);
+     
 
-        cv::imshow("result", resized_label_probability);
-        cv::imshow("original", resized_original);
-        cv::waitKey(10);
+
+
+        //cv::imshow("original", original);
+        //cv::waitKey(10);
 
 
 

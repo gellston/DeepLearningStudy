@@ -43,12 +43,14 @@ for epoch in range(200):
         break;
 
 
+
+tf.saved_model.save(model.get_model(), "C:\\Github\\DeepLearningStudy\\trained_model\\LeafletLineClassification")
+
 # Save the weights
 model.get_model().save_weights("C:\\Github\\DeepLearningStudy\\trained_model\\LeafletLineClassification.h5")
 
 # Save the model architecture as json
 with open("C:\\Github\\DeepLearningStudy\\trained_model\\LeafletLineClassification.json", "w") as fp:
   fp.write(model.get_model().to_json(indent="\t"))
-
 
 

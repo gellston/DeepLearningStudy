@@ -54,7 +54,7 @@ class LeafletLineClassification:
         x = BatchNormalization()(x)
         x = PReLU()(x)
         x = GlobalAveragePooling2D()(x)
-        x = Softmax()(x)
+        x = Softmax(name='output')(x)
 
         self.model = Model(inputs=x_input, outputs=x)
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)

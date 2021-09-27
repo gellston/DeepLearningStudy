@@ -1,1 +1,1 @@
-saved_model_cli show --all --dir C:\Github\DeepLearningStudy\trained_model\PCBDefectSegmentation\ --tag_set serve --signature_def serving_default
+saved_model_cli show --all --dir C:\Github\DeepLearningStudy\trained_model\LeafletLineClassification\ --tag_set serve --signature_def serving_default

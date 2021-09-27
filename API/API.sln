@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnyxChassisLocationEstimato
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TorchExample", "TorchExample\TorchExample.vcxproj", "{F6623964-EA98-42BA-A290-47CFC342C184}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClassificationNative", "ClassificationNative\ClassificationNative.vcxproj", "{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,16 @@ Global
 		{F6623964-EA98-42BA-A290-47CFC342C184}.Release|x64.Build.0 = Release|x64
 		{F6623964-EA98-42BA-A290-47CFC342C184}.Release|x86.ActiveCfg = Release|Win32
 		{F6623964-EA98-42BA-A290-47CFC342C184}.Release|x86.Build.0 = Release|Win32
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Debug|x64.ActiveCfg = Debug|x64
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Debug|x64.Build.0 = Debug|x64
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Debug|x86.ActiveCfg = Debug|Win32
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Debug|x86.Build.0 = Debug|Win32
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Release|Any CPU.ActiveCfg = Release|Win32
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Release|x64.ActiveCfg = Release|x64
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Release|x64.Build.0 = Release|x64
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Release|x86.ActiveCfg = Release|Win32
+		{DFE5DA69-98E3-43C0-AC8D-4E47882F568C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
