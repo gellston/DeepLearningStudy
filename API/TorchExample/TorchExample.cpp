@@ -34,7 +34,7 @@ int main()
     try {
         
         
-        module = torch::jit::load("C://Github//DeepLearningStudy//trained_model//CharacterClassificationFromCpp.pt");
+        module = torch::jit::load("C://Github//DeepLearningStudy//trained_model//NoTrainCharacterClassification.pt");
         module.to(device);
        // torch::from_file("",)
         std::cout << "test" << std::endl;
@@ -109,6 +109,7 @@ int main()
     }
 
     // Ready optimizer , Cross entropy function
+   
     torch::optim::SGD optimizer(parameters, learning_rate);
     torch::nn::CrossEntropyLoss cost_function;
 
