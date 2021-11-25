@@ -1,8 +1,12 @@
+
+
+
 if __name__ == "__main__":
     from torchsummary import summary
     import pdb
     import torch
-    from util.helper import MLPMixer
+    import numpy as np
+    from util.helper_mixerMlp import MLPMixer
 
     # --------- base_model_param ---------
     in_channels = 3

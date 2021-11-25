@@ -32,16 +32,6 @@
       </list>
     </option>
   </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>loss</find>
-      <find>labelNames</find>
-      <find>shape2</find>
-      <find>cost</find>
-      <find>batches</find>
-      <find>residual_separable_conv_relu</find>
-    </findStrings>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
@@ -57,7 +47,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.torch_character_train">
+  <component name="RunManager" selected="Python.torch_animal_train">
     <configuration name="torch_animal_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -100,6 +90,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="torch_mlpMixer_train" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="torch" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_mlpMixer_train.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="torch_version_check" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -123,8 +134,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.torch_character_train" />
         <item itemvalue="Python.torch_animal_train" />
+        <item itemvalue="Python.torch_mlpMixer_train" />
+        <item itemvalue="Python.torch_character_train" />
         <item itemvalue="Python.torch_version_check" />
       </list>
     </recent_temporary>
@@ -173,21 +185,25 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="592" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1634533366689" />
-    <state width="1899" height="414" key="GridCell.Tab.0.bottom" timestamp="1634543743545">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="258" key="GridCell.Tab.0.bottom" timestamp="1637819692962">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="258" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637819692962" />
     <state width="1899" height="414" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
-    <state width="1899" height="414" key="GridCell.Tab.0.center" timestamp="1634543743545">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="258" key="GridCell.Tab.0.center" timestamp="1637819692962">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="258" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637819692962" />
     <state width="1899" height="414" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
-    <state width="1899" height="414" key="GridCell.Tab.0.left" timestamp="1634543743545">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="258" key="GridCell.Tab.0.left" timestamp="1637819692961">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="258" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637819692961" />
     <state width="1899" height="414" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
-    <state width="1899" height="414" key="GridCell.Tab.0.right" timestamp="1634543743545">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="258" key="GridCell.Tab.0.right" timestamp="1637819692962">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="258" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637819692962" />
     <state width="1899" height="414" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
     <state width="1899" height="414" key="GridCell.Tab.1.bottom" timestamp="1634543743545">
       <screen x="0" y="0" width="1920" height="1040" />
