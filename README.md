@@ -16,11 +16,6 @@
 
 <br/>
 
-# 딥러닝 스터디 모임 시즌2
-<br/>
-###  시간 : 미정
-<br/>
-
 ###  Tensorflow 2.3.1 설치 방법
 * CUDA 설치 : https://developer.nvidia.com/cuda-10.2-download-archive
 * CuDNN 설치 : https://developer.nvidia.com/compute/machine-learning/cudnn/secure/8.0.5/10.2_20201106/cudnn-10.2-windows10-x64-v8.0.5.39.zip
@@ -31,4 +26,9 @@ pip install tensorflow==2.3.1      # CPU
 pip install tensorflow-gpu==2.3.1  # GPU
 ```
 
+<br/>
+
+# 딥러닝 스터디 모임 시즌2
+<br/>
+###  시간 : 미정
 <br/>
