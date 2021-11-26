@@ -51,7 +51,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.torch_version_check">
+  <component name="RunManager" selected="Python.torch_softMaxRegression_train_mnist">
     <configuration name="torch_basicLogisticRegression_class2_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -73,7 +73,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="torch_basicLogisticRegression_class_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="torch_softMaxRegression_train_mnist" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -85,7 +85,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_basicLogisticRegression_class_train.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_softMaxRegression_train_mnist.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -159,11 +159,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.torch_version_check" />
+        <item itemvalue="Python.torch_softMaxRegression_train_mnist" />
         <item itemvalue="Python.torch_softmaxRegression_train_class" />
+        <item itemvalue="Python.torch_version_check" />
         <item itemvalue="Python.torch_softmaxRegression_train" />
         <item itemvalue="Python.torch_basicLogisticRegression_class2_train" />
-        <item itemvalue="Python.torch_basicLogisticRegression_class_train" />
       </list>
     </recent_temporary>
   </component>
@@ -211,25 +211,25 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="592" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1634533366689" />
-    <state width="1899" height="295" key="GridCell.Tab.0.bottom" timestamp="1637912431324">
+    <state width="939" height="367" key="GridCell.Tab.0.bottom" timestamp="1637918798561">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="295" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637912431324" />
+    <state width="939" height="367" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637918798561" />
     <state width="1899" height="414" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
-    <state width="1899" height="295" key="GridCell.Tab.0.center" timestamp="1637912431324">
+    <state width="939" height="367" key="GridCell.Tab.0.center" timestamp="1637918798561">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="295" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637912431324" />
+    <state width="939" height="367" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637918798561" />
     <state width="1899" height="414" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
-    <state width="1899" height="295" key="GridCell.Tab.0.left" timestamp="1637912431324">
+    <state width="939" height="367" key="GridCell.Tab.0.left" timestamp="1637918798561">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="295" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637912431324" />
+    <state width="939" height="367" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637918798561" />
     <state width="1899" height="414" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
-    <state width="1899" height="295" key="GridCell.Tab.0.right" timestamp="1637912431324">
+    <state width="939" height="367" key="GridCell.Tab.0.right" timestamp="1637918798561">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="295" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637912431324" />
+    <state width="939" height="367" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1637918798561" />
     <state width="1899" height="414" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1634543743545" />
     <state width="1899" height="414" key="GridCell.Tab.1.bottom" timestamp="1634543743545">
       <screen x="0" y="0" width="1920" height="1040" />
