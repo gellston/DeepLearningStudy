@@ -1,4 +1,4 @@
-# 딥러닝 스터디 모임
+# 딥러닝 스터디 모임 시즌1
 
 ###  시간 : 매주 목요일 8~9시쯤에 시작.
  ***주의사항 : 시간이 변동될수 있습니다.*** <br/>
@@ -10,10 +10,15 @@
 1. Linear Regression. - 완료
 2. Logistic Regression. - 완료
 3. Softmax Regression. - 완료
-4. XOR 문제 
-5. ANN
-6. CNN
+4. XOR 문제 - 완료
+5. ANN - 완료
+6. CNN - 완료
 
+<br/>
+
+# 딥러닝 스터디 모임 시즌2
+<br/>
+###  시간 : 미정
 <br/>
 
 ###  Tensorflow 2.3.1 설치 방법
