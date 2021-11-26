@@ -6,7 +6,7 @@ if torch.cuda.is_available():
     DEVICE = torch.device('cuda')
 else:
     print('cpu enabled')
-    DEVICE = torch.devie('cpu')
+    DEVICE = torch.device('cpu')
 
 print('Device :', DEVICE)
 print("Torch version:{}".format(torch.__version__))
