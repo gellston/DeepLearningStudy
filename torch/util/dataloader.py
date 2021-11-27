@@ -21,20 +21,10 @@ class dataloader:
             if labelName == '.DS_Store': continue
             temp = self.root + '/' + labelName
             if os.path.isdir(temp):
-                self.labelPaths.append(temp)
-                self.labelNames.append([labelName.split('_')[1], self.labelCount])
+                self.labelPaths.append([temp, labelName.split('_')[1]])
                 self.labelCount = self.labelCount + 1
 
-        for index in range(self.labelCount):
-            path = self.labelPaths[index]
-            list = os.listdir(path)
-            for name in list:
-                if name == '.DS_Store': continue
-                self.fullPaths.append(path + '/' + name)
 
-        shuffle(self.fullPaths)
-        self.size = len(self.fullPaths)
-        self.currentIndex = 0
 
     def load(self, shape1, shape2, dev, batch, is_color=True):
 
