@@ -1,9 +1,9 @@
 import torch
 
-class VGG16FC(torch.nn.Module):
+class VGG16BN_GAP(torch.nn.Module):
 
     def __init__(self, class_num=5):
-        super(VGG16FC, self).__init__()
+        super(VGG16BN_GAP, self).__init__()
         self.drop_rate = 0.3
         self.class_num = class_num
 
@@ -43,25 +43,12 @@ class VGG16FC(torch.nn.Module):
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
-
-        self.adaptive_average_pool = torch.nn.AdaptiveAvgPool2d((7, 7))
-
-        # L1 FC 7x7x512 inputs ->
-        self.fc1 = torch.nn.Sequential(torch.nn.Linear(7*7*512, 4096, bias=True),
-                                       torch.nn.ReLU(),
-                                       torch.nn.Dropout(p=self.drop_rate))
-
-        self.fc2 = torch.nn.Sequential(torch.nn.Linear(4096, 4096, bias=True),
-                                       torch.nn.ReLU(),
-                                       torch.nn.Dropout(p=self.drop_rate))
-
-        self.final_output = torch.nn.Sequential(torch.nn.Linear(4096, self.class_num, bias=True),
-                                                torch.nn.ReLU())
+        self.final_conv_layer = torch.nn.Sequential(torch.nn.Conv2d(512, self.class_num, kernel_size=3, stride=1, padding='same'),
+                                                    torch.nn.ReLU())
 
 
-
-
-
+        self.global_average_pooling = torch.nn.Sequential(torch.nn.AvgPool2d((7, 7)),
+                                                          torch.nn.ReLU())
 
     def forward(self, x):
         x = self.layer1(x)
@@ -69,12 +56,8 @@ class VGG16FC(torch.nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
-        x = self.adaptive_average_pool(x)
-        x = x.view(-1, 7*7*512)
-        x = self.fc1(x)
-        x = x.view(-1, 4096)
-        x = self.fc2(x)
-        x = self.final_output(x)
-
+        x = self.final_conv_layer(x)
+        x = self.global_average_pooling(x)
+        x = torch.reshape(x, (-1, 5))
 
         return x
