@@ -1,6 +1,6 @@
 import torch
+import torch.nn.functional as F
 import torch.nn as nn
-
 
 
 class depthwise_separable_convV2(nn.Module):
@@ -72,6 +72,8 @@ class bottleneck_residual_block(nn.Module):
                                     dilation=dilation,
                                     bias=False)
 
+
+
         self.identity = nn.Identity()
 
     def forward(self, x):
@@ -87,7 +89,6 @@ class bottleneck_residual_block(nn.Module):
         ##Projection layer
         x = self.projection(x)
         x = self.batch_norm2(x)
-        x = self.relu6(x)
         ##identity Layer
         if self.stride == 1:
             shortcut = self.identity(x)
@@ -96,30 +97,67 @@ class bottleneck_residual_block(nn.Module):
         return x
 
 
+class CustomSegmentationV1(torch.nn.Module):
 
-class depthwise_separable_conv(nn.Module):
-    def __init__(self, in_filters, out_filters, dilation=1, padding='same'):
-        super(depthwise_separable_conv, self).__init__()
-        self.depthwise = nn.Conv2d(in_channels=in_filters, out_channels=in_filters, kernel_size=3, padding=padding, groups=in_filters, dilation=dilation)
-        self.pointwise = nn.Conv2d(in_channels=in_filters, out_channels=out_filters, kernel_size=1)
+    def __init__(self):
+        super(CustomSegmentationV1, self).__init__()
+        #256x256
+        self.layer1 = nn.Conv2d(in_channels=3,
+                                out_channels=32,
+                                dilation=1,
+                                bias=False,
+                                kernel_size=3,
+                                stride=1)
+        self.bn_layer1 = nn.BatchNorm2d(32)
+        self.layer1_bottleneck = bottleneck_residual_block(in_filters=32,
+                                                           expand_ratio=1)
+
+
+        # 128x128
+        self.layer2 = nn.Conv2d(in_channels=32,
+                                out_channels=64,
+                                dilation=1,
+                                bias=False,
+                                kernel_size=3,
+                                stride=2)
+        self.bn_layer2 = nn.BatchNorm2d(64)
+        self.layer2_bottleneck = bottleneck_residual_block(in_filters=64)
+
+
+        # 64x64
+        self.layer3 = nn.Conv2d(in_channels=64,
+                                out_channels=128,
+                                dilation=1,
+                                bias=False,
+                                kernel_size=3,
+                                stride=2)
+        self.bn_layer3 = nn.BatchNorm2d(128)
+        self.layer3_bottleneck = bottleneck_residual_block(in_filters=128)
+
+
+
+        # 32x32
+        self.layer4 = nn.Conv2d(in_channels=128,
+                                out_channels=256,
+                                dilation=1,
+                                bias=False,
+                                kernel_size=3,
+                                stride=2)
+        self.bn_layer4 = nn.BatchNorm2d(256)
+        self.laye4_bottleneck = bottleneck_residual_block(in_filters=256)
+
+        # 16x16
+        self.layer4 = nn.Conv2d(in_channels=256,
+                                out_channels=512,
+                                dilation=1,
+                                bias=False,
+                                kernel_size=3,
+                                stride=2)
+        self.bn_layer4 = nn.BatchNorm2d(512)
+        self.laye4_bottleneck = bottleneck_residual_block(in_filters=512)
+
 
     def forward(self, x):
-        out = self.depthwise(x)
-        out = self.pointwise(out)
-        return out
 
-class residual_separable_conv_relu(nn.Module):
-    def __init__(self, in_filters, out_filters, dilation=1, padding='same'):
-        super(residual_separable_conv_relu, self).__init__()
-        self.separable_conv = depthwise_separable_conv(in_filters=in_filters, out_filters=out_filters, dilation=dilation, padding=padding)
-        self.identity = nn.Identity()
-        self.activation = nn.ReLU()
-        self.batch_norm = nn.BatchNorm2d(out_filters)
 
-    def forward(self, x):
-        x = self.separable_conv(x)
-        x = self.batch_norm(x)
-        x = self.activation(x)
-        shortcut = self.identity(x)
-        x = x + shortcut
         return x

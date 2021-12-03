@@ -5,7 +5,7 @@ import random
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from util.torchClassifierDatasetLoader import torchClassifierDatasetLoader
+from util.TorchClassifierDatasetLoader import TorchClassifierDatasetLoader
 from model.VGG16BN_GAP import VGG16BN_GAP
 
 USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
@@ -23,7 +23,7 @@ training_epochs = 15
 batch_size = 5
 
 
-datasets = torchClassifierDatasetLoader('C://Github//DeepLearningStudy//dataset//animal-train-v1', image_height=224, image_width=224)
+datasets = TorchClassifierDatasetLoader('C://Github//DeepLearningStudy//dataset//animal-train-v1', image_height=224, image_width=224)
 data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 

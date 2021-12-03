@@ -6,9 +6,9 @@ import numpy as np
 from torch.utils.data import Dataset
 
 
-class torchClassifierDatasetLoader(Dataset):
+class TorchClassifierDatasetLoader(Dataset):
     def __init__(self, root, image_height, image_width):
-        super(torchClassifierDatasetLoader, self).__init__()
+        super(TorchClassifierDatasetLoader, self).__init__()
         self.root = root
         self.labelPaths = []
         self.fullPaths = []
