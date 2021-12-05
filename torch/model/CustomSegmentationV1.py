@@ -97,64 +97,73 @@ class bottleneck_residual_block(nn.Module):
         return x
 
 
+class convolution_bn_relu6(nn.Module):
+    def __init__(self, in_filters=32, out_filters=32, stride=1):
+        self.conv = nn.Conv2d(in_channels=in_filters,
+                              out_channels=out_filters,
+                              dilation=1,
+                              bias=False,
+                              kernel_size=3,
+                              stride=stride)
+        self.bn = nn.BatchNorm2d(out_filters)
+        self.relu6 = nn.ReLU6()
+
+
+    def forward(self, x):
+
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.relu6(x)
+
+        return x
+
+
+
 class CustomSegmentationV1(torch.nn.Module):
 
     def __init__(self):
         super(CustomSegmentationV1, self).__init__()
         #256x256
-        self.layer1 = nn.Conv2d(in_channels=3,
-                                out_channels=32,
-                                dilation=1,
-                                bias=False,
-                                kernel_size=3,
-                                stride=1)
-        self.bn_layer1 = nn.BatchNorm2d(32)
-        self.layer1_bottleneck = bottleneck_residual_block(in_filters=32,
-                                                           expand_ratio=1)
+        self.layer_down1 = convolution_bn_relu6(in_filters=3, out_filters=8, stride=1)
+        self.layer_down1_bottleneck1 = bottleneck_residual_block(in_filters=8, expand_ratio=1)
+        self.layer_down1_bottleneck2 = bottleneck_residual_block(in_filters=8, expand_ratio=1)
 
 
         # 128x128
-        self.layer2 = nn.Conv2d(in_channels=32,
-                                out_channels=64,
-                                dilation=1,
-                                bias=False,
-                                kernel_size=3,
-                                stride=2)
-        self.bn_layer2 = nn.BatchNorm2d(64)
-        self.layer2_bottleneck = bottleneck_residual_block(in_filters=64)
+        self.layer_down2 = convolution_bn_relu6(in_filters=8, out_filters=32, stride=2)
+        self.layer_down2_bottleneck1 = bottleneck_residual_block(in_filters=32)
+        self.layer_down2_bottleneck2 = bottleneck_residual_block(in_filters=32)
 
 
         # 64x64
-        self.layer3 = nn.Conv2d(in_channels=64,
-                                out_channels=128,
-                                dilation=1,
-                                bias=False,
-                                kernel_size=3,
-                                stride=2)
-        self.bn_layer3 = nn.BatchNorm2d(128)
-        self.layer3_bottleneck = bottleneck_residual_block(in_filters=128)
+        self.layer_down3 = convolution_bn_relu6(in_filters=32, out_filters=64, stride=2)
+        self.layer_down3_bottleneck1 = bottleneck_residual_block(in_filters=64)
+        self.layer_down3_bottleneck2 = bottleneck_residual_block(in_filters=64)
 
 
 
         # 32x32
-        self.layer4 = nn.Conv2d(in_channels=128,
-                                out_channels=256,
-                                dilation=1,
-                                bias=False,
-                                kernel_size=3,
-                                stride=2)
-        self.bn_layer4 = nn.BatchNorm2d(256)
-        self.laye4_bottleneck = bottleneck_residual_block(in_filters=256)
+        self.layer_down4 = convolution_bn_relu6(in_filters=64, out_filters=128, stride=2)
+        self.layer_down4_bottlenect1 = bottleneck_residual_block(in_filters=128)
+        self.layer_down4_bottlenect2 = bottleneck_residual_block(in_filters=128)
 
-        # 16x16
-        self.layer4 = nn.Conv2d(in_channels=256,
-                                out_channels=512,
-                                dilation=1,
-                                bias=False,
-                                kernel_size=3,
-                                stride=2)
-        self.bn_layer4 = nn.BatchNorm2d(512)
-        self.laye4_bottleneck = bottleneck_residual_block(in_filters=512)
+
+        # 16x16 ### Center
+        self.layer_down5 = convolution_bn_relu6(in_filters=128, out_filters=128, stride=2)
+        self.layer_down5_bottlenect1 = bottleneck_residual_block(in_filters=128)
+        self.layer_down5_bottlenect2 = bottleneck_residual_block(in_filters=128)
+        self.layer_down5_bottlenect3 = bottleneck_residual_block(in_filters=128)
+
+
+
+
+
+        # deconv 32
+        self.layer_up4 = nn.ConvTranspose2d(kernel_size=3,
+                                            bias=False,
+                                            in_channels=128,
+                                            out_channels=128,
+                                            stride=2)
 
 
     def forward(self, x):
