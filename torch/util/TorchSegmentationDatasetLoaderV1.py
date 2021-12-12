@@ -69,8 +69,9 @@ class TorchSegmentationDatasetLoaderV1(Dataset):
         _, label = cv2.threshold(label, 20, 255, cv2.THRESH_BINARY)
         label = label / 255
 
+
         y = torch.FloatTensor(cv2.resize(label, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA))
-        y = y.unsqueeze(dim=0)
+        y = y.unsqueeze(dim=0).float()
         ##y = y.permute([2, 0, 1]).float()
 
         return x, y
