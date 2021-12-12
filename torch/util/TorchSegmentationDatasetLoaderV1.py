@@ -66,11 +66,12 @@ class TorchSegmentationDatasetLoaderV1(Dataset):
         x = x.permute([2, 0, 1])
 
         label = cv2.imread(label_image, cv2.IMREAD_GRAYSCALE).astype('uint8')
-        _, label = cv2.threshold(label, 20, 255, cv2.THRESH_BINARY)
+        label = cv2.resize(label, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA)
+        _, label = cv2.threshold(label, 128, 255, cv2.THRESH_BINARY)
         label = label / 255
 
 
-        y = torch.FloatTensor(cv2.resize(label, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA))
+        y = torch.FloatTensor(label)
         y = y.unsqueeze(dim=0).float()
         ##y = y.permute([2, 0, 1]).float()
 

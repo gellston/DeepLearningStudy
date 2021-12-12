@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import torch.nn as nn
 
 def train(model, optimizer, cost_function, batches, device):
     input = torch.from_numpy(batches[0]).to(device, dtype=torch.float32)
@@ -27,8 +28,19 @@ def train(model, optimizer, cost_function, batches, device):
     return (cost, accuracy)
 
 
+def iou_(y_pred,y):
+    inputs = y_pred
+    targets = y
+    intersection = (inputs * targets).sum()
+    total = (inputs + targets).sum()
+    union = total - intersection
+    smooth = 1
+    iou = (intersection + smooth)/(union + smooth)
+    return iou
+
 
 def IOU(target, prediction):
+    prediction = np.where(prediction > 0.5, 1, 0)
     intersection = np.logical_and(target, prediction)
     union = np.logical_or(target, prediction)
     iou_score = np.sum(intersection) / np.sum(union)
