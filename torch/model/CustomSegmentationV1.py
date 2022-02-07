@@ -92,72 +92,52 @@ class bottleneck_residual_block(nn.Module):
 
         return x
 
-
-
-class separable_conv_residual(nn.Module):
-    def __init__(self, in_filters=3, out_filters=3, dilation=1, padding=1):
-        super(separable_conv_residual, self).__init__()
-        self.separable_conv = depthwise_separable_convV2(in_filters=in_filters,
-                                                         out_filters=out_filters,
-                                                         dilation=dilation,
-                                                         padding=padding)
-        self.identity = nn.Identity()
-        self.bn = nn.BatchNorm2d(out_filters)
+class Down(torch.nn.Module):
+    def __init__(self, in_channel=3, out_channel=32, stride=1, expand_ratio=1):
+        super(Down, self).__init__()
+        self.layer = nn.Conv2d(in_channels=in_channel,
+                               out_channels=out_channel,
+                               dilation=1,
+                               bias=False,
+                               kernel_size=3,
+                               stride=stride,
+                               padding=1)
+        self.bn = nn.BatchNorm2d(out_channel)
+        self.bottleneck = bottleneck_residual_block(in_filters=out_channel,
+                                                    expand_ratio=expand_ratio,
+                                                    padding='same',
+                                                    dilation=1)
         self.relu = nn.ReLU6()
 
     def forward(self, x):
-        x = self.separable_conv(x)
-        x = self.bn(x)
-        skip = self.identity(x)
-        summation = skip + x
-        x = self.relu(summation)
-        return x
-
-
-
-class down(nn.Module):
-    def __init__(self, in_filters=3, out_filters=32, stride=1, padding=1):
-        super(down, self).__init__()
-        self.conv = nn.Conv2d(in_channels=in_filters,
-                              out_channels=out_filters,
-                              stride=stride,
-                              padding=padding,
-                              bias=False,
-                              kernel_size=3)
-        self.bn = nn.BatchNorm2d(out_filters)
-        self.relu = nn.ReLU6()
-
-        self.separable_residual = separable_conv_residual(in_filters=out_filters,
-                                                          out_filters=out_filters)
-
-
-    def forward(self, x):
-        x = self.conv(x)
+        x = self.layer(x)
         x = self.bn(x)
         x = self.relu(x)
-        x = self.separable_residual(x)
+        x = self.bottleneck(x)
+        x = self.relu(x)
         return x
 
-class up(nn.Module):
-    def __init__(self, in_filters=3 , out_filters=3, stride=1, padding=1):
-        super(up, self).__init__()
-        self.transpose_conv = nn.ConvTranspose2d(in_channels=in_filters,
-                                                 out_channels=out_filters,
-                                                 stride=stride,
-                                                 padding=padding,
-                                                 kernel_size=2)
-        self.bn = nn.BatchNorm2d(out_filters)
+class Up(torch.nn.Module):
+    def __init__(self, in_channel=3, out_channel=32, stride=2, expand_ratio=1):
+        super(Up, self).__init__()
+        self.layer = nn.ConvTranspose2d(in_channels=in_channel,
+                                        out_channels=out_channel,
+                                        dilation=1,
+                                        bias=False,
+                                        kernel_size=2,
+                                        stride=stride)
+        self.bn = nn.BatchNorm2d(out_channel)
+        self.bottleneck = bottleneck_residual_block(in_filters=out_channel,
+                                                    expand_ratio=expand_ratio)
         self.relu = nn.ReLU6()
 
-        self.separable_residual = separable_conv_residual(in_filters=out_filters,
-                                                          out_filters=out_filters)
-
-
     def forward(self, x):
-        x = self.transpose_conv(x)
+        x = self.layer(x)
         x = self.bn(x)
         x = self.relu(x)
-        x = self.separable_residual(x)
+        x = self.bottleneck(x)
+        x = self.relu(x)
+
         return x
 
 
@@ -165,33 +145,45 @@ class CustomSegmentationV1(torch.nn.Module):
 
     def __init__(self):
         super(CustomSegmentationV1, self).__init__()
-        #256x256
-        self.down1 = down(in_filters=3, out_filters=32, stride=1, padding=1)
 
-        #128x128
-        self.down2 = down(in_filters=32, out_filters=64, stride=2, padding=1)
 
-        #64x64
-        self.down3 = down(in_filters=64, out_filters=128, stride=2, padding=1)
-
-        #32x32
-        self.down4 = down(in_filters=128, out_filters=256, stride=2, padding=1)
-
-        #16x16 (center)
-        self.center = down(in_filters=256, out_filters=256, stride=2, padding=1)
-
-        #32x32
-        self.up4 = up(in_filters=256, out_filters=256, stride=2, padding=0)
-
-        #64x64
-        self.up3 = up(in_filters=256, out_filters=128, stride=2, padding=0)
-
-        #128x128
-        self.up2 = up(in_filters=128, out_filters=64, stride=2, padding=0)
+        self.exapand_rate = 2
 
         #256x256
-        self.up1 = up(in_filters=64, out_filters=32, stride=2, padding=0)
-        self.final = nn.Conv2d(in_channels=32, out_channels=1, padding=1, kernel_size=3, dilation=1)
+        self.down1 = Down(in_channel=3, out_channel=32, stride=1, expand_ratio=1)
+
+        # 128x128
+        self.down2 = Down(in_channel=32, out_channel=64, stride=2, expand_ratio=self.exapand_rate)
+
+        # 64x64
+        self.down3 = Down(in_channel=64, out_channel=128, stride=2, expand_ratio=self.exapand_rate)
+
+        # 32x32
+        self.down4 = Down(in_channel=128, out_channel=256, stride=2, expand_ratio=self.exapand_rate)
+
+        # 16x16
+        self.down5 = Down(in_channel=256, out_channel=256, stride=2, expand_ratio=self.exapand_rate)
+        self.center1 = bottleneck_residual_block(in_filters=256, stride=1, expand_ratio=self.exapand_rate)
+        #self.center2 = bottleneck_residual_block(in_filters=256, stride=1, expand_ratio=self.exapand_rate)
+
+        # 32x32
+        self.up4 = Up(in_channel=256, out_channel=256, stride=2, expand_ratio=self.exapand_rate)
+
+        # 64x64
+        self.up3 = Up(in_channel=256, out_channel=128, stride=2, expand_ratio=self.exapand_rate)
+
+        # 128x128
+        self.up2 = Up(in_channel=128, out_channel=64, stride=2, expand_ratio=self.exapand_rate)
+
+        # 256x256
+        self.up1 = Up(in_channel=64, out_channel=32, stride=2, expand_ratio=self.exapand_rate)
+        #self.final1 = bottleneck_residual_block(in_filters=32, stride=1, expand_ratio=self.exapand_rate)
+        self.final1 = nn.Conv2d(in_channels=32,
+                                out_channels=1,
+                                dilation=1,
+                                bias=False,
+                                kernel_size=3,
+                                padding=1)
         self.sigmoid = nn.Sigmoid()
 
 
@@ -201,16 +193,23 @@ class CustomSegmentationV1(torch.nn.Module):
         down3 = self.down3(down2)
         down4 = self.down4(down3)
 
-        center = self.center(down4)
+        center1 = self.down5(down4)
+        center2 = self.center1(center1)
+        #center3 = self.center2(center2)
 
-        up4 = self.up4(center)
-        sum4 = up4 + down4
+        up4 = self.up4(center2)
+        sum4 = torch.add(up4, down4)
+
         up3 = self.up3(sum4)
-        sum3 = up3 + down3
+        sum3 = torch.add(up3, down3)
+
         up2 = self.up2(sum3)
-        sum2 = up2 + down2
+        sum2 = torch.add(up2, down2)
+
         up1 = self.up1(sum2)
-        sum1 = up1 + down1
-        final = self.final(sum1)
+        sum1 = torch.add(up1, down1)
+        #final1 = self.final1(sum1)
+        final = self.final1(sum1)
         y = self.sigmoid(final)
+
         return y
