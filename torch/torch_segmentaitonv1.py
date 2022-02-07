@@ -2,6 +2,8 @@ import gc
 import torch
 import torch.nn as nn
 import random
+import numpy as np
+import cv2
 
 from torchsummary import summary
 from torch.utils.data import DataLoader
@@ -90,6 +92,20 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
         avg_cost += (cost / total_batch)
         avg_acc += (accuracy / total_batch)
+
+    original_image = X[0].permute(1, 2, 0).numpy().astype('uint8')
+    label_image = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
+    label_image = np.where(label_image > 0.5, 255, 0).astype('uint8')
+
+    cv2.namedWindow("original", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('original', 512, 512)
+    cv2.imshow('original', original_image)
+
+    cv2.namedWindow("label", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('label', 512, 512)
+    cv2.imshow('label', label_image)
+
+    cv2.waitKey(33)
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     if avg_acc > target_accuracy:
