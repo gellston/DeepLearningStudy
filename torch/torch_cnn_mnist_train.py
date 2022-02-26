@@ -60,8 +60,8 @@ for epoch in range(training_epochs):  # 앞서 training_epochs의 값은 15로 �
         # 레이블은 원-핫 인코딩이 된 상태가 아니라 0 ~ 9의 정수.
         Y = Y.to(device)
 
-        print('x = ', X.shape)
-        print('y = ', Y.shape)
+        ##print('x = ', X.shape)
+        ##print('y = ', Y.shape)
 
         ##cost calculation
         model.train()
