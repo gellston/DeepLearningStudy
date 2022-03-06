@@ -1,7 +1,13 @@
 import torch
 import torch.nn as nn
 
+class Swish(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.sigmoid = nn.Sigmoid()
 
+    def forward(self, x):
+        return x * self.sigmoid(x)
 
 class depthwise_separable_convV2(nn.Module):
     def __init__(self, in_filters, out_filters, dilation=1, padding='same'):
@@ -119,7 +125,26 @@ class residual_separable_conv_relu(nn.Module):
     def forward(self, x):
         x = self.separable_conv(x)
         x = self.batch_norm(x)
-        x = self.activation(x)
         shortcut = self.identity(x)
         x = x + shortcut
+        x = self.activation(x)
+        return x
+
+
+class residual_conv_relu(nn.Module):
+    def __init__(self, in_filters, out_filters, dilation=1, padding='same'):
+        super(residual_conv_relu, self).__init__()
+        self.conv = nn.Conv2d(in_channels=in_filters, out_channels=out_filters, kernel_size=3, dilation=dilation, padding=padding, bias=False)
+        torch.nn.init.xavier_uniform_(self.conv.weight)
+        self.identity = nn.Identity()
+        self.activation = Swish()
+        self.batch_norm = nn.BatchNorm2d(out_filters)
+
+    def forward(self, x):
+        shortcut = self.identity(x)
+
+        x = self.conv(x)
+        x = self.batch_norm(x)
+        x = x + shortcut
+        x = self.activation(x)
         return x

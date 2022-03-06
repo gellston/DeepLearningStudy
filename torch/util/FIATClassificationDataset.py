@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 
 
 class FIATClassificationDataset(Dataset):
-    def __init__(self, labelSourcePath, label_height, label_width, isColor, isNorm=False):
+    def __init__(self, labelSourcePath, label_height, label_width, isColor=True, isNorm=False):
         super(FIATClassificationDataset, self).__init__()
         self.labelSourcePath = labelSourcePath
         self.labelCount = 0
@@ -16,15 +16,32 @@ class FIATClassificationDataset(Dataset):
         self.label_width = label_width
         self.isColor = isColor
         self.isNorm = isNorm
-        self.labelJsonArray = [];
+        self.labelJsonArray = []
+
+        if labelSourcePath.endswith('//') == False :
+            self.labelSourcePath += "//"
+
+
+        label_info_file = self.labelSourcePath + "___target_info.json"
+        self.labelNames = []
+        with open(label_info_file, encoding='utf-8-sig') as f:
+            json_objet = json.load(f)
+            if len(json_objet) == 0 :
+                raise Exception('Label is not exists')
+            for label in json_objet:
+                print(label)
+                self.labelNames.append(label['Name'])
+
 
         filelist = sorted(os.listdir(self.labelSourcePath))
         for labelName in filelist:
             if labelName == '.DS_Store': continue
-            if labelName == "__LabelInfo.json": continue
-            temp = self.labelSourcePath + '/' + labelName
-            self.labelJsonArray.append(temp)
-            self.labelCount = self.labelCount + 1
+            if labelName == "___target_info.json":continue
+            if labelName.endswith('.json') == False:continue
+            self.labelJsonArray.append(self.labelSourcePath + labelName)
+
+        self.labelCount = len(self.labelJsonArray)
+
 
   # 총 데이터의 개수를 리턴
     def __len__(self):
@@ -37,21 +54,39 @@ class FIATClassificationDataset(Dataset):
 
         # shuffle(self.fullPaths)
         json_info = self.labelJsonArray[idx]
-        startX = json_info.StartX
-        startY = json_info.StartY
-        endX = json_info.EndX
-        endY = json_info.Endy
-        imageWIdth = json_info.ImageWidth
-        imageHeight = json_info.ImageHeight
-
-
 
         with open(json_info, encoding='utf-8-sig') as f:
             json_objet = json.load(f)
 
 
-            print("check")
+            ##### input image load
+            imageFile = self.labelSourcePath + json_objet['FileName']
 
+            isOpencvColor = cv2.IMREAD_GRAYSCALE
+            if self.isColor == True:
+                isOpencvColor =cv2.IMREAD_COLOR
 
+            image = cv2.imread(imageFile, flags=isOpencvColor).astype(np.uint8)
+            resize = cv2.resize(image, dsize=(self.label_width, self.label_height), interpolation=cv2.INTER_AREA)
+            x = torch.FloatTensor(resize)
+            x = x.permute([2, 0, 1]).float()
 
-        return json_info, json_info
+            if self.isNorm == True:
+                x = x / 255
+
+            #torch_output = torch.zeros([len(self.labelNames)], dtype=torch.float32)
+            """
+            torch_output = torch.zeros([1], dtype=torch.float32)
+            for index in range(len(self.labelNames)):
+                for label in json_objet['ClassCollection']:
+                    if self.labelNames[index] == label["Name"]:
+                        torch_output[0] = index
+            """
+
+            labelName = json_objet['ClassCollection'][0]['Name']
+            y = torch.tensor(self.labelNames.index(labelName))
+            #torch.FloatTensor(self.y_data[idx])
+
+            #print('label name =', labelName)
+            #print('y =', y)
+            return x, y

@@ -8,38 +8,51 @@ class VGG16BN_GAP(torch.nn.Module):
         self.class_num = class_num
 
         self.layer1 = torch.nn.Sequential(torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(64),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(64, 64, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(64),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer2 = torch.nn.Sequential(torch.nn.Conv2d(64, 128, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(128),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(128, 128, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(128),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer3 = torch.nn.Sequential(torch.nn.Conv2d(128, 256, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(256),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(256, 256, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(256),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(256, 256, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(256),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer4 = torch.nn.Sequential(torch.nn.Conv2d(256, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer5 = torch.nn.Sequential(torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
@@ -58,6 +71,6 @@ class VGG16BN_GAP(torch.nn.Module):
         x = self.layer5(x)
         x = self.final_conv_layer(x)
         x = self.global_average_pooling(x)
-        x = torch.reshape(x, (-1, 5))
+        x = x.view(-1, self.class_num)
 
         return x
