@@ -60,8 +60,8 @@ class VGG16BN_GAP(torch.nn.Module):
                                                     torch.nn.ReLU())
 
 
-        self.global_average_pooling = torch.nn.Sequential(torch.nn.AvgPool2d((7, 7)),
-                                                          torch.nn.ReLU())
+        self.global_average_pooling = torch.nn.Sequential(torch.nn.AdaptiveAvgPool2d(1))
+        self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x):
         x = self.layer1(x)
@@ -72,5 +72,6 @@ class VGG16BN_GAP(torch.nn.Module):
         x = self.final_conv_layer(x)
         x = self.global_average_pooling(x)
         x = x.view(-1, self.class_num)
+        x = self.sigmoid(x)
 
         return x

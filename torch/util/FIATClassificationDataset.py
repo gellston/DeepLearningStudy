@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import json
 
+
+
 from torch.utils.data import Dataset
 
 
@@ -66,27 +68,17 @@ class FIATClassificationDataset(Dataset):
             if self.isColor == True:
                 isOpencvColor =cv2.IMREAD_COLOR
 
-            image = cv2.imread(imageFile, flags=isOpencvColor).astype(np.uint8)
-            resize = cv2.resize(image, dsize=(self.label_width, self.label_height), interpolation=cv2.INTER_AREA)
-            x = torch.FloatTensor(resize)
-            x = x.permute([2, 0, 1]).float()
+            image = cv2.imread(imageFile, flags=isOpencvColor)
+            image = cv2.resize(image, dsize=(self.label_width, self.label_height), interpolation=cv2.INTER_AREA)
+            image = image.transpose(2, 0, 1)  # (H, W, CH) -> (CH, H, W)
+            image = np.ascontiguousarray(image)
+            x = torch.tensor(image, dtype=torch.float32)
 
-            if self.isNorm == True:
-                x = x / 255
 
-            #torch_output = torch.zeros([len(self.labelNames)], dtype=torch.float32)
-            """
-            torch_output = torch.zeros([1], dtype=torch.float32)
+            torch_output = torch.zeros([len(self.labelNames)], dtype=torch.float32)
             for index in range(len(self.labelNames)):
                 for label in json_objet['ClassCollection']:
                     if self.labelNames[index] == label["Name"]:
-                        torch_output[0] = index
-            """
+                        torch_output[index] = 1
 
-            labelName = json_objet['ClassCollection'][0]['Name']
-            y = torch.tensor(self.labelNames.index(labelName))
-            #torch.FloatTensor(self.y_data[idx])
-
-            #print('label name =', labelName)
-            #print('y =', y)
-            return x, y
+            return x, torch_output
