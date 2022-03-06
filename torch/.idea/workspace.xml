@@ -20,11 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bf2ba71-7d8e-46fe-b6da-1535080af415" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/AnimalClassificationV1.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/AnimalClassificationV1.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/VGG16BN_GAP.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/VGG16BN_GAP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/FIATClassificationDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/FIATClassificationDataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/toy.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/toy.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -49,7 +45,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/torch_FIATClassificationTest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1553">
+            <state>
               <caret line="60" column="27" selection-start-line="60" selection-start-column="27" selection-end-line="60" selection-end-column="27" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
@@ -133,8 +129,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/model/VGG16BN_GAP.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="547">
-              <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="64" />
+            <state relative-caret-position="211">
+              <caret line="58" column="140" selection-start-line="58" selection-start-column="140" selection-end-line="58" selection-end-column="140" />
             </state>
           </provider>
         </entry>
@@ -166,15 +162,15 @@
         <option value="$PROJECT_DIR$/util/toy.py" />
         <option value="$PROJECT_DIR$/model/AnimalClassificationV1.py" />
         <option value="$PROJECT_DIR$/torch_image_crawler.py" />
-        <option value="$PROJECT_DIR$/model/VGG16BN_GAP.py" />
         <option value="$PROJECT_DIR$/util/FIATClassificationDataset.py" />
         <option value="$PROJECT_DIR$/torch_FIATClassificationTest.py" />
+        <option value="$PROJECT_DIR$/model/VGG16BN_GAP.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="652" />
-    <option name="y" value="6" />
+    <option name="x" value="417" />
+    <option name="y" value="51" />
     <option name="width" value="1322" />
     <option name="height" value="985" />
   </component>
@@ -381,7 +377,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.31838074" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.38402626" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.51641136" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -955,7 +951,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/torch_FIATClassificationTest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1553">
+        <state>
           <caret line="60" column="27" selection-start-line="60" selection-start-column="27" selection-end-line="60" selection-end-column="27" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
@@ -965,8 +961,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/model/VGG16BN_GAP.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="547">
-          <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="64" />
+        <state relative-caret-position="211">
+          <caret line="58" column="140" selection-start-line="58" selection-start-column="140" selection-end-line="58" selection-end-column="140" />
         </state>
       </provider>
     </entry>
