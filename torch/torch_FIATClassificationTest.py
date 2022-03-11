@@ -46,7 +46,7 @@ traced_script_module.save("C://Github//DeepLearningStudy//trained_model//NoTrain
 ## no Train Model Save
 
 
-datasets = FIATClassificationDataset('C://Github//DeepLearningStudy//dataset//FIAT_dataset//',
+datasets = FIATClassificationDataset('C://Github//DeepLearningStudy//dataset//FIAT_dataset_food//',
                                      label_height=224,
                                      label_width=224,
                                      isColor=True,
