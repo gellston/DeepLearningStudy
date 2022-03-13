@@ -7,7 +7,7 @@ class PerceptronMnistClassification(nn.Module):
 
     def __init__(self):
         super(PerceptronMnistClassification, self).__init__()
-        self.fc1 = nn.Linear(784, 100)
+        self.fc1 = nn.Linear(784, 100) #--> 784 *100 = 78400 W 썻음
         self.fc2 = nn.Linear(100, 100)
         self.fc3 = nn.Linear(100, 10)
 

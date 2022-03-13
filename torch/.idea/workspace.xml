@@ -20,7 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bf2ba71-7d8e-46fe-b6da-1535080af415" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/torch_FIATClassificationTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_FIATClassificationTest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/PerceptronMnistClassification.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/PerceptronMnistClassification.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -29,46 +29,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/torch_FIATClassificationTest.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1824">
-              <caret line="73" selection-start-line="73" selection-end-line="73" />
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/util/FIATClassificationDataset.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="139">
-              <caret line="28" selection-start-line="28" selection-end-line="28" />
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/torch_animal_train.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1344">
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/torch_character_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="-420">
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -77,9 +42,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/torch_cnn_mnist_train.py">
+        <entry file="file://$PROJECT_DIR$/torch_perceptron_mnist_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="420">
+              <caret line="75" selection-end-line="109" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -88,12 +54,46 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/torch_vgg16_bn_gap.py">
+        <entry file="file://$PROJECT_DIR$/torch_perceptron_mnist_simple_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-504">
+            <state relative-caret-position="-1234">
+              <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="65" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/model/PerceptronMnistClassification.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="224">
+              <caret line="11" column="37" selection-end-line="33" />
+              <folding>
+                <element signature="e#20#32#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/model/PerceptronSimpleMnist.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="224">
+              <caret line="8" column="53" lean-forward="true" selection-start-line="8" selection-start-column="53" selection-end-line="9" selection-end-column="74" />
+              <folding>
+                <element signature="e#20#32#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Python/Lib/site-packages/torch/nn/modules/module.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="149">
+              <caret line="1101" selection-start-line="1101" selection-end-line="1101" />
             </state>
           </provider>
         </entry>
@@ -123,6 +123,12 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/torch_FIATClassificationTest.py" />
+        <option value="$PROJECT_DIR$/torch_perceptron_mnist_train.py" />
+        <option value="$PROJECT_DIR$/model/PerceptronMnistClassification.py" />
+        <option value="$PROJECT_DIR$/util/torch_perceptron_mnist_simple_train.py" />
+        <option value="$PROJECT_DIR$/model/PerceptronSiimpleMnist.py" />
+        <option value="$PROJECT_DIR$/torch_perceptron_mnist_simple_train.py" />
+        <option value="$PROJECT_DIR$/model/PerceptronSimpleMnist.py" />
       </list>
     </option>
   </component>
@@ -149,6 +155,16 @@
               <item name="torch" type="b2602c69:ProjectViewProjectNode" />
               <item name="torch" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="torch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="torch" type="462c0819:PsiDirectoryNode" />
+              <item name="model" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="torch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="torch" type="462c0819:PsiDirectoryNode" />
+              <item name="util" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -166,6 +182,12 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Github\DeepLearningStudy\torch" />
+      <recent name="C:\Github\DeepLearningStudy\torch\model" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
@@ -178,7 +200,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.torch_FIATClassificationTest">
+  <component name="RunManager" selected="Python.torch_perceptron_mnist_simple_train">
     <configuration name="torch_FIATClassificationTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -213,27 +235,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_basicLogisticRegression_class2_train.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="torch_basicLogisticRegression_class_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="torch" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_basicLogisticRegression_class_train.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -284,13 +285,34 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="torch_perceptron_mnist_simple_train" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="torch" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_perceptron_mnist_simple_train.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.torch_perceptron_mnist_simple_train" />
         <item itemvalue="Python.torch_FIATClassificationTest" />
         <item itemvalue="Python.torch_image_crawler" />
         <item itemvalue="Python.torch_cnn_mnist_train" />
         <item itemvalue="Python.torch_basicLogisticRegression_class2_train" />
-        <item itemvalue="Python.torch_basicLogisticRegression_class_train" />
       </list>
     </recent_temporary>
   </component>
@@ -319,20 +341,20 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1048" extended-state="6" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24973656" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23972602" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Python Console" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.47045952" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.30415756" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -524,6 +546,26 @@
           <line>52</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/torch_perceptron_mnist_train.py</url>
+          <line>28</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/torch_perceptron_mnist_train.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/torch_perceptron_mnist_simple_train.py</url>
+          <line>58</line>
+          <option name="timeStamp" value="52" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/torch_perceptron_mnist_simple_train.py</url>
+          <line>60</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -556,9 +598,24 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/torch_vgg16_bn_gap.py">
+    <entry file="file://C:/Python/Lib/site-packages/torch/nn/modules/loss.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-504">
+        <state relative-caret-position="152">
+          <caret line="602" selection-start-line="602" selection-end-line="602" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python/Lib/site-packages/torch/nn/functional.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="2907" selection-start-line="2907" selection-end-line="2907" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util/FIATClassificationDataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="560">
+          <caret line="28" selection-start-line="28" selection-end-line="28" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
@@ -566,15 +623,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/torch_animal_train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1344">
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/torch_character_train.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <folding>
@@ -592,43 +640,77 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/util/FIATClassificationDataset.py">
+    <entry file="file://$PROJECT_DIR$/torch_vgg16_bn_gap.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="139">
-          <caret line="28" selection-start-line="28" selection-end-line="28" />
+        <state>
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/torch_FIATClassificationTest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="809">
+          <caret line="73" selection-start-line="73" selection-end-line="73" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/torch_character_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-420">
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/torch_perceptron_mnist_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="75" selection-end-line="109" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/model/PerceptronMnistClassification.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="224">
+          <caret line="11" column="37" selection-end-line="33" />
+          <folding>
+            <element signature="e#20#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://C:/Python/Lib/site-packages/torch/nn/modules/module.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
+        <state relative-caret-position="149">
           <caret line="1101" selection-start-line="1101" selection-end-line="1101" />
         </state>
       </provider>
     </entry>
-    <entry file="file://C:/Python/Lib/site-packages/torch/nn/modules/loss.py">
+    <entry file="file://$PROJECT_DIR$/torch_perceptron_mnist_simple_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="602" selection-start-line="602" selection-end-line="602" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python/Lib/site-packages/torch/nn/functional.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="2907" selection-start-line="2907" selection-end-line="2907" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/torch_FIATClassificationTest.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1824">
-          <caret line="73" selection-start-line="73" selection-end-line="73" />
+        <state relative-caret-position="-1234">
+          <caret line="64" lean-forward="true" selection-start-line="64" selection-end-line="65" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/model/PerceptronSimpleMnist.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="224">
+          <caret line="8" column="53" lean-forward="true" selection-start-line="8" selection-start-column="53" selection-end-line="9" selection-end-column="74" />
+          <folding>
+            <element signature="e#20#32#0" expanded="true" />
           </folding>
         </state>
       </provider>
