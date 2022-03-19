@@ -1,0 +1,25 @@
+﻿{
+  "Labels": [
+    {
+      "_X": 0.0,
+      "_Y": 0.0,
+      "_Z": 0.0,
+      "_Width": 0.0,
+      "_Height": 0.0,
+      "_IsSelected": false,
+      "Name": "Burn",
+      "Points": [],
+      "Color": "#70FF0000",
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "Width": 0.0,
+      "Height": 0.0,
+      "IsSelected": false
+    }
+  ],
+  "LabelSize": 1,
+  "ImageWidth": 400,
+  "ImageHeight": 112,
+  "IsGray": true
+}
