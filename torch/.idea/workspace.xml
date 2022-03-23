@@ -67,7 +67,7 @@
       <recent name="C:\Github\DeepLearningStudy\torch\util" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.torch_segmentaitonv_haz">
+  <component name="RunManager" selected="Python.torch_fiat_classification_food">
     <configuration name="torch_FIATClassificationTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -89,7 +89,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="torch_image_crawler" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="torch_fiat_classification_food" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -101,7 +101,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_image_crawler.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_fiat_classification_food.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -175,11 +175,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.torch_fiat_classification_food" />
         <item itemvalue="Python.torch_segmentaitonv_haz" />
         <item itemvalue="Python.torch_lenet_cnn_mnist_train" />
         <item itemvalue="Python.torch_perceptron_mnist_simple_train" />
         <item itemvalue="Python.torch_FIATClassificationTest" />
-        <item itemvalue="Python.torch_image_crawler" />
       </list>
     </recent_temporary>
   </component>
@@ -232,34 +232,30 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1177" height="466" key="DebuggerActiveHint" timestamp="1639300614632">
-      <screen x="1920" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1177" height="466" key="DebuggerActiveHint/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1639300614632" />
     <state x="2012" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1647662584184">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2012" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647662584184" />
-    <state width="1899" height="336" key="GridCell.Tab.0.bottom" timestamp="1647664545003">
+    <state width="1899" height="353" key="GridCell.Tab.0.bottom" timestamp="1648023313451">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="212" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1647663203236" />
-    <state width="1899" height="336" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647664545003" />
-    <state width="1899" height="336" key="GridCell.Tab.0.center" timestamp="1647664545002">
+    <state width="1899" height="353" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1648023313451" />
+    <state width="1899" height="353" key="GridCell.Tab.0.center" timestamp="1648023313451">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="212" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1647663203236" />
-    <state width="1899" height="336" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647664545002" />
-    <state width="1899" height="336" key="GridCell.Tab.0.left" timestamp="1647664545002">
+    <state width="1899" height="353" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1648023313451" />
+    <state width="1899" height="353" key="GridCell.Tab.0.left" timestamp="1648023313451">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="212" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1647663203236" />
-    <state width="1899" height="336" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647664545002" />
-    <state width="1899" height="336" key="GridCell.Tab.0.right" timestamp="1647664545002">
+    <state width="1899" height="353" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1648023313451" />
+    <state width="1899" height="353" key="GridCell.Tab.0.right" timestamp="1648023313451">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="212" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1647663203236" />
-    <state width="1899" height="336" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647664545002" />
+    <state width="1899" height="353" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1648023313451" />
     <state width="1899" height="336" key="GridCell.Tab.1.bottom" timestamp="1647664545002">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
@@ -276,10 +272,10 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="336" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647664545002" />
-    <state x="2381" y="164" key="SettingsEditor" timestamp="1647656477137">
+    <state x="2381" y="164" key="SettingsEditor" timestamp="1648022353210">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="2381" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647656477137" />
+    <state x="2381" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1648022353210" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
