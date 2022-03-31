@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 
 class VGG16FC(torch.nn.Module):
 
@@ -57,10 +58,10 @@ class VGG16FC(torch.nn.Module):
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
 
-        self.adaptive_average_pool = torch.nn.AdaptiveAvgPool2d((7, 7))
+        self.adaptive_average_pool = torch.nn.AdaptiveAvgPool2d((1))
 
         # L1 FC 7x7x512 inputs ->
-        self.fc1 = torch.nn.Sequential(torch.nn.Linear(7*7*512, 4096, bias=True),
+        self.fc1 = torch.nn.Sequential(torch.nn.Linear(512, 4096, bias=True),
                                        torch.nn.BatchNorm1d(4096),
                                        torch.nn.ReLU(),
                                        torch.nn.Dropout(p=self.drop_rate))
@@ -70,8 +71,7 @@ class VGG16FC(torch.nn.Module):
                                        torch.nn.ReLU(),
                                        torch.nn.Dropout(p=self.drop_rate))
 
-        self.final_output = torch.nn.Sequential(torch.nn.Linear(4096, self.class_num, bias=True),
-                                                torch.nn.Softmax(dim=1))
+        self.final_output = torch.nn.Sequential(torch.nn.Linear(4096, self.class_num, bias=True))
 
 
 
@@ -85,11 +85,11 @@ class VGG16FC(torch.nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.adaptive_average_pool(x)
-        x = x.view(-1, 7*7*512)
+        x = x.view(-1, 512)
         x = self.fc1(x)
-        x = x.view(-1, 4096)
         x = self.fc2(x)
         x = self.final_output(x)
-
+        x = x.view([-1, self.class_num])
+        x = F.softmax(x, dim=1)
 
         return x

@@ -24,7 +24,7 @@ if device == 'cuda':
 
 
 ## Hyper parameter
-training_epochs = 300
+training_epochs = 1
 batch_size = 10
 target_accuracy = 0.99
 learning_rate = 0.003
@@ -40,10 +40,10 @@ print('====================')
 
 ## no Train Model Save
 
+
 model.eval()
-trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
-traced_script_module = torch.jit.trace(model, trace_input)
-traced_script_module.save("C://Github//DeepLearningStudy//trained_model//NoTrainFoodVgg16V1_FIAT.pt")
+compiled_model = torch.jit.script(model)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//NoTrainFoodVgg16V1_FIAT.pt")
 ## no Train Model Save
 
 
@@ -89,9 +89,8 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 ## no Train Model Save
 model.eval()
-trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
-traced_script_module = torch.jit.trace(model, trace_input)
-traced_script_module.save("C://Github//DeepLearningStudy//trained_model//TrainFoodVgg16V1_FIAT.pt")
+compiled_model = torch.jit.script(model)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TrainFoodVgg16V1_FIAT.pt")
 ## no Train Model Save
 
 print('Learning finished')
