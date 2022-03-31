@@ -12,6 +12,12 @@ USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라
 device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
 print("다음 기기로 학습합니다:", device)
 
+
+
+
+
+
+
 # for reproducibility
 random.seed(777)
 torch.manual_seed(777)
@@ -31,6 +37,14 @@ VGG16 = VGG16FC(class_num=5).to(device)
 print('==== model info ====')
 summary(VGG16, (3, 224, 224))
 print('====================')
+
+
+VGG16.eval()
+compiled_model = torch.jit.script(VGG16)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//NoVgg16.pt")
+## no Train Model Save
+
+
 
 
 loss_fn = nn.CrossEntropyLoss().to(device) # 내부적으로 소프트맥스 함수를 포함하고 있음.
