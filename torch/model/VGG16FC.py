@@ -8,38 +8,51 @@ class VGG16FC(torch.nn.Module):
         self.class_num = class_num
 
         self.layer1 = torch.nn.Sequential(torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(64),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(64, 64, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(64),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer2 = torch.nn.Sequential(torch.nn.Conv2d(64, 128, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(128),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(128, 128, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(128),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer3 = torch.nn.Sequential(torch.nn.Conv2d(128, 256, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(256),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(256, 256, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(256),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(256, 256, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(256),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer4 = torch.nn.Sequential(torch.nn.Conv2d(256, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer5 = torch.nn.Sequential(torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding='same'),
+                                          torch.nn.BatchNorm2d(512),
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
@@ -48,15 +61,17 @@ class VGG16FC(torch.nn.Module):
 
         # L1 FC 7x7x512 inputs ->
         self.fc1 = torch.nn.Sequential(torch.nn.Linear(7*7*512, 4096, bias=True),
+                                       torch.nn.BatchNorm1d(4096),
                                        torch.nn.ReLU(),
                                        torch.nn.Dropout(p=self.drop_rate))
 
         self.fc2 = torch.nn.Sequential(torch.nn.Linear(4096, 4096, bias=True),
+                                       torch.nn.BatchNorm1d(4096),
                                        torch.nn.ReLU(),
                                        torch.nn.Dropout(p=self.drop_rate))
 
         self.final_output = torch.nn.Sequential(torch.nn.Linear(4096, self.class_num, bias=True),
-                                                torch.nn.ReLU())
+                                                torch.nn.Softmax(dim=1))
 
 
 

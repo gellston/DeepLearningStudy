@@ -7,7 +7,7 @@ import numpy as np
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.AnimalClassificationV1 import AnimalClassificationV1
+from model.VGG16FC import VGG16FC
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
@@ -27,22 +27,23 @@ if device == 'cuda':
 training_epochs = 300
 batch_size = 10
 target_accuracy = 0.99
-learning_rate = 0.0004
+learning_rate = 0.003
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = AnimalClassificationV1(num_class=4).to(device)
+model = VGG16FC(class_num=4).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')
 
 
 ## no Train Model Save
+
 model.eval()
 trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
 traced_script_module = torch.jit.trace(model, trace_input)
-traced_script_module.save("C://Github//DeepLearningStudy//trained_model//NoTrainAnimalClassificationV1_FIAT.pt")
+traced_script_module.save("C://Github//DeepLearningStudy//trained_model//NoTrainFoodVgg16V1_FIAT.pt")
 ## no Train Model Save
 
 
@@ -55,8 +56,8 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 
 model.train()
-criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
@@ -78,9 +79,8 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
         model.eval()
         prediction = model(gpu_X)
-        output = (prediction > accuracy_threshold).float()
-        equal_matrix = torch.logical_and(output, gpu_Y)
-        accuracy = torch.count_nonzero(equal_matrix) / torch.count_nonzero(gpu_Y)
+        correct_prediction = torch.argmax(prediction, 1) == torch.argmax(gpu_Y, 1)
+        accuracy = correct_prediction.float().mean()
         avg_acc += (accuracy / total_batch)
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
@@ -91,7 +91,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 model.eval()
 trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
 traced_script_module = torch.jit.trace(model, trace_input)
-traced_script_module.save("C://Github//DeepLearningStudy//trained_model//TrainAnimalClassificationV1_FIAT.pt")
+traced_script_module.save("C://Github//DeepLearningStudy//trained_model//TrainFoodVgg16V1_FIAT.pt")
 ## no Train Model Save
 
 print('Learning finished')
