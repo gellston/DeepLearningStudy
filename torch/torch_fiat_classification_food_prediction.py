@@ -34,7 +34,7 @@ accuracy_threshold = 0.5
 
 
 
-model = torch.jit.load("C://Github//DeepLearningStudy//trained_model//NoFood_FIAT.pt").to(device)
+model = torch.jit.load("C://Github//DeepLearningStudy//trained_model//food_test.pt").to(device)
 model.eval()
 
 
@@ -72,7 +72,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         cv2.namedWindow("result", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('result', 512, 512)
         cv2.imshow('result', test_image)
-        cv2.waitKey(33)
+        cv2.waitKey(1000)
 
 
 
