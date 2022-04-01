@@ -7,7 +7,7 @@ import numpy as np
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.VGG16FC import VGG16FC
+from model.AnimalClassificationV1 import AnimalClassificationV1
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
@@ -32,7 +32,7 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = VGG16FC(class_num=4).to(device)
+model = AnimalClassificationV1(num_class=4).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')
@@ -43,7 +43,7 @@ print('====================')
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//NoTrainFoodVgg16V1_FIAT.pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//NoFood_FIAT.pt")
 ## no Train Model Save
 
 
@@ -90,7 +90,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TrainFoodVgg16V1_FIAT.pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//Food_FIAT.pt")
 ## no Train Model Save
 
 print('Learning finished')
