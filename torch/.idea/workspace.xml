@@ -21,33 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5bf2ba71-7d8e-46fe-b6da-1535080af415" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/AnimalClassificationV1.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/CNNMnistClassification.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/CharacterClassification.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/CharacterClassification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/CustomSegmentationV1.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/CustomSegmentationV1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/CustomSegmentationV2.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/CustomSegmentationV2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/LinearRegressionModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/LinearRegressionModel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/PerceptronMnistClassification.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/PerceptronSimpleMnist.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/PerceptronSimpleMnist.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/SoftmaxClassifierModel.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/mlpMixer.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/mlpMixer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_animal_train.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_basicLinearRegression_custom_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_basicLinearRegression_custom_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_basicLogisticRegression_custom2_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_basicLogisticRegression_custom2_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_basicLogisticRegression_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_basicLogisticRegression_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_cnn_mnist_train.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/torch_fiat_classification_food.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_fiat_classification_food.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_fiat_classification_food_prediction.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_fiat_classification_food_prediction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_perceptron_mnist_train.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_retina_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_retina_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_segmentaitonv_haz.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_segmentaitonv_haz.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_softmaxRegression_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_softmaxRegression_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/torch_softmaxRegression_train_class.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/FIATClassificationDataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/FIATClassificationDataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/dataloader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/helper.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/opendl_segmentation_dataloader_torch.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/opendl_segmentation_dataloader_torch.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/toy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../trained_model/NoFood_FIAT.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../trained_model/NoFood_FIAT.pt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -77,21 +52,21 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/model" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Github\DeepLearningStudy\torch" />
+      <recent name="C:\Github\DeepLearningStudy\torch\model" />
+      <recent name="C:\Github\DeepLearningStudy\torch\util" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Github\DeepLearningStudy\torch" />
       <recent name="C:\Github\DeepLearningStudy\torch\model" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Github\DeepLearningStudy\torch\model" />
-      <recent name="C:\Github\DeepLearningStudy\torch" />
-      <recent name="C:\Github\DeepLearningStudy\torch\util" />
-    </key>
   </component>
-  <component name="RunManager" selected="Python.torch_fiat_classification_food">
+  <component name="RunManager" selected="Python.torch_fiat_classification_resnet18">
     <configuration name="SoftmaxClassifierModel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -155,7 +130,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="torch_segmentaitonv_haz" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="torch_fiat_classification_resnet18" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -167,7 +142,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_segmentaitonv_haz.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_fiat_classification_resnet18.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -199,11 +174,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.torch_fiat_classification_resnet18" />
         <item itemvalue="Python.torch_fiat_classification_food" />
         <item itemvalue="Python.SoftmaxClassifierModel" />
         <item itemvalue="Python.torch_fiat_classification_food_prediction" />
         <item itemvalue="Python.torch_vgg16_fc_train" />
-        <item itemvalue="Python.torch_segmentaitonv_haz" />
       </list>
     </recent_temporary>
   </component>
@@ -264,41 +239,45 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2012" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647662584184" />
-    <state width="1899" height="235" key="GridCell.Tab.0.bottom" timestamp="1649399429485">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="197" key="GridCell.Tab.0.bottom" timestamp="1649410544763">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="299" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1648712673624" />
+    <state width="1899" height="197" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
     <state width="1899" height="235" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429485" />
-    <state width="1899" height="235" key="GridCell.Tab.0.center" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="197" key="GridCell.Tab.0.center" timestamp="1649410544763">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="299" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1648712673624" />
+    <state width="1899" height="197" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
     <state width="1899" height="235" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="235" key="GridCell.Tab.0.left" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="197" key="GridCell.Tab.0.left" timestamp="1649410544763">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="299" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1648712673623" />
+    <state width="1899" height="197" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
     <state width="1899" height="235" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="235" key="GridCell.Tab.0.right" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="197" key="GridCell.Tab.0.right" timestamp="1649410544763">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="299" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1648712673624" />
+    <state width="1899" height="197" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
     <state width="1899" height="235" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="235" key="GridCell.Tab.1.bottom" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="235" key="GridCell.Tab.1.bottom" timestamp="1649410544759">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="235" key="GridCell.Tab.1.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544759" />
     <state width="1899" height="235" key="GridCell.Tab.1.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="235" key="GridCell.Tab.1.center" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="235" key="GridCell.Tab.1.center" timestamp="1649410544759">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="235" key="GridCell.Tab.1.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544759" />
     <state width="1899" height="235" key="GridCell.Tab.1.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="235" key="GridCell.Tab.1.left" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="235" key="GridCell.Tab.1.left" timestamp="1649410544759">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="235" key="GridCell.Tab.1.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544759" />
     <state width="1899" height="235" key="GridCell.Tab.1.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="235" key="GridCell.Tab.1.right" timestamp="1649399429484">
-      <screen x="1920" y="0" width="1920" height="1040" />
+    <state width="1899" height="235" key="GridCell.Tab.1.right" timestamp="1649410544759">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state width="1899" height="235" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544759" />
     <state width="1899" height="235" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
     <state x="2381" y="164" key="SettingsEditor" timestamp="1648022353210">
       <screen x="1920" y="0" width="1920" height="1040" />
