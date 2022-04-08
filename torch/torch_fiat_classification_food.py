@@ -1,13 +1,12 @@
 import torch
 import torch.nn as nn
 import random
-import cv2
-import numpy as np
+
 
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.AnimalClassificationV1 import AnimalClassificationV1
+from model.VGG16BN_GAP import VGG16BN_GAP
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
@@ -32,7 +31,7 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = AnimalClassificationV1(num_class=4).to(device)
+model = VGG16BN_GAP(class_num=4).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

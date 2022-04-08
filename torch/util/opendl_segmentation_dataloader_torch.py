@@ -6,11 +6,6 @@ import torch
 from torch.utils.data import Dataset
 
 
-
-
-
-
-
 class opendl_segmentation_dataloader_torch(Dataset):
     def __init__(self, labelSourcePath, label_height, label_width):
         super(opendl_segmentation_dataloader_torch, self).__init__()

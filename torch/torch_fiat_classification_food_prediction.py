@@ -4,7 +4,7 @@ import random
 import cv2
 import numpy as np
 
-from torchsummary import summary
+
 from torch.utils.data import DataLoader
 
 

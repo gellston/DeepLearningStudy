@@ -1,10 +1,6 @@
 import torch
-import torch.nn as nn
 import random
-import cv2
-import numpy as np
 
-from torchsummary import summary
 from torch.utils.data import DataLoader
 
 from util.ODDatasetLoader import ODDatasetLoader

@@ -4,10 +4,7 @@ import cv2
 import numpy as np
 import json
 
-
-
 from torch.utils.data import Dataset
-
 
 class FIATClassificationDataset(Dataset):
     def __init__(self, labelSourcePath, label_height, label_width, isColor=True, isNorm=False):
