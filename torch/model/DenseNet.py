@@ -5,7 +5,7 @@ from util.helper import Transition
 
 class DenseNet(torch.nn.Module):
 
-    def __init__(self, class_num=5, block_config=(6, 12, 24, 16), expansion_rate=4, growth_rate=12, droprate=0.2):
+    def __init__(self, class_num=5, block_config=(6, 12, 24, 16), expansion_rate=4, growth_rate=12, droprate=0.2, activation=torch.nn.ReLU):
 
         super(DenseNet, self).__init__()
 
@@ -32,7 +32,8 @@ class DenseNet(torch.nn.Module):
                                num_layers=num_layers,
                                expansion_rate=self.expansion_rate,
                                growth_rate=self.growth_rate,
-                               droprate=droprate)
+                               droprate=droprate,
+                               activation=activation)
 
             self.features.add_module("denseblock_%d" % (i+1), block)
             inner_channels = inner_channels + num_layers * growth_rate
@@ -40,12 +41,13 @@ class DenseNet(torch.nn.Module):
             if i != len(block_config) - 1:
                 transition = Transition(in_channels=inner_channels,
                                         out_channels=int(inner_channels / 2),
-                                        droprate=droprate)
+                                        droprate=droprate,
+                                        activation=activation)
                 self.features.add_module("transition_%d" % (i + 1), transition)
                 inner_channels = int(inner_channels / 2)
 
         self.features.add_module("final_norm", torch.nn.BatchNorm2d(inner_channels))
-        self.features.add_module("final_relu", torch.nn.ReLU())
+        self.features.add_module("final_relu", activation())
         self.class_conv = torch.nn.Conv2d(in_channels=inner_channels,
                                           out_channels=self.class_num,
                                           kernel_size=3,

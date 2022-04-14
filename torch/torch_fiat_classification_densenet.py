@@ -35,7 +35,8 @@ accuracy_threshold = 0.5
 model = DenseNet(class_num=4,
                  block_config=(6, 12, 24, 16),
                  expansion_rate=4,                       ##Bottleneck exansion size
-                 growth_rate=12).to(device)
+                 growth_rate=12,
+                 activation=torch.nn.SiLU).to(device)
 
 
 

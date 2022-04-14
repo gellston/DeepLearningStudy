@@ -54,7 +54,7 @@ class ResidualBlock(torch.nn.Module):
 
 
 class BottleNeck(torch.nn.Module):
-    def __init__(self, in_channels, growth_rate=32, expansion_rate=4, droprate=0.2):
+    def __init__(self, in_channels, growth_rate=32, expansion_rate=4, droprate=0.2, activation=torch.nn.ReLU):
         super().__init__()
 
         inner_channels = expansion_rate * growth_rate ##expansion_size=32*4
@@ -62,10 +62,10 @@ class BottleNeck(torch.nn.Module):
 
         self.residual = torch.nn.Sequential(
             torch.nn.BatchNorm2d(in_channels),   ##ex:128
-            torch.nn.ReLU(),
+            activation(),
             torch.nn.Conv2d(in_channels, inner_channels, 1, stride=1, padding=0, bias=False),##32*4 #expansion layer
             torch.nn.BatchNorm2d(inner_channels),
-            torch.nn.ReLU(),
+            activation(),
             torch.nn.Conv2d(inner_channels, growth_rate, 3, stride=1, padding=1, bias=False) ##32
         )
 
@@ -78,12 +78,12 @@ class BottleNeck(torch.nn.Module):
 
 
 class Transition(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, droprate=0.2):
+    def __init__(self, in_channels, out_channels, droprate=0.2, activation=torch.nn.ReLU):
         super().__init__()
         self.droprate=droprate
         self.down_sample = torch.nn.Sequential(
             torch.nn.BatchNorm2d(in_channels),
-            torch.nn.ReLU(),
+            activation(),
             torch.nn.Conv2d(in_channels, out_channels, 1, stride=1, padding=0, bias=False),
             torch.nn.AvgPool2d(2, stride=2)
         )
@@ -91,7 +91,7 @@ class Transition(torch.nn.Module):
 
     def forward(self, x):
         output = self.down_sample(x)
-        output = self.spatial_dropout(output)
+        #output = self.spatial_dropout(output)
         #if self.droprate > 0:
         #    output = F.dropout(output, p=self.droprate, inplace=False, training=self.training)
         return output
@@ -99,9 +99,44 @@ class Transition(torch.nn.Module):
 
 
 
+class CSPDenseBlock(torch.nn.Module):
+
+    def __init__(self, num_input_features, num_layers, expansion_rate, growth_rate, droprate, part_ratio=0.5, activation=torch.nn.ReLU):
+        super(CSPDenseBlock, self).__init__()
+
+
+        self.part1_chnls = int(num_input_features * part_ratio)
+        self.part2_chnls = num_input_features - self.part1_chnls ##Dense Layer Channel Calculation
+
+
+        self.dense_block = torch.nn.Sequential()
+        self.droprate = droprate
+
+        for i in range(num_layers):
+            layer = BottleNeck(in_channels=self.part2_chnls + i * growth_rate,
+                               growth_rate=growth_rate,
+                               expansion_rate=expansion_rate,
+                               droprate=droprate,
+                               activation=activation)
+            self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
+
+        self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
+
+    def forward(self, x):
+
+        part1 = x[:, :self.part1_chnls, :, :] #part1 channel 자르기
+        part2 = x[:, self.part1_chnls:, :, :] #part2 channel 자르기
+        part2 = self.dense_block(part2)
+        #part2 = self.spatial_dropout(part2)
+        out = torch.cat((part1, part2), 1)
+
+        return out
+
+
+
 class DenseBlock(torch.nn.Module):
 
-    def __init__(self, num_input_features, num_layers, expansion_rate, growth_rate, droprate):
+    def __init__(self, num_input_features, num_layers, expansion_rate, growth_rate, droprate, activation=torch.nn.ReLU):
         super(DenseBlock, self).__init__()
 
         self.dense_block = torch.nn.Sequential()
@@ -111,7 +146,8 @@ class DenseBlock(torch.nn.Module):
             layer = BottleNeck(in_channels=num_input_features + i * growth_rate,
                                growth_rate=growth_rate,
                                expansion_rate=expansion_rate,
-                               droprate=droprate)
+                               droprate=droprate,
+                               activation=activation)
             self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
 
         self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
