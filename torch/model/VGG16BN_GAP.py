@@ -56,8 +56,7 @@ class VGG16BN_GAP(torch.nn.Module):
                                           torch.nn.ReLU(),
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
-        self.final_conv_layer = torch.nn.Sequential(torch.nn.Conv2d(512, self.class_num, kernel_size=3, stride=1, padding='same', bias=False),
-                                                    torch.nn.ReLU())
+        self.final_conv_layer = torch.nn.Sequential(torch.nn.Conv2d(512, self.class_num, kernel_size=3, stride=1, padding='same', bias=True))
 
 
         self.global_average_pooling = torch.nn.Sequential(torch.nn.AdaptiveAvgPool2d(1))

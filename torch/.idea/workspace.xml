@@ -20,7 +20,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5bf2ba71-7d8e-46fe-b6da-1535080af415" name="Default Changelist" comment="">
+<<<<<<< Updated upstream
       <change beforePath="$PROJECT_DIR$/util/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/helper.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/Resnet18.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/Resnet18.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/VGG16BN_GAP.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/VGG16BN_GAP.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/torch_fiat_classification_resnet18.py" beforeDir="false" afterPath="$PROJECT_DIR$/torch_fiat_classification_resnet18.py" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -180,6 +187,7 @@
       <recent name="C:\Github\DeepLearningStudy\torch\util" />
     </key>
   </component>
+<<<<<<< Updated upstream
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
@@ -193,6 +201,9 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.torch_fiat_densenet_food">
+=======
+  <component name="RunManager" selected="Python.torch_fiat_classification_vgg16bn">
+>>>>>>> Stashed changes
     <configuration name="SoftmaxClassifierModel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -277,7 +288,11 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+<<<<<<< Updated upstream
     <configuration name="torch_fiat_densenet_food" type="PythonConfigurationType" factoryName="Python" temporary="true">
+=======
+    <configuration name="torch_fiat_classification_vgg16bn" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+>>>>>>> Stashed changes
       <module name="torch" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -289,7 +304,11 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+<<<<<<< Updated upstream
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_fiat_densenet_food.py" />
+=======
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/torch_fiat_classification_vgg16bn.py" />
+>>>>>>> Stashed changes
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -300,7 +319,11 @@
     </configuration>
     <recent_temporary>
       <list>
+<<<<<<< Updated upstream
         <item itemvalue="Python.torch_fiat_densenet_food" />
+=======
+        <item itemvalue="Python.torch_fiat_classification_vgg16bn" />
+>>>>>>> Stashed changes
         <item itemvalue="Python.torch_fiat_classification_resnet18" />
         <item itemvalue="Python.torch_fiat_classification_food" />
         <item itemvalue="Python.SoftmaxClassifierModel" />
@@ -412,26 +435,26 @@
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="2012" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1647662584184" />
-    <state width="1899" height="197" key="GridCell.Tab.0.bottom" timestamp="1649410544763">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="298" key="GridCell.Tab.0.bottom" timestamp="1649489386550">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="197" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
-    <state width="1899" height="235" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429485" />
-    <state width="1899" height="197" key="GridCell.Tab.0.center" timestamp="1649410544763">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="298" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649489386550" />
+    <state width="1899" height="298" key="GridCell.Tab.0.center" timestamp="1649489386550">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="197" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
-    <state width="1899" height="235" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="197" key="GridCell.Tab.0.left" timestamp="1649410544763">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="298" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649489386550" />
+    <state width="1899" height="298" key="GridCell.Tab.0.left" timestamp="1649489386550">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="197" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
-    <state width="1899" height="235" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
-    <state width="1899" height="197" key="GridCell.Tab.0.right" timestamp="1649410544763">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state width="1899" height="298" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649489386550" />
+    <state width="1899" height="298" key="GridCell.Tab.0.right" timestamp="1649489386550">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="197" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1649410544763" />
-    <state width="1899" height="235" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649399429484" />
+    <state width="1899" height="298" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1649489386550" />
     <state width="1899" height="235" key="GridCell.Tab.1.bottom" timestamp="1649410544759">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

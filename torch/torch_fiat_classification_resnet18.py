@@ -3,6 +3,8 @@ import torch.nn as nn
 import random
 
 
+
+
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
@@ -31,7 +33,7 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = Resnet18(class_num=4).to(device)
+model = Resnet18(class_num=10).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

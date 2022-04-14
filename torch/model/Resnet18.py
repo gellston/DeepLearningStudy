@@ -37,7 +37,7 @@ class Resnet18(torch.nn.Module):
 
         self.global_average_pooling = torch.nn.AdaptiveAvgPool2d(1)
 
-        self.softmax = torch.nn.Softmax()
+        self.sigmoid = torch.nn.Sigmoid()
 
 
 
@@ -51,6 +51,6 @@ class Resnet18(torch.nn.Module):
         x = self.bn(x)
         x = self.global_average_pooling(x)
         x = x.view([-1, self.class_num])
-        x = self.softmax(x)
+        x = self.sigmoid(x)
 
         return x
