@@ -25,8 +25,8 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 40
-batch_size = 10
-target_accuracy = 0.999
+batch_size = 5
+target_accuracy = 0.99
 learning_rate = 0.0003
 accuracy_threshold = 0.5
 ## Hyper parameter
