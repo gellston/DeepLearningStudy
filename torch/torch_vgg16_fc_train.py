@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import random
 
+from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
@@ -37,6 +38,14 @@ VGG16 = VGG16FC(class_num=5).to(device)
 print('==== model info ====')
 summary(VGG16, (3, 224, 224))
 print('====================')
+
+
+macs, params = get_model_complexity_info(VGG16,
+                                         (3, 224, 224),
+                                         as_strings=True,
+                                         print_per_layer_stat=True, verbose=True)
+print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+print('{:<30}  {:<8}'.format('Number of parameters: ', params))
 
 
 VGG16.eval()

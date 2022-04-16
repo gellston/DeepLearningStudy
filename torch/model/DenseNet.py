@@ -1,5 +1,4 @@
 import torch
-import math
 from util.helper import DenseBlock
 from util.helper import Transition
 

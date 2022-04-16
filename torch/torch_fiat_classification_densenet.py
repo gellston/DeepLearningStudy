@@ -3,6 +3,7 @@ import torch.nn as nn
 import random
 
 
+from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
@@ -51,6 +52,13 @@ print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')
 
+
+macs, params = get_model_complexity_info(model,
+                                         (3, 224, 224),
+                                         as_strings=True,
+                                         print_per_layer_stat=True, verbose=True)
+print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+print('{:<30}  {:<8}'.format('Number of parameters: ', params))
 
 
 ## no Train Model Save
