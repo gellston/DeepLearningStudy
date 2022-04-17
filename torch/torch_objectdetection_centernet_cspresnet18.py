@@ -7,7 +7,7 @@ from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.CSPResnet18 import CSPResnet18
+from model.CSPCenterNetResnet18 import CSPCenterNetResnet18
 
 
 
@@ -25,20 +25,20 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 100
-batch_size = 30
-target_accuracy = 0.70
+batch_size = 15
+target_accuracy = 0.90
 learning_rate = 0.003
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = CSPResnet18(class_num=257, activation=torch.nn.SiLU).to(device)
+model = CSPCenterNetResnet18(class_num=257, activation=torch.nn.SiLU).to(device)
 print('==== model info ====')
-summary(model, (3, 224, 224))
+summary(model, (3, 512, 512))
 print('====================')
 
 macs, params = get_model_complexity_info(model,
-                                         (3, 224, 224),
+                                         (3, 512, 512),
                                          as_strings=True,
                                          print_per_layer_stat=True, verbose=True)
 print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
@@ -53,7 +53,7 @@ model.eval()
 compiled_model = torch.jit.script(model)
 torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(CenterNetCSPResnet18).pt")
 
-trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
+trace_input = torch.rand(1, 3, 512, 512).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
 torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(CenterNetCSPResnet18)_Trace.pt")
 
@@ -62,16 +62,16 @@ torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(
 
 transform = torchvision.transforms.Compose([
                 torchvision.transforms.Grayscale(num_output_channels=3),
-                torchvision.transforms.Resize((224, 224)),
+                torchvision.transforms.Resize((512, 512)),
                 torchvision.transforms.ToTensor()
             ])
 
-dataset = torchvision.datasets.Caltech256(root="C://Github//Dataset//",
-                                          transform=transform,
-                                          download=False)
+classificationDataset = torchvision.datasets.Caltech256(root="C://Github//Dataset//",
+                                                        transform=transform,
+                                                        download=False)
 
 # dataset loader
-data_loader = DataLoader(dataset=dataset,
+data_loader = DataLoader(dataset=classificationDataset,
                          batch_size=batch_size,  # 배치 크기는 100
                          shuffle=True,
                          drop_last=True)
@@ -93,15 +93,15 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
         model.train()
         optimizer.zero_grad()
-        hypothesis = model(gpu_X)
-        cost = criterion(hypothesis, gpu_Y)
+        classificaiton, class_heatmap, size_map, offset_map = model(gpu_X)
+        cost = criterion(classificaiton, gpu_Y)
         cost.backward()
         avg_cost += (cost / total_batch)
         optimizer.step()
 
         model.eval()
-        prediction = model(gpu_X)
-        correct_prediction = torch.argmax(prediction, 1) == torch.argmax(gpu_Y, 1)
+        classificaiton, class_heatmap, size_map, offset_map = model(gpu_X)
+        correct_prediction = torch.argmax(classificaiton, 1) == torch.argmax(gpu_Y, 1)
         accuracy = correct_prediction.float().mean()
         avg_acc += (accuracy / total_batch)
 
@@ -114,4 +114,16 @@ model.eval()
 compiled_model = torch.jit.script(model)
 torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(CenterNetCSPResnet18).pt")
 ## no Train Model Save
+
+
+
+
+
+objectDetectionDataset = torchvision.datasets.WIDERFace(root="C://Github//Dataset//",
+                                                        transform=transform,
+                                                        download=False)
+
+
+
+
 print('Learning finished')

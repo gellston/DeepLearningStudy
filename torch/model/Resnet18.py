@@ -37,7 +37,7 @@ class Resnet18(torch.nn.Module):
 
         self.global_average_pooling = torch.nn.AdaptiveAvgPool2d(1)
 
-        self.sigmoid = torch.nn.Sigmod()
+        self.sigmoid = torch.nn.Sigmoid()
 
 
 

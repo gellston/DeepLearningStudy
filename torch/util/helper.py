@@ -10,6 +10,37 @@ def IOU(target, prediction):
     return iou_score
 
 
+class SeparableConv2d(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU):
+        super(SeparableConv2d, self).__init__()
+        self.depthwise = torch.nn.Conv2d(in_channels,
+                                         in_channels,
+                                         kernel_size=kernel_size,
+                                         groups=in_channels,
+                                         bias=bias,
+                                         stride=stride,
+                                         padding=padding)
+        self.bn1 = torch.nn.BatchNorm2d(in_channels)
+        self.activation1 = activation()
+        self.pointwise = torch.nn.Conv2d(in_channels,
+                                         out_channels,
+                                         kernel_size=1,
+                                         bias=bias)
+        self.bn2 = torch.nn.BatchNorm2d(out_channels)
+        self.activation2 = activation()
+
+
+    def forward(self, x):
+        out = self.depthwise(x)
+        out = self.bn1(out)
+        out = self.activation1(out)
+        out = self.pointwise(out)
+        out = self.bn2(out)
+        out = self.activation2(out)
+        return out
+
+
+
 class ResidualBlock(torch.nn.Module):
 
     def __init__(self, in_dim, mid_dim, out_dim, stride=1, activation=torch.nn.SiLU):
@@ -206,6 +237,69 @@ class CSPDenseBlock(torch.nn.Module):
         part2 = self.dense_block(part2)
         #part2 = self.spatial_dropout(part2)
         out = torch.cat((part1, part2), 1)
+
+        return out
+
+
+
+class CSPSeparableResidualBlock(torch.nn.Module):
+
+    def __init__(self, in_dim, mid_dim, out_dim, stride=1, part_ratio=0.5, activation=torch.nn.SiLU):
+        super(CSPSeparableResidualBlock, self).__init__()
+
+        self.check_different = mid_dim != out_dim
+
+        self.part1_chnls = int(in_dim * part_ratio)
+        self.part2_chnls = in_dim - self.part1_chnls                ##Residual Layer Channel Calculation
+
+        self.part1_out_chnls = int(out_dim * part_ratio)
+        self.part2_out_chnls = out_dim - self.part1_out_chnls
+
+        self.stride = stride;
+        self.residual_block = torch.nn.Sequential(SeparableConv2d(self.part2_chnls,
+                                                                  mid_dim,
+                                                                  kernel_size=3,
+                                                                  stride=self.stride,
+                                                                  padding=1,
+                                                                  bias=False,
+                                                                  activation=activation),
+                                                  torch.nn.BatchNorm2d(num_features=mid_dim),
+                                                  activation(),
+                                                  SeparableConv2d(mid_dim,
+                                                                  self.part2_out_chnls,
+                                                                  kernel_size=3,
+                                                                  padding='same',
+                                                                  bias=False,
+                                                                  activation=activation),
+                                                  torch.nn.BatchNorm2d(num_features=self.part2_out_chnls))
+
+        self.projection1 = torch.nn.Conv2d(in_channels=self.part2_chnls,            ##Residual Projection
+                                           out_channels=self.part2_out_chnls,
+                                           kernel_size=1,
+                                           stride=self.stride)
+
+        self.projection2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
+                                          out_channels=self.part1_out_chnls,
+                                          kernel_size=1,
+                                          stride=self.stride)
+
+        self.activation = activation()
+
+    def forward(self, x):
+
+        part1 = x[:, :self.part1_chnls, :, :] #part1 channel 자르기
+        part2 = x[:, self.part1_chnls:, :, :] #part2 channel 자르기
+        skip_connection = part2
+
+        if self.stride == 2 or self.check_different:
+            skip_connection = self.projection1(skip_connection)
+            part1 = self.projection2(part1)
+
+        residual = self.residual_block(part2)  # F(x)
+        residual = torch.add(residual, skip_connection)
+        residual = self.activation(residual)
+
+        out = torch.cat((part1, residual), 1)
 
         return out
 
