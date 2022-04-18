@@ -11,8 +11,9 @@ def IOU(target, prediction):
 
 
 class SeparableConv2d(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU):
+    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False):
         super(SeparableConv2d, self).__init__()
+
         self.depthwise = torch.nn.Conv2d(in_channels,
                                          in_channels,
                                          kernel_size=kernel_size,
@@ -20,12 +21,39 @@ class SeparableConv2d(torch.nn.Module):
                                          bias=bias,
                                          stride=stride,
                                          padding=padding)
-        self.bn1 = torch.nn.BatchNorm2d(in_channels)
-        self.activation1 = activation()
+
         self.pointwise = torch.nn.Conv2d(in_channels,
                                          out_channels,
                                          kernel_size=1,
                                          bias=bias)
+
+    def forward(self, x):
+        out = self.depthwise(x)
+        out = self.pointwise(out)
+        return out
+
+
+
+class SeparableActivationConv2d(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU):
+        super(SeparableActivationConv2d, self).__init__()
+
+        self.depthwise = torch.nn.Conv2d(in_channels,
+                                         in_channels,
+                                         kernel_size=kernel_size,
+                                         groups=in_channels,
+                                         bias=bias,
+                                         stride=stride,
+                                         padding=padding)
+
+        self.pointwise = torch.nn.Conv2d(in_channels,
+                                         out_channels,
+                                         kernel_size=1,
+                                         bias=bias)
+
+        self.bn1 = torch.nn.BatchNorm2d(in_channels)
+        self.activation1 = activation()
+
         self.bn2 = torch.nn.BatchNorm2d(out_channels)
         self.activation2 = activation()
 
@@ -38,7 +66,6 @@ class SeparableConv2d(torch.nn.Module):
         out = self.bn2(out)
         out = self.activation2(out)
         return out
-
 
 
 class ResidualBlock(torch.nn.Module):
@@ -261,16 +288,14 @@ class CSPSeparableResidualBlock(torch.nn.Module):
                                                                   kernel_size=3,
                                                                   stride=self.stride,
                                                                   padding=1,
-                                                                  bias=False,
-                                                                  activation=activation),
+                                                                  bias=False),
                                                   torch.nn.BatchNorm2d(num_features=mid_dim),
                                                   activation(),
                                                   SeparableConv2d(mid_dim,
                                                                   self.part2_out_chnls,
                                                                   kernel_size=3,
                                                                   padding='same',
-                                                                  bias=False,
-                                                                  activation=activation),
+                                                                  bias=False),
                                                   torch.nn.BatchNorm2d(num_features=self.part2_out_chnls))
 
         self.projection1 = torch.nn.Conv2d(in_channels=self.part2_chnls,            ##Residual Projection
