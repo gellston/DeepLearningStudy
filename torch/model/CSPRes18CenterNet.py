@@ -1,6 +1,7 @@
 import torch
+import torch.nn.functional as F
 from util.helper import CSPResidualBlock
-from util.helper import SeparableConv2d
+
 
 class CSPRes18CenterNet(torch.nn.Module):
 
@@ -148,8 +149,7 @@ class CSPRes18CenterNet(torch.nn.Module):
                                                                  out_channels=1,
                                                                  kernel_size=1,
                                                                  bias=True,
-                                                                 padding='same'),
-                                                 torch.nn.Sigmoid())
+                                                                 padding='same'))
 
         self.size_map = torch.nn.Sequential(torch.nn.Conv2d(in_channels=128,
                                                             out_channels=64,
@@ -230,8 +230,8 @@ class CSPRes18CenterNet(torch.nn.Module):
 
 
         ##Feature Pyramid
-        class_heatmap = self.class_heatmap(final_feature3)
+        class_feature = self.class_heatmap(final_feature3)
         size_map = self.size_map(final_feature3)
         offset_map = self.offset_map(final_feature3)
 
-        return classificaiton, class_heatmap, size_map, offset_map
+        return classificaiton, F.sigmoid(class_feature), class_feature, size_map, offset_map

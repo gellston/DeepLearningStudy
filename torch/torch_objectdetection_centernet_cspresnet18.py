@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 import random
 import torchvision
 import numpy as np
@@ -30,8 +29,8 @@ if device == 'cuda':
 
 
 ## Hyper parameter
-training_epochs = 100
-batch_size = 4
+training_epochs = 300
+batch_size = 12
 target_accuracy = 0.90
 learning_rate = 0.003
 accuracy_threshold = 0.5
@@ -113,9 +112,9 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
         model.train()
         optimizer.zero_grad()
-        classificaiton, prediction_heatmap, prediction_sizemap, prediction_offsetmap = model(gpu_label_image)
+        classificaiton, prediction_heatmap, prediction_features, prediction_sizemap, prediction_offsetmap = model(gpu_label_image)
 
-        cost = criterion(prediction_heatmap,
+        cost = criterion(prediction_features,
                          prediction_sizemap,
                          prediction_offsetmap,
                          gpu_label_heatmap,
@@ -142,7 +141,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 
 
-        input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy().astype(np.float32)
+        input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy().astype(np.uint8)
         input_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
         cv2.namedWindow("input", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('input', 512, 512)

@@ -45,6 +45,8 @@ def gaussian2D(shape, sigma=1):
 def draw_umich_gaussian(heatmap, center, radius, k=1):
     diameter = 2 * radius + 1
     gaussian = gaussian2D((diameter, diameter), sigma=diameter / 6)
+    maxPixelValue = np.amax(gaussian)
+    gaussian = gaussian / maxPixelValue
 
     x, y = int(center[0]), int(center[1])
 
@@ -103,7 +105,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
         color_image_width = color_image.size(dim=2)
         color_image_height = color_image.size(dim=1)
 
-        resized_color_image = ttf.resize(image, size=(input_width, input_height))
+        resized_color_image = ttf.resize(image, size=(input_width, input_height)) * 255
         image_list.append(resized_color_image)
 
         """
