@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 
 
 ## new
-def gaussian_radius_2(det_size, min_overlap=0.7):
+def gaussian_radius(det_size, min_overlap=0.7):
     height, width = det_size
 
     a1 = 1
@@ -32,22 +32,8 @@ def gaussian_radius_2(det_size, min_overlap=0.7):
     r3 = (b3 + sq3) / 2
     return min(r1, r2, r3)
 
-def gaussian_radius(det_size, min_overlap=0.7):
-    det_h, det_w = det_size
-    rh = 0.1155 * det_h
-    rw = 0.1155 * det_w
-    return rh, rw
 
-
-def gaussian2D(shape, sigma_w=1, sigma_h=1):
-    m, n = [(ss - 1.) / 2. for ss in shape]
-    y, x = np.ogrid[-m:m + 1, -n:n + 1]
-
-    h = np.exp(-((x * x) / (2 * sigma_w * sigma_w) + (y * y) / (2 * sigma_h * sigma_h)))
-    h[h < np.finfo(h.dtype).eps * h.max()] = 0
-    return h
-
-def gaussian2D_2(shape, sigma=1):
+def gaussian2D(shape, sigma=1):
     m, n = [(ss - 1.) / 2. for ss in shape]
     y, x = np.ogrid[-m:m + 1, -n:n + 1]
 
@@ -55,9 +41,10 @@ def gaussian2D_2(shape, sigma=1):
     h[h < np.finfo(h.dtype).eps * h.max()] = 0
     return h
 
-def draw_gaussian_2(heatmap, center, radius, k=1):
+
+def draw_umich_gaussian(heatmap, center, radius, k=1):
     diameter = 2 * radius + 1
-    gaussian = gaussian2D_2((diameter, diameter), sigma=diameter / 6)
+    gaussian = gaussian2D((diameter, diameter), sigma=diameter / 6)
 
     x, y = int(center[0]), int(center[1])
 
@@ -72,30 +59,29 @@ def draw_gaussian_2(heatmap, center, radius, k=1):
         np.maximum(masked_heatmap, masked_gaussian * k, out=masked_heatmap)
     return heatmap
 
-def draw_gaussian(heatmap, center, radius_h, radius_w, k=1):
-    diameter_h = 2 * radius_h + 1
-    diameter_w = 2 * radius_w + 1
-    gaussian = gaussian2D((diameter_h, diameter_w), sigma_w=diameter_w / 6, sigma_h=diameter_h / 6)
 
-    x, y = int(center[0]), int(center[1])
+def generate_heatmap(heatmap, center_x, center_y, bboxes_h, bboxes_w):
 
-    height, width = heatmap.shape[0:2]
+    radius = gaussian_radius((np.ceil(bboxes_h), np.ceil(bboxes_w)))
+    radius = max(0, int(radius))
 
-    left, right = min(x, radius_w), min(width - x, radius_w + 1)
-    top, bottom = min(y, radius_h), min(height - y, radius_h + 1)
-
-    masked_heatmap = heatmap[y - top:y + bottom, x - left:x + right]
-    masked_gaussian = gaussian[radius_h - top:radius_h + bottom, radius_w - left:radius_w + right]
-    if min(masked_gaussian.shape) > 0 and min(masked_heatmap.shape) > 0:  # TODO debug
-        np.maximum(masked_heatmap, masked_gaussian * k, out=masked_heatmap)
-    return heatmap
+    draw_umich_gaussian(heatmap, (center_x, center_y), radius)
 
 ## new
 
 
 
 
-def batch_loader(loader, batch_size, input_width, input_height, feature_map_scale):
+
+
+
+
+
+
+
+
+
+def batch_loader(loader, batch_size, input_width, input_height, feature_map_scale, device):
 
 
     image_list = []
@@ -109,16 +95,23 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
 
     tensorTransform = transforms.ToTensor()
 
+
     temp_batch_size = batch_size
 
     for image, label in loader:
-
         color_image = image[0]
         color_image_width = color_image.size(dim=2)
         color_image_height = color_image.size(dim=1)
 
         resized_color_image = ttf.resize(image, size=(input_width, input_height))
         image_list.append(resized_color_image)
+
+        """
+        ##opencv
+        torch_image = resized_color_image.squeeze() * 255
+        opencv_image = torch_image.numpy().transpose(1, 2, 0).astype(np.uint8).copy()
+        opencv_image = cv2.cvtColor(opencv_image, cv2.COLOR_RGB2BGR)
+        """
 
         size_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
         offset_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
@@ -128,15 +121,22 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
         bbox_count = bbox.size(dim=0)
         for box_index in range(bbox_count):
 
-            ##Fitting into input image size (Based on input image)
+            ##Fitting into input image size (Based on input image) Confirmed
+            input_box_x = bbox[box_index][0] / color_image_width * input_width
+            input_box_y = bbox[box_index][1] / color_image_height * input_height
             input_box_width = bbox[box_index][2] / color_image_width * input_width
             input_box_height = bbox[box_index][3] / color_image_height * input_height
+            ##Fitting into input image size (Based on input image) Confirmed
+
+            #red = (0, 0, 255)
+            #cv2.rectangle(opencv_image, (int(input_box_x), int(input_box_y)),
+            #             (int(input_box_x + input_box_width), int(input_box_y + input_box_height)), red, 3)
 
             ##Fitting into input image size (Based on feature image)
-            feature_box_width = bbox[box_index][2] / feature_map_width * input_width
-            feature_box_height = bbox[box_index][3] / feature_map_height * input_height
-            feature_box_x = bbox[box_index][0] / feature_map_width * input_width + feature_box_width/2
-            feature_box_y = bbox[box_index][1] / feature_map_height * input_height + feature_box_height/2
+            feature_box_width = bbox[box_index][2] / color_image_width * feature_map_width
+            feature_box_height = bbox[box_index][3] / color_image_height * feature_map_height
+            feature_box_x = bbox[box_index][0] / color_image_width * feature_map_width + feature_box_width/2
+            feature_box_y = bbox[box_index][1] / color_image_height * feature_map_height + feature_box_height/2
 
             ##Clamping x,y
             clamp_feature_box_x = np.clip(feature_box_x, 0, feature_map_width)
@@ -155,19 +155,20 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             offset_map[0][1][int(clamp_feature_box_y-1)][int(clamp_feature_box_x-1)] = feature_box_offset_y
 
             ##Gaussian Map
-            radius_h, radius_w = gaussian_radius((math.ceil(feature_box_height), math.ceil(feature_box_width)))
-            radius_h = max(0, int(radius_h))
-            radius_w = max(0, int(radius_w))
-
-            radius = gaussian_radius_2((math.ceil(feature_box_height), math.ceil(feature_box_width)))
-            radius = max(0, int(radius))
-            ct = np.array([int(feature_box_x), int(feature_box_y)], dtype=np.float32)
-            ct_int = ct.astype(np.int32)
-            draw_gaussian(gaussian_map[:, :, 0], ct_int, radius_h, radius_w)
-            draw_gaussian_2(gaussian_map[:, :, 0], ct_int, radius)
+            generate_heatmap(gaussian_map[:, :, 0], clamp_feature_box_x, clamp_feature_box_y, feature_box_height, feature_box_width)
+            ##Gaussian Map
 
 
-        gaussian_map_tensor = tensorTransform(gaussian_map)
+        ##opencv
+        """
+        resized_gaussian_map = cv2.resize(gaussian_map[:, :, 0], dsize=(input_width, input_height), interpolation=cv2.INTER_AREA)
+        cv2.imshow('gaussian map', resized_gaussian_map)
+        cv2.imshow('rect visualizaiton', opencv_image)
+        cv2.waitKey(100)
+        """
+
+
+        gaussian_map_tensor = tensorTransform(gaussian_map).unsqueeze(dim=0)
         size_map_list.append(size_map)
         offset_map_list.append(offset_map)
         gaussian_map_list.append(gaussian_map_tensor)
@@ -176,9 +177,9 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
         if temp_batch_size == 0:
             break
 
-    image_batch = torch.cat(image_list, dim=0)
-    gaussian_map_batch = torch.cat(gaussian_map_list, dim=0)
-    size_map_batch = torch.cat(size_map_list, dim=0)
-    offset_map_batch = torch.cat(offset_map_list, dim=0)
+    image_batch = torch.cat(image_list, dim=0).to(device)
+    gaussian_map_batch = torch.cat(gaussian_map_list, dim=0).to(device)
+    size_map_batch = torch.cat(size_map_list, dim=0).to(device)
+    offset_map_batch = torch.cat(offset_map_list, dim=0).to(device)
 
     return (image_batch, gaussian_map_batch, size_map_batch, offset_map_batch)

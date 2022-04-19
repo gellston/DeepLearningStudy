@@ -2,19 +2,24 @@ import torch
 import torch.nn as nn
 import random
 import torchvision
+import numpy as np
+import cv2
 
 from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 from util.centernet_helper import batch_loader
+from util.losses import CenterNetLoss
 
-from model.CSPSeparableRes18CenterNet import CSPSeparableRes18CenterNet
+from model.CSPRes18CenterNet import CSPRes18CenterNet
 
 
 
 USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
 device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
 print("다음 기기로 학습합니다:", device)
+
+
 
 
 # for reproducibility
@@ -36,7 +41,8 @@ feature_map_scale_factor = 4
 ## Hyper parameter
 
 
-model = CSPSeparableRes18CenterNet(class_num=257, activation=torch.nn.SiLU).to(device)
+model = CSPRes18CenterNet(class_num=257, activation=torch.nn.SiLU).to(device)
+
 print('==== model info ====')
 summary(model, (3, 512, 512))
 print('====================')
@@ -64,7 +70,7 @@ torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(
 
 
 transform = torchvision.transforms.Compose([
-                torchvision.transforms.Grayscale(num_output_channels=3),
+                #torchvision.transforms.Grayscale(num_output_channels=3),
                 torchvision.transforms.ToTensor()
             ])
 
@@ -80,9 +86,8 @@ data_loader = DataLoader(dataset=objectDetectionDataset,
                          drop_last=True)
 
 model.train()
-criterion = nn.CrossEntropyLoss()
+criterion = CenterNetLoss(alpha=.25, gamma=2, lambda_size=0.1, lambda_offset=1)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
@@ -93,17 +98,56 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 
     for batch_index in range(total_batch):
-        print('batch index = ', batch_index)
-        image_batch, gaussian_map_batch, size_map_batch, offset_map_batch = batch_loader(data_loader,
-                                                                                         batch_size,
-                                                                                         input_image_width,
-                                                                                         input_image_height,
-                                                                                         feature_map_scale_factor)
+        #print('batch index = ', batch_index)
+        label_image, label_heatmap, label_sizemap, label_offsetmap = batch_loader(data_loader,
+                                                                                  batch_size,
+                                                                                  input_image_width,
+                                                                                  input_image_height,
+                                                                                  feature_map_scale_factor,
+                                                                                  device)
+        gpu_label_image = label_image.to(device)
+        gpu_label_heatmap = label_heatmap.to(device)
+        gpu_label_sizemap = label_sizemap.to(device)
+        gpu_label_offsetmap = label_offsetmap.to(device)
 
-        #print('image_batch', image_batch.shape)
-        #print('gaussian_map_batch', gaussian_map_batch.shape)
-        #print('size_map_batch', size_map_batch.shape)
-        #print('offset_map_batch', offset_map_batch.shape)
+
+        model.train()
+        optimizer.zero_grad()
+        classificaiton, prediction_heatmap, prediction_sizemap, prediction_offsetmap = model(gpu_label_image)
+
+        cost = criterion(prediction_heatmap,
+                         prediction_sizemap,
+                         prediction_offsetmap,
+                         gpu_label_heatmap,
+                         gpu_label_sizemap,
+                         gpu_label_offsetmap)
+
+        cost.backward()
+        avg_cost += (cost / total_batch)
+        optimizer.step()
+
+
+
+
+        heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('heatmap', 512, 512)
+        cv2.imshow('heatmap', heatmap_image)
+
+
+        heatmap_label = label_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        cv2.namedWindow("heatmap_label", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('heatmap_label', 512, 512)
+        cv2.imshow('heatmap_label', heatmap_label)
+
+
+
+        input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy().astype(np.float32)
+        input_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
+        cv2.namedWindow("input", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('input', 512, 512)
+        cv2.imshow('input', input_image)
+        cv2.waitKey(10)
 
         """
         model.train()
