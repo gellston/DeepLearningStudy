@@ -130,6 +130,53 @@ class BottleNeck(torch.nn.Module):
         return torch.cat([self.shortcut(x), self.residual(x)], 1)
 
 
+class InvertedBottleNect(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, expansion_rate=4, stride=1, activation=torch.nn.ReLU6):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.expansion_rate = expansion_rate
+        self.stride = stride
+
+        self.expansion_out = int(self.in_channels * self.expansion_rate)
+
+        self.conv_expansion = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
+                                                                  in_channels=self.in_channels,
+                                                                  out_channels=self.expansion_out,
+                                                                  bias=False,
+                                                                  stride=self.stride),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.conv_depthwise = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=3,
+                                                                  in_channels=self.expansion_out,
+                                                                  out_channels=self.expansion_out,
+                                                                  bias=False,
+                                                                  padding=1,
+                                                                  stride=1),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.conv_projection = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
+                                                                   in_channels=self.expansion_out,
+                                                                   out_channels=self.out_channels,
+                                                                   bias=False),
+                                                   torch.nn.BatchNorm2d(self.out_channels))
+
+    def forward(self, x):
+        out = x
+
+        if self.expansion_rate != 1:
+            out = self.conv_expansion(out)
+
+        out = self.conv_depthwise_convolution(out)
+        out = self.conv_projection(out)
+
+        if self.stride == 1 or self.in_channels != self.out_channels:
+            out = torch.add(out, x)
+
+        return out
+
 
 class Transition(torch.nn.Module):
     def __init__(self, in_channels, out_channels, droprate=0.2, activation=torch.nn.ReLU):
