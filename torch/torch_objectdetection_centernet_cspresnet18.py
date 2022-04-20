@@ -191,8 +191,6 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         object_detection_optimizer.step()
 
 
-
-
         heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
         cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('heatmap', input_image_width, input_image_height)
@@ -212,6 +210,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         cv2.resizeWindow('input', input_image_width, input_image_height)
         cv2.imshow('input', input_image)
         cv2.waitKey(10)
+
 
         """
         model.train()
