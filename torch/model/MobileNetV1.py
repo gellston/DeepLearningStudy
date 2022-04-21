@@ -18,34 +18,53 @@ class MobileNetV1(torch.nn.Module):
                             padding=1,
                             kernel_size=3),
             torch.nn.BatchNorm2d(32),
+
             activation(),
+
             SeparableActivationConv2d(in_channels=32, out_channels=64, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=64, out_channels=128, bias=False, stride=2,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=128, out_channels=128, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=128, out_channels=256, bias=False, stride=2,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=256, out_channels=256, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=256, out_channels=512, bias=False, stride=2,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=512, out_channels=512, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=512, out_channels=512, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=512, out_channels=512, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=512, out_channels=512, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=512, out_channels=512, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
+
             SeparableActivationConv2d(in_channels=512, out_channels=1024, bias=False, stride=2,
                                       activation=activation, kernel_size=3),
-            SeparableActivationConv2d(in_channels=1024, out_channels=self.class_num, bias=False, stride=1,
+
+            SeparableActivationConv2d(in_channels=1024, out_channels=1024, bias=False, stride=1,
                                       activation=activation, kernel_size=3),
-            torch.nn.AdaptiveAvgPool2d(1)
+
+            torch.nn.AdaptiveAvgPool2d(1),
+            torch.nn.Conv2d(in_channels=1024,
+                            out_channels=self.class_num,
+                            kernel_size=1,
+                            bias=True)
         )
 
         # module 초기화
@@ -59,5 +78,5 @@ class MobileNetV1(torch.nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.view([-1, self.class_num])
-        x = F.sigmoid(x)
+        x = torch.sigmoid(x)
         return x

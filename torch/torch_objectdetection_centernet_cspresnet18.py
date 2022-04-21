@@ -113,7 +113,7 @@ clsasification_data_loader = DataLoader(dataset=classificationDataset,
 
 model.train()
 criterion = CenterNetLoss(alpha=.25, gamma=2, lambda_size=0.1, lambda_offset=1)
-crossEntropyLoss = torch.nn.CrossEntropyLoss()
+crossEntropyLoss = torch.nn.BCELoss()
 classification_optimizer = torch.optim.Adam(model.parameters(), lr=classification_learning_rate)
 object_detection_optimizer = torch.optim.Adam(model.parameters(), lr=object_detection_learning_rate)
 

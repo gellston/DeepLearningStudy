@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import random
 
-
 from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
@@ -26,8 +25,8 @@ if device == 'cuda':
 ## Hyper parameter
 training_epochs = 30
 batch_size = 10
-target_accuracy = 0.999
-learning_rate = 0.0002
+target_accuracy = 0.99
+learning_rate = 0.0001
 accuracy_threshold = 0.5
 ## Hyper parameter
 

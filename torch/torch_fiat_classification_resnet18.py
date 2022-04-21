@@ -15,6 +15,7 @@ device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 �
 print("다음 기기로 학습합니다:", device)
 
 
+
 # for reproducibility
 random.seed(777)
 torch.manual_seed(777)
@@ -24,9 +25,9 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 30
-batch_size = 10
-target_accuracy = 0.999
-learning_rate = 0.003
+batch_size = 20
+target_accuracy = 0.99
+learning_rate = 0.0001
 accuracy_threshold = 0.5
 ## Hyper parameter
 

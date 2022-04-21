@@ -16,31 +16,39 @@ class CSPSeparableResnet18(torch.nn.Module):
                                                          padding=1,
                                                          bias=False),
                                          torch.nn.BatchNorm2d(num_features=64),
+                                         activation(),
+                                         SeparableConv2d(in_channels=64,
+                                                         out_channels=64,
+                                                         kernel_size=3,
+                                                         stride=2,
+                                                         padding=1,
+                                                         bias=False),
+                                         torch.nn.BatchNorm2d(num_features=64),
                                          activation())
 
-        self.conv2 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=64, mid_dim=64, out_dim=64, stride=1,
+        self.conv2 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=64, mid_dim=64, out_dim=64, stride=2,
                                                                    activation=activation),
-                                         CSPSeparableResidualBlock(in_dim=64, mid_dim=64, out_dim=128, stride=2,
+                                         CSPSeparableResidualBlock(in_dim=64, mid_dim=64, out_dim=64, stride=1,
                                                                    activation=activation))
 
-        self.conv3 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=128, mid_dim=128, out_dim=128, stride=1,
+        self.conv3 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=64, mid_dim=128, out_dim=128, stride=2,
                                                                    activation=activation),
-                                         CSPSeparableResidualBlock(in_dim=128, mid_dim=128, out_dim=256, stride=2,
+                                         CSPSeparableResidualBlock(in_dim=128, mid_dim=128, out_dim=128, stride=1,
                                                                    activation=activation))
 
-        self.conv4 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=256, mid_dim=256, out_dim=256, stride=1,
+        self.conv4 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=128, mid_dim=256, out_dim=256, stride=2,
                                                                    activation=activation),
-                                         CSPSeparableResidualBlock(in_dim=256, mid_dim=256, out_dim=512, stride=2,
+                                         CSPSeparableResidualBlock(in_dim=256, mid_dim=256, out_dim=256, stride=1,
                                                                    activation=activation))
 
-        self.conv5 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=512, mid_dim=512, out_dim=512, stride=1,
+        self.conv5 = torch.nn.Sequential(CSPSeparableResidualBlock(in_dim=256, mid_dim=512, out_dim=512, stride=1,
                                                                    activation=activation),
-                                         CSPSeparableResidualBlock(in_dim=512, mid_dim=512, out_dim=512, stride=2,
+                                         CSPSeparableResidualBlock(in_dim=512, mid_dim=512, out_dim=512, stride=1,
                                                                    activation=activation))
 
         self.final_conv = SeparableConv2d(in_channels=512,
                                           out_channels=self.class_num,
-                                          kernel_size=3,
+                                          kernel_size=1,
                                           bias=False,
                                           padding='same')
 

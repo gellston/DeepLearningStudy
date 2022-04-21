@@ -73,41 +73,49 @@ class ResidualBlock(torch.nn.Module):
     def __init__(self, in_dim, mid_dim, out_dim, stride=1, activation=torch.nn.SiLU):
         super(ResidualBlock, self).__init__()
 
-        self.stride = stride;
-        self.residual_block = torch.nn.Sequential(torch.nn.Conv2d(in_dim,
-                                                                  mid_dim,
-                                                                  kernel_size=3,
-                                                                  stride=self.stride,
-                                                                  padding=1,
-                                                                  bias=False),
-                                                  torch.nn.BatchNorm2d(num_features=mid_dim),
-                                                  activation(),
-                                                  torch.nn.Conv2d(mid_dim,
-                                                                  out_dim,
-                                                                  kernel_size=3,
-                                                                  padding='same',
-                                                                  bias=False),
-                                                  torch.nn.BatchNorm2d(num_features=out_dim))
+        self.stride = stride
+        self.features = torch.nn.Sequential(torch.nn.Conv2d(in_dim,
+                                                            mid_dim,
+                                                            kernel_size=3,
+                                                            stride=self.stride,
+                                                            padding=1,
+                                                            bias=False),
+                                            torch.nn.BatchNorm2d(num_features=mid_dim),
+                                            activation(),
+                                            torch.nn.Conv2d(mid_dim,
+                                                            out_dim,
+                                                            kernel_size=3,
+                                                            padding='same',
+                                                            bias=False),
+                                            torch.nn.BatchNorm2d(num_features=out_dim))
 
-        self.projection = torch.nn.Conv2d(in_channels=in_dim,
-                                          out_channels=out_dim,
-                                          kernel_size=1,
-                                          stride=2)
-        self.activation = activation()
+        self.down_skip_connection = torch.nn.Conv2d(in_channels=in_dim,
+                                                    out_channels=out_dim,
+                                                    kernel_size=1,
+                                                    stride=self.stride)
+        self.dim_equalizer = torch.nn.Conv2d(in_channels=in_dim,
+                                             out_channels=out_dim,
+                                             kernel_size=1)
+        self.final_activation = activation()
 
 
 
     def forward(self, x):
-        out = self.residual_block(x)  # F(x)
         if self.stride == 2:
-            out = torch.add(out, self.projection(x))
+            down = self.down_skip_connection(x)
+            out = self.features(x)
+            out = out + down
+
         else:
-            out = torch.add(out, x)
-        out = self.activation(out)
+            out = self.features(x)
+            if x.size() is not out.size():
+                x = self.dim_equalizer(x)
+            out = out + x
+        out = self.final_activation(out)
         return out
 
 
-class BottleNeck(torch.nn.Module):
+class DenseBottleNeck(torch.nn.Module):
     def __init__(self, in_channels, growth_rate=32, expansion_rate=4, droprate=0.2, activation=torch.nn.ReLU):
         super().__init__()
 
@@ -128,6 +136,53 @@ class BottleNeck(torch.nn.Module):
     def forward(self, x):
         #output = F.dropout(self.residual(x), p=self.droprate, inplace=False, training=self.training)
         return torch.cat([self.shortcut(x), self.residual(x)], 1)
+
+
+class ResidualBottleNeck(torch.nn.Module):
+    def __init__(self, in_channels, inner_channels, out_channels, stride=1, activation=torch.nn.ReLU):
+        super().__init__()
+
+        self.stride = stride
+
+
+        self.features = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=inner_channels,
+                            kernel_size=1,
+                            stride=self.stride,
+                            bias=False),
+            torch.nn.BatchNorm2d(inner_channels),                  ##ex:128
+            activation(),
+            torch.nn.Conv2d(inner_channels, inner_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            torch.nn.BatchNorm2d(inner_channels),
+            activation(),
+            torch.nn.Conv2d(inner_channels, out_channels, kernel_size=1, stride=1, bias=False),
+            torch.nn.BatchNorm2d(out_channels),
+
+        )
+
+        self.final_activation = activation()
+        self.down_skip_connection = torch.nn.Conv2d(in_channels=in_channels,
+                                                    out_channels=out_channels,
+                                                    kernel_size=1,
+                                                    stride=self.stride)
+        self.dim_equalizer = torch.nn.Conv2d(in_channels=in_channels,
+                                             out_channels=out_channels,
+                                             kernel_size=1)
+
+    def forward(self, x):
+        if self.stride == 2:
+            down = self.down_skip_connection(x)
+            out = self.features(x)
+            out = out + down
+
+        else:
+            out = self.features(x)
+            if x.size() is not out.size():
+                x = self.dim_equalizer(x)
+            out = out + x
+        out = self.final_activation(out)
+        return out
 
 
 class InvertedBottleNect(torch.nn.Module):
@@ -151,6 +206,7 @@ class InvertedBottleNect(torch.nn.Module):
         self.conv_depthwise = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=3,
                                                                   in_channels=self.expansion_out,
                                                                   out_channels=self.expansion_out,
+                                                                  groups=self.expansion_out,
                                                                   bias=False,
                                                                   padding=1,
                                                                   stride=1),
@@ -163,17 +219,14 @@ class InvertedBottleNect(torch.nn.Module):
                                                                    bias=False),
                                                    torch.nn.BatchNorm2d(self.out_channels))
 
+
     def forward(self, x):
-        out = x
-
-        if self.expansion_rate != 1:
-            out = self.conv_expansion(out)
-
-        out = self.conv_depthwise_convolution(out)
+        out = self.conv_expansion(x)
+        out = self.conv_depthwise(out)
         out = self.conv_projection(out)
 
-        if self.stride == 1 or self.in_channels != self.out_channels:
-            out = torch.add(out, x)
+        if self.stride != 2 and self.in_channels == self.out_channels:
+            out = out + x
 
         return out
 
@@ -207,11 +260,11 @@ class DenseBlock(torch.nn.Module):
         self.droprate = droprate
 
         for i in range(num_layers):
-            layer = BottleNeck(in_channels=num_input_features + i * growth_rate,
-                               growth_rate=growth_rate,
-                               expansion_rate=expansion_rate,
-                               droprate=droprate,
-                               activation=activation)
+            layer = DenseBottleNeck(in_channels=num_input_features + i * growth_rate,
+                                    growth_rate=growth_rate,
+                                    expansion_rate=expansion_rate,
+                                    droprate=droprate,
+                                    activation=activation)
             self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
 
         self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
@@ -254,12 +307,20 @@ class CSPResidualBlock(torch.nn.Module):
         self.projection1 = torch.nn.Conv2d(in_channels=self.part2_chnls,            ##Residual Projection
                                            out_channels=self.part2_out_chnls,
                                            kernel_size=1,
-                                           stride=self.stride)
+                                           stride=2)
 
         self.projection2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
-                                          out_channels=self.part1_out_chnls,
-                                          kernel_size=1,
-                                          stride=self.stride)
+                                           out_channels=self.part1_out_chnls,
+                                           kernel_size=1,
+                                           stride=2)
+
+        self.dim_equalizer1 = torch.nn.Conv2d(in_channels=self.part2_chnls,
+                                              out_channels=self.part2_out_chnls,
+                                              kernel_size=1)
+
+        self.dim_equalizer2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
+                                              out_channels=self.part1_out_chnls,
+                                              kernel_size=1)
 
         self.activation = activation()
 
@@ -272,14 +333,17 @@ class CSPResidualBlock(torch.nn.Module):
         if self.stride == 2:
             skip_connection = self.projection1(skip_connection)
             part1 = self.projection2(part1)
+        else:
+            if self.part1_chnls != self.part1_out_chnls:
+                skip_connection = self.dim_equalizer1(skip_connection)
+                part1 = self.dim_equalizer2(part1)
 
         residual = self.residual_block(part2)  # F(x)
         residual = torch.add(residual, skip_connection)
         residual = self.activation(residual)
-
         out = torch.cat((part1, residual), 1)
-
         return out
+
 
 class CSPDenseBlock(torch.nn.Module):
 
@@ -295,11 +359,11 @@ class CSPDenseBlock(torch.nn.Module):
         self.droprate = droprate
 
         for i in range(num_layers):
-            layer = BottleNeck(in_channels=self.part2_chnls + i * growth_rate,
-                               growth_rate=growth_rate,
-                               expansion_rate=expansion_rate,
-                               droprate=droprate,
-                               activation=activation)
+            layer = DenseBottleNeck(in_channels=self.part2_chnls + i * growth_rate,
+                                    growth_rate=growth_rate,
+                                    expansion_rate=expansion_rate,
+                                    droprate=droprate,
+                                    activation=activation)
             self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
 
         self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
@@ -351,9 +415,17 @@ class CSPSeparableResidualBlock(torch.nn.Module):
                                            stride=self.stride)
 
         self.projection2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
-                                          out_channels=self.part1_out_chnls,
-                                          kernel_size=1,
-                                          stride=self.stride)
+                                           out_channels=self.part1_out_chnls,
+                                           kernel_size=1,
+                                           stride=self.stride)
+
+        self.dim_equalizer1 = torch.nn.Conv2d(in_channels=self.part2_chnls,
+                                              out_channels=self.part2_out_chnls,
+                                              kernel_size=1)
+
+        self.dim_equalizer2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
+                                              out_channels=self.part1_out_chnls,
+                                              kernel_size=1)
 
         self.activation = activation()
 
@@ -363,14 +435,17 @@ class CSPSeparableResidualBlock(torch.nn.Module):
         part2 = x[:, self.part1_chnls:, :, :] #part2 channel 자르기
         skip_connection = part2
 
-        if self.stride == 2 or self.check_different:
+        if self.stride == 2:
             skip_connection = self.projection1(skip_connection)
             part1 = self.projection2(part1)
+        else:
+            if self.part1_chnls != self.part1_out_chnls:
+                skip_connection = self.dim_equalizer1(skip_connection)
+                part1 = self.dim_equalizer2(part1)
 
         residual = self.residual_block(part2)  # F(x)
         residual = torch.add(residual, skip_connection)
         residual = self.activation(residual)
-
         out = torch.cat((part1, residual), 1)
 
         return out

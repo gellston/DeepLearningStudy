@@ -36,7 +36,7 @@ class MobileNetV2(torch.nn.Module):
             InvertedBottleNect(in_channels=160, out_channels=160, expansion_rate=6, stride=1, activation=torch.nn.ReLU6),
             InvertedBottleNect(in_channels=160, out_channels=160, expansion_rate=6, stride=1, activation=torch.nn.ReLU6),
             InvertedBottleNect(in_channels=160, out_channels=320, expansion_rate=6, stride=1, activation=torch.nn.ReLU6),
-            InvertedBottleNect(in_channels=320, out_channels=1280, expansion_rate=6, stride=1, activation=torch.nn.ReLU6),
+            torch.nn.Conv2d(in_channels=320, out_channels=1280, kernel_size=1, stride=1, bias=False),
             torch.nn.AdaptiveAvgPool2d(1),
             torch.nn.Conv2d(in_channels=1280,
                             out_channels=self.class_num,
@@ -52,8 +52,9 @@ class MobileNetV2(torch.nn.Module):
                 m.weight.data.fill_(1)  #
                 m.bias.data.zero_()
 
+
     def forward(self, x):
         x = self.features(x)
         x = x.view([-1, self.class_num])
-        x = F.sigmoid(x)
+        x = torch.sigmoid(x)
         return x
