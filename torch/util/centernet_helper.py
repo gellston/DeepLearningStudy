@@ -83,13 +83,16 @@ def generate_heatmap(heatmap, center_x, center_y, bboxes_h, bboxes_w):
 
 
 
-def batch_loader(loader, batch_size, input_width, input_height, feature_map_scale, device):
+def batch_loader(loader, batch_size, input_width, input_height, feature_map_scale, device, isNorm=True):
 
 
     image_list = []
     size_map_list = []
     offset_map_list = []
     gaussian_map_list = []
+    bbox_list = []
+    image_size_list = []
+
 
     feature_map_width = input_width / feature_map_scale
     feature_map_height = input_height / feature_map_scale
@@ -100,14 +103,20 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
 
     temp_batch_size = batch_size
 
+    #box counting for normalization
+    box_count = 0
     for image, label in loader:
         color_image = image[0]
         color_image_width = color_image.size(dim=2)
         color_image_height = color_image.size(dim=1)
 
-        resized_color_image = ttf.resize(image, size=(input_width, input_height)) * 255
-        image_list.append(resized_color_image)
+        resized_color_image = ttf.resize(image, size=(input_width, input_height))
 
+        if isNorm == False:
+            resized_color_image = resized_color_image * 255
+
+        image_list.append(resized_color_image)
+        image_size_list.append((color_image_width, color_image_height))
         """
         ##opencv
         torch_image = resized_color_image.squeeze() * 255
@@ -121,8 +130,9 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
 
         bbox = label['bbox'][0]
         bbox_count = bbox.size(dim=0)
+        bbox_list.append(bbox)
         for box_index in range(bbox_count):
-
+            box_count = box_count+1
             ##Fitting into input image size (Based on input image) Confirmed
             input_box_x = bbox[box_index][0] / color_image_width * input_width
             input_box_y = bbox[box_index][1] / color_image_height * input_height
@@ -184,4 +194,102 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
     size_map_batch = torch.cat(size_map_list, dim=0).to(device)
     offset_map_batch = torch.cat(offset_map_list, dim=0).to(device)
 
-    return (image_batch, gaussian_map_batch, size_map_batch, offset_map_batch)
+    return (image_batch, image_size_list, bbox_list, box_count, gaussian_map_batch, size_map_batch, offset_map_batch)
+
+
+
+def batch_accuracy(batch_size,
+                   input_image_width,
+                   input_image_height,
+                   scale_factor,
+                   score_threshold,
+                   iou_threshold,
+                   gaussian_map_batch,
+                   size_map_batch,
+                   offset_map_batch,
+                   image_size_list,
+                   bbox_list):
+
+    feature_image_width = int(input_image_width / scale_factor)
+    feature_image_height = int(input_image_height / scale_factor)
+    average_accuracy = 0
+
+
+
+    for batch_index in range(batch_size):
+        prediction_box_list = []
+
+        gaussian_map = gaussian_map_batch[batch_index]
+        size_map = size_map_batch[batch_index]
+        offset_map = offset_map_batch[batch_index]
+        image_size = image_size_list[batch_index]
+        bbox = bbox_list[batch_index]
+
+        ## Box extraction from feature map
+        for feature_y in range(feature_image_height):
+            for feature_x in range(feature_image_width):
+                if gaussian_map[0, feature_y, feature_x] > score_threshold:
+                    bbox_score = gaussian_map[0, feature_y, feature_x].item()
+                    offset_x = offset_map[0, feature_y, feature_x]
+                    offset_y = offset_map[1, feature_y, feature_x]
+                    final_box_x = (feature_x + offset_x) / feature_image_width * input_image_width
+                    final_box_y = (feature_y + offset_y) / feature_image_height * input_image_height
+                    final_box_width = size_map[0, feature_y, feature_x]
+                    final_box_height = size_map[1, feature_y, feature_x]
+                    prediction_box_list.append([final_box_x, final_box_y, final_box_width, final_box_height])
+
+        total_bbox = len(bbox)
+        for bbox_index in range(bbox):
+            bbox_x = bbox[bbox_index][0] ##x
+            bbox_y = bbox[bbox_index][1] ##y
+            bbox_width = bbox[bbox_index][2] ##width
+            bbox_height = bbox[bbox_index][3] ##height
+
+            for prediction_box_index in range(prediction_box_list):
+                prediction_box_x = prediction_box_list[prediction_box_index][0]
+                prediction_box_y = prediction_box_list[prediction_box_index][1]
+                prediction_box_width = prediction_box_list[prediction_box_index][2]
+                prediction_box_height = prediction_box_list[prediction_box_index][3]
+                if bbox_iou(bbox_x, bbox_y, bbox_width, bbox_height,
+                            prediction_box_x, prediction_box_y, prediction_box_width, prediction_box_height) > iou_threshold:
+                    average_accuracy += (1 / total_bbox / batch_size);
+
+    return average_accuracy
+
+
+
+
+
+def bbox_iou(boxA_x, boxA_y, boxA_width, boxA_height,
+             boxB_x, boxB_y, boxB_width, boxB_height):
+
+    center_cordinate_boxA_sx = boxA_x
+    center_cordinate_boxA_sy = boxA_y
+    center_cordinate_boxA_ex = boxA_x + boxA_width
+    center_cordinate_boxA_ey = boxA_y + boxA_height
+
+    center_cordinate_boxB_sx = boxB_x
+    center_cordinate_boxB_sy = boxB_y
+    center_cordinate_boxB_ex = boxB_x + boxB_width
+    center_cordinate_boxB_ey = boxB_y + boxB_height
+
+    # determine the (x, y)-coordinates of the intersection rectangle
+    x1 = max(center_cordinate_boxA_sx, center_cordinate_boxB_sx)
+    y1 = max(center_cordinate_boxA_sy, center_cordinate_boxB_sy)
+    x2 = min(center_cordinate_boxA_ex, center_cordinate_boxB_ex)
+    y2 = min(center_cordinate_boxA_ey, center_cordinate_boxB_ey)
+
+    # compute the area of intersection rectangle
+    interArea = max(0, x2 - x1 + 1) * max(0, y2 - y1 + 1)
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    boxAArea = (center_cordinate_boxA_ex - center_cordinate_boxA_sx + 1) * (center_cordinate_boxA_ey - center_cordinate_boxA_sy + 1)
+    boxBArea = (center_cordinate_boxB_ex - center_cordinate_boxB_sx + 1) * (center_cordinate_boxB_ey - center_cordinate_boxB_sy + 1)
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+    # return the intersection over union value
+
+    return iou
+

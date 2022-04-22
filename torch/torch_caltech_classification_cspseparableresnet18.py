@@ -112,7 +112,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//CALTECH256(CSPSeparableResnet18).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_CALTECH256(CSPSeparableResnet18).pt")
 ## no Train Model Save
 
 
