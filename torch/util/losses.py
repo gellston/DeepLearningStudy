@@ -111,6 +111,6 @@ class CenterNetLoss(torch.nn.Module):
         class_loss = self.focal_loss(clamped_sigmoid, label_heatmap)
         size_loss = self.size_loss(prediction_sizemap, label_sizemap) / label_bbox_count
         offset_loss = self.offset_loss(prediction_offsetmap, label_offsetmap) / label_bbox_count
-        iou_loss = torch.sum(self.iou_loss_function(torch.sigmoid(prediction_features), label_heatmap) * label_heatmap) / batch_size
-
+        #iou_loss = torch.sum(self.iou_loss_function(torch.sigmoid(prediction_features), label_heatmap) * label_heatmap) / batch_size
+        iou_loss = jaccard_loss(prediction_features, label_heatmap.long())
         return class_loss + size_loss * self.lambda_size + offset_loss * self.lambda_offset + iou_loss
