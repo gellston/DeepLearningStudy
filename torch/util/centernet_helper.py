@@ -144,8 +144,11 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             feature_box_y = bbox[box_index][1].item() / color_image_height * feature_map_height + feature_box_height/2
 
             ##Clamping x,y
-            clamp_feature_box_x = int(feature_box_x)
-            clamp_feature_box_y = int(feature_box_y)
+            clamp_feature_box_x = np.clip(feature_box_x, 0, feature_map_width)
+            clamp_feature_box_y = np.clip(feature_box_y, 0, feature_map_height)
+            clamp_feature_box_x = int(clamp_feature_box_x)
+            clamp_feature_box_y = int(clamp_feature_box_y)
+
 
             ##Calculating offset x, y
             feature_box_offset_x = feature_box_x - clamp_feature_box_x

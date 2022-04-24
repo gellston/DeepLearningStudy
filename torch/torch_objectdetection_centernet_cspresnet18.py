@@ -7,7 +7,6 @@ import cv2
 from torchsummary import summary
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import CyclicLR
-from ptflops import get_model_complexity_info
 
 from util.centernet_helper import batch_loader
 from util.centernet_helper import batch_accuracy
@@ -72,7 +71,7 @@ object_detection_transform = torchvision.transforms.Compose([
     ])
 
 objectDetectionDataset = torchvision.datasets.WIDERFace(root="C://Github//Dataset//",
-                                                        split="val",
+                                                        split="train",
                                                         transform=object_detection_transform,
                                                         download=False)
 
@@ -83,6 +82,7 @@ object_detection_data_loader = DataLoader(dataset=objectDetectionDataset,
                                           drop_last=True)
 
 total_batch = int(len(object_detection_data_loader) / batch_size)
+print('total batch=', total_batch)
 # object detection dataset loader
 
 
