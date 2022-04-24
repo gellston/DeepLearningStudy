@@ -76,13 +76,6 @@ def generate_heatmap(heatmap, center_x, center_y, bboxes_h, bboxes_w):
 
 
 
-
-
-
-
-
-
-
 def batch_loader(loader, batch_size, input_width, input_height, feature_map_scale, device, isNorm=True):
 
 
@@ -126,7 +119,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
 
         size_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
         offset_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
-        gaussian_map = np.zeros((int(feature_map_height), int(feature_map_width), 1), np.float32)
+        gaussian_map = np.zeros((int(feature_map_height), int(feature_map_width), 1), dtype=np.float32)
 
         bbox = label['bbox'][0]
         bbox_count = bbox.size(dim=0)
@@ -145,14 +138,14 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             #             (int(input_box_x + input_box_width), int(input_box_y + input_box_height)), red, 3)
 
             ##Fitting into input image size (Based on feature image)
-            feature_box_width = bbox[box_index][2] / color_image_width * feature_map_width
-            feature_box_height = bbox[box_index][3] / color_image_height * feature_map_height
-            feature_box_x = bbox[box_index][0] / color_image_width * feature_map_width + feature_box_width/2
-            feature_box_y = bbox[box_index][1] / color_image_height * feature_map_height + feature_box_height/2
+            feature_box_width = bbox[box_index][2].item() / color_image_width * feature_map_width
+            feature_box_height = bbox[box_index][3].item() / color_image_height * feature_map_height
+            feature_box_x = bbox[box_index][0].item() / color_image_width * feature_map_width + feature_box_width/2
+            feature_box_y = bbox[box_index][1].item() / color_image_height * feature_map_height + feature_box_height/2
 
             ##Clamping x,y
-            clamp_feature_box_x = np.clip(feature_box_x, 0, feature_map_width)
-            clamp_feature_box_y = np.clip(feature_box_y, 0, feature_map_height)
+            clamp_feature_box_x = int(feature_box_x)
+            clamp_feature_box_y = int(feature_box_y)
 
             ##Calculating offset x, y
             feature_box_offset_x = feature_box_x - clamp_feature_box_x
@@ -197,9 +190,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
     return (image_batch, image_size_list, bbox_list, box_count, gaussian_map_batch, size_map_batch, offset_map_batch)
 
 
-
-def batch_accuracy(batch_size,
-                   input_image_width,
+def batch_accuracy(input_image_width,
                    input_image_height,
                    scale_factor,
                    score_threshold,
@@ -214,54 +205,71 @@ def batch_accuracy(batch_size,
     feature_image_height = int(input_image_height / scale_factor)
     average_accuracy = 0
 
+    prediction_box_batch_result_list = []
+    prediction_box_batch_list = []
 
-
+    batch_size = gaussian_map_batch.size(0)
     for batch_index in range(batch_size):
         prediction_box_list = []
-
         gaussian_map = gaussian_map_batch[batch_index]
         size_map = size_map_batch[batch_index]
         offset_map = offset_map_batch[batch_index]
         image_size = image_size_list[batch_index]
-        bbox = bbox_list[batch_index]
+
 
         ## Box extraction from feature map
         for feature_y in range(feature_image_height):
             for feature_x in range(feature_image_width):
-                if gaussian_map[0, feature_y, feature_x] > score_threshold:
-                    bbox_score = gaussian_map[0, feature_y, feature_x].item()
-                    offset_x = offset_map[0, feature_y, feature_x]
-                    offset_y = offset_map[1, feature_y, feature_x]
+                if gaussian_map[0, feature_y, feature_x].item() > score_threshold:
+                    #bbox_score = gaussian_map[0, feature_y, feature_x].item()
+                    offset_x = offset_map[0, feature_y, feature_x].item()
+                    offset_y = offset_map[1, feature_y, feature_x].item()
                     final_box_x = (feature_x + offset_x) / feature_image_width * input_image_width
                     final_box_y = (feature_y + offset_y) / feature_image_height * input_image_height
-                    final_box_width = size_map[0, feature_y, feature_x]
-                    final_box_height = size_map[1, feature_y, feature_x]
-                    prediction_box_list.append([final_box_x, final_box_y, final_box_width, final_box_height])
+                    final_box_width = size_map[0, feature_y, feature_x].item()
+                    final_box_height = size_map[1, feature_y, feature_x].item()
+                    probability = gaussian_map[0, feature_y, feature_x].item()
+                    if final_box_width != 0 or final_box_height != 0:
+                        prediction_box_list.append((probability, final_box_x, final_box_y, final_box_width, final_box_height))
 
-        total_bbox = len(bbox)
-        for bbox_index in range(bbox):
-            bbox_x = bbox[bbox_index][0] ##x
-            bbox_y = bbox[bbox_index][1] ##y
-            bbox_width = bbox[bbox_index][2] ##width
-            bbox_height = bbox[bbox_index][3] ##height
+        prediction_box_batch_list.append(prediction_box_list)
 
-            for prediction_box_index in range(prediction_box_list):
-                prediction_box_x = prediction_box_list[prediction_box_index][0]
-                prediction_box_y = prediction_box_list[prediction_box_index][1]
-                prediction_box_width = prediction_box_list[prediction_box_index][2]
-                prediction_box_height = prediction_box_list[prediction_box_index][3]
-                if bbox_iou(bbox_x, bbox_y, bbox_width, bbox_height,
-                            prediction_box_x, prediction_box_y, prediction_box_width, prediction_box_height) > iou_threshold:
-                    average_accuracy += (1 / total_bbox / batch_size);
-
-    return average_accuracy
+    prediction_box_batch_length = len(prediction_box_batch_list)
+    if prediction_box_batch_length == 0:
+        return
 
 
 
+    bbox_batch_size = len(bbox_list)
+    for batch_index in range(bbox_batch_size):
+        prediction_box_list = []
+        box_size = len(bbox_list[batch_index])
+        for box_index in range(box_size):
+            bbox_x = bbox_list[batch_index][box_index][0] / image_size[0] * input_image_width
+            bbox_y = bbox_list[batch_index][box_index][1] / image_size[1] * input_image_height
+            bbox_width = bbox_list[batch_index][box_index][2] / image_size[0] * input_image_width
+            bbox_height = bbox_list[batch_index][box_index][3] / image_size[1] * input_image_height
+
+            prediction_box_size = len(prediction_box_batch_list[batch_index])
+            for prediction_box_index in range(prediction_box_size):
+                prediction_probability = prediction_box_batch_list[batch_index][prediction_box_index][0]
+                prediction_box_x = prediction_box_batch_list[batch_index][prediction_box_index][1]
+                prediction_box_y = prediction_box_batch_list[batch_index][prediction_box_index][2]
+                prediction_box_width = prediction_box_batch_list[batch_index][prediction_box_index][3]
+                prediction_box_height = prediction_box_batch_list[batch_index][prediction_box_index][4]
+                if BOX_IOU(bbox_x, bbox_y, bbox_width, bbox_height, prediction_box_x, prediction_box_y, prediction_box_width, prediction_box_height) > iou_threshold:
+                    average_accuracy += (1 / bbox_batch_size / batch_size)
+                    prediction_box_list.append((prediction_probability, prediction_box_x, prediction_box_y, prediction_box_width, prediction_box_height))
+        prediction_box_batch_result_list.append(prediction_box_list)
+
+    return (average_accuracy, prediction_box_batch_result_list)
 
 
-def bbox_iou(boxA_x, boxA_y, boxA_width, boxA_height,
-             boxB_x, boxB_y, boxB_width, boxB_height):
+
+
+
+def BOX_IOU(boxA_x, boxA_y, boxA_width, boxA_height,
+            boxB_x, boxB_y, boxB_width, boxB_height):
 
     center_cordinate_boxA_sx = boxA_x
     center_cordinate_boxA_sy = boxA_y
@@ -274,10 +282,10 @@ def bbox_iou(boxA_x, boxA_y, boxA_width, boxA_height,
     center_cordinate_boxB_ey = boxB_y + boxB_height
 
     # determine the (x, y)-coordinates of the intersection rectangle
-    x1 = max(center_cordinate_boxA_sx, center_cordinate_boxB_sx)
-    y1 = max(center_cordinate_boxA_sy, center_cordinate_boxB_sy)
-    x2 = min(center_cordinate_boxA_ex, center_cordinate_boxB_ex)
-    y2 = min(center_cordinate_boxA_ey, center_cordinate_boxB_ey)
+    x1 = max(center_cordinate_boxA_sx, center_cordinate_boxB_sx)    #SX
+    y1 = max(center_cordinate_boxA_sy, center_cordinate_boxB_sy)    #SY
+    x2 = min(center_cordinate_boxA_ex, center_cordinate_boxB_ex)    #EX
+    y2 = min(center_cordinate_boxA_ey, center_cordinate_boxB_ey)    #EY
 
     # compute the area of intersection rectangle
     interArea = max(0, x2 - x1 + 1) * max(0, y2 - y1 + 1)
