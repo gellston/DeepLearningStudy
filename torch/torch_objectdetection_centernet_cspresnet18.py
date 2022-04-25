@@ -37,7 +37,7 @@ accuracy_threshold = 0.5
 input_image_width = 512
 input_image_height = 512
 feature_map_scale_factor = 4
-pretrained = True
+pretrained = False
 ## Hyper parameter
 
 
@@ -106,14 +106,12 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
                              input_image_height,
                              feature_map_scale_factor,
                              device,
-                             isNorm=True)
+                             isNorm=False)
         label_image = batch[0]          #Original Image
-        label_image_size = batch[1]     #Original Image Size
-        label_bbox = batch[2]           #BBox Info
-        label_bbox_count = batch[3]     #BBox Count
-        label_heatmap = batch[4]        #Gaussian Heatmap
-        label_sizemap = batch[5]        #Size Map
-        label_offsetmap = batch[6]      #Offset Map
+        label_bbox = batch[1]           #BBox Info
+        label_heatmap = batch[2]        #Gaussian Heatmap
+        label_sizemap = batch[3]        #Size Map
+        label_offsetmap = batch[4]      #Offset Map
 
         gpu_label_image = label_image.to(device)
         gpu_label_heatmap = label_heatmap.to(device)
@@ -141,10 +139,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         avg_cost += (cost / total_batch)
         optimizer.step()
 
-        #print('prediction_size_map count=', torch.sum(prediction_sizemap > 0).item())
-        #print('prediction_offsetmap count=', torch.sum(prediction_offsetmap > 0).item())
-
-
+        """
         validation = batch_accuracy(input_image_width=input_image_width,
                                     input_image_height=input_image_height,
                                     scale_factor=feature_map_scale_factor,
@@ -153,14 +148,13 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
                                     gaussian_map_batch=prediction_heatmap,
                                     size_map_batch=prediction_sizemap,
                                     offset_map_batch=prediction_offsetmap,
-                                    image_size_list=label_image_size,
                                     bbox_list=label_bbox)
         accuracy = validation[0]
         prediction_result = validation[1]
         avg_acc += (accuracy / total_batch)
-        
-
+       
         print('batch accuracy=', accuracy)
+        """
 
         heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
         cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
@@ -176,9 +170,17 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 
         input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy()
-        input_image = input_image * 255
+        input_image = input_image
         input_image = input_image.astype(np.uint8)
         input_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
+        ##BBox Visualization
+        for bbox in label_bbox[0]:
+            bbox_x = int(bbox[0])
+            bbox_y = int(bbox[1])
+            bbox_width = int(bbox[2])
+            bbox_height = int(bbox[3])
+            cv2.rectangle(input_image, (bbox_x, bbox_y), (bbox_x + bbox_width, bbox_y + bbox_height), (255, 0, 0))
+        ##BBox Visualization
         cv2.namedWindow("input", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('input', input_image_width, input_image_height)
         cv2.imshow('input', input_image)

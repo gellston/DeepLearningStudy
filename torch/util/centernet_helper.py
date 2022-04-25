@@ -78,23 +78,18 @@ def generate_heatmap(heatmap, center_x, center_y, bboxes_h, bboxes_w):
 
 def batch_loader(loader, batch_size, input_width, input_height, feature_map_scale, device, isNorm=True):
 
-
     image_list = []
     size_map_list = []
     offset_map_list = []
     gaussian_map_list = []
-    bbox_list = []
+    resized_bbox_list = []
     image_size_list = []
-
 
     feature_map_width = input_width / feature_map_scale
     feature_map_height = input_height / feature_map_scale
 
-
     tensorTransform = transforms.ToTensor()
-
-
-    temp_batch_size = batch_size
+    temp_batch_size = 0
 
     #box counting for normalization
     box_count = 0
@@ -110,12 +105,6 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
 
         image_list.append(resized_color_image)
         image_size_list.append((color_image_width, color_image_height))
-        """
-        ##opencv
-        torch_image = resized_color_image.squeeze() * 255
-        opencv_image = torch_image.numpy().transpose(1, 2, 0).astype(np.uint8).copy()
-        opencv_image = cv2.cvtColor(opencv_image, cv2.COLOR_RGB2BGR)
-        """
 
         size_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
         offset_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
@@ -123,25 +112,20 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
 
         bbox = label['bbox'][0]
         bbox_count = bbox.size(dim=0)
-        bbox_list.append(bbox)
+        bbox_list = []
         for box_index in range(bbox_count):
-            box_count = box_count+1
-            ##Fitting into input image size (Based on input image) Confirmed
-            input_box_x = bbox[box_index][0] / color_image_width * input_width
-            input_box_y = bbox[box_index][1] / color_image_height * input_height
-            input_box_width = bbox[box_index][2] / color_image_width * input_width
-            input_box_height = bbox[box_index][3] / color_image_height * input_height
-            ##Fitting into input image size (Based on input image) Confirmed
-
-            #red = (0, 0, 255)
-            #cv2.rectangle(opencv_image, (int(input_box_x), int(input_box_y)),
-            #             (int(input_box_x + input_box_width), int(input_box_y + input_box_height)), red, 3)
-
             ##Fitting into input image size (Based on feature image)
             feature_box_width = bbox[box_index][2].item() / color_image_width * feature_map_width
             feature_box_height = bbox[box_index][3].item() / color_image_height * feature_map_height
             feature_box_x = bbox[box_index][0].item() / color_image_width * feature_map_width + feature_box_width/2
             feature_box_y = bbox[box_index][1].item() / color_image_height * feature_map_height + feature_box_height/2
+
+            input_image_box_width = bbox[box_index][2].item() / color_image_width * input_width
+            input_image_box_height = bbox[box_index][3].item() / color_image_height * input_height
+            input_image_box_x = bbox[box_index][0].item() / color_image_width * input_width
+            input_image_box_y = bbox[box_index][1].item() / color_image_height * input_height
+
+            bbox_list.append((input_image_box_x, input_image_box_y, input_image_box_width, input_image_box_height))
 
             ##Clamping x,y
             clamp_feature_box_x = np.clip(feature_box_x, 0, feature_map_width)
@@ -150,39 +134,42 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             clamp_feature_box_y = int(clamp_feature_box_y)
 
 
+            assign_area_min_x = (int)(clamp_feature_box_x) - 1
+            assign_area_max_x = (int)(clamp_feature_box_x) + 1
+            assign_area_min_y = (int)(clamp_feature_box_y) - 1
+            assign_area_max_y = (int)(clamp_feature_box_y) + 1
+
+            assign_area_min_x = (int)(np.clip(assign_area_min_x, 0, feature_map_width))
+            assign_area_max_x = (int)(np.clip(assign_area_max_x, 0, feature_map_width))
+            assign_area_min_y = (int)(np.clip(assign_area_min_y, 0, feature_map_height))
+            assign_area_max_y = (int)(np.clip(assign_area_max_y, 0, feature_map_height))
+
+
             ##Calculating offset x, y
             feature_box_offset_x = feature_box_x - clamp_feature_box_x
             feature_box_offset_y = feature_box_y - clamp_feature_box_y
 
             ##Fill Size Map
-            size_map[0][0][int(clamp_feature_box_y-1)][int(clamp_feature_box_x-1)] = input_box_width
-            size_map[0][1][int(clamp_feature_box_y-1)][int(clamp_feature_box_x-1)] = input_box_height
+            size_map[0][0][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_width
+            size_map[0][1][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_height
 
             ##Fill Offset Map
-            offset_map[0][0][int(clamp_feature_box_y-1)][int(clamp_feature_box_x-1)] = feature_box_offset_x
-            offset_map[0][1][int(clamp_feature_box_y-1)][int(clamp_feature_box_x-1)] = feature_box_offset_y
+            offset_map[0][0][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_offset_x
+            offset_map[0][1][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_offset_y
 
             ##Gaussian Map
             generate_heatmap(gaussian_map[:, :, 0], clamp_feature_box_x, clamp_feature_box_y, feature_box_height, feature_box_width)
             ##Gaussian Map
 
-
-        ##opencv
-        """
-        resized_gaussian_map = cv2.resize(gaussian_map[:, :, 0], dsize=(input_width, input_height), interpolation=cv2.INTER_AREA)
-        cv2.imshow('gaussian map', resized_gaussian_map)
-        cv2.imshow('rect visualizaiton', opencv_image)
-        cv2.waitKey(100)
-        """
-
+        resized_bbox_list.append(bbox_list)
 
         gaussian_map_tensor = tensorTransform(gaussian_map).unsqueeze(dim=0)
         size_map_list.append(size_map)
         offset_map_list.append(offset_map)
         gaussian_map_list.append(gaussian_map_tensor)
 
-        temp_batch_size = temp_batch_size-1
-        if temp_batch_size == 0:
+        temp_batch_size = temp_batch_size+1
+        if temp_batch_size == batch_size:
             break
 
     image_batch = torch.cat(image_list, dim=0).to(device)
@@ -190,7 +177,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
     size_map_batch = torch.cat(size_map_list, dim=0).to(device)
     offset_map_batch = torch.cat(offset_map_list, dim=0).to(device)
 
-    return (image_batch, image_size_list, bbox_list, box_count, gaussian_map_batch, size_map_batch, offset_map_batch)
+    return (image_batch, resized_bbox_list, gaussian_map_batch, size_map_batch, offset_map_batch)
 
 
 def batch_accuracy(input_image_width,
@@ -201,7 +188,6 @@ def batch_accuracy(input_image_width,
                    gaussian_map_batch,
                    size_map_batch,
                    offset_map_batch,
-                   image_size_list,
                    bbox_list):
 
     feature_image_width = int(input_image_width / scale_factor)
@@ -217,22 +203,19 @@ def batch_accuracy(input_image_width,
         gaussian_map = gaussian_map_batch[batch_index]
         size_map = size_map_batch[batch_index]
         offset_map = offset_map_batch[batch_index]
-        image_size = image_size_list[batch_index]
-
 
         ## Box extraction from feature map
         for feature_y in range(feature_image_height):
             for feature_x in range(feature_image_width):
                 if gaussian_map[0, feature_y, feature_x].item() > score_threshold:
-                    #bbox_score = gaussian_map[0, feature_y, feature_x].item()
                     offset_x = offset_map[0, feature_y, feature_x].item()
                     offset_y = offset_map[1, feature_y, feature_x].item()
                     final_box_x = (feature_x + offset_x) / feature_image_width * input_image_width
                     final_box_y = (feature_y + offset_y) / feature_image_height * input_image_height
-                    final_box_width = size_map[0, feature_y, feature_x].item()
-                    final_box_height = size_map[1, feature_y, feature_x].item()
+                    final_box_width = size_map[0, feature_y, feature_x].item() / feature_image_width * input_image_width
+                    final_box_height = size_map[1, feature_y, feature_x].item() / feature_image_height * input_image_height
                     probability = gaussian_map[0, feature_y, feature_x].item()
-                    if final_box_width != 0 or final_box_height != 0:
+                    if final_box_width != 0 and final_box_height != 0:
                         prediction_box_list.append((probability, final_box_x, final_box_y, final_box_width, final_box_height))
 
         prediction_box_batch_list.append(prediction_box_list)
@@ -241,33 +224,30 @@ def batch_accuracy(input_image_width,
     if prediction_box_batch_length == 0:
         return
 
-
-
-    bbox_batch_size = len(bbox_list)
-    for batch_index in range(bbox_batch_size):
+    for batch_index in range(batch_size):
         prediction_box_list = []
-        box_size = len(bbox_list[batch_index])
-        for box_index in range(box_size):
-            bbox_x = bbox_list[batch_index][box_index][0] / image_size[0] * input_image_width
-            bbox_y = bbox_list[batch_index][box_index][1] / image_size[1] * input_image_height
-            bbox_width = bbox_list[batch_index][box_index][2] / image_size[0] * input_image_width
-            bbox_height = bbox_list[batch_index][box_index][3] / image_size[1] * input_image_height
+        one_batch_box_count = len(bbox_list[batch_index])
+        for bbox in bbox_list[batch_index]:
+            bbox_x = bbox[0]
+            bbox_y = bbox[1]
+            bbox_width = bbox[2]
+            bbox_height = bbox[3]
 
-            prediction_box_size = len(prediction_box_batch_list[batch_index])
-            for prediction_box_index in range(prediction_box_size):
-                prediction_probability = prediction_box_batch_list[batch_index][prediction_box_index][0]
-                prediction_box_x = prediction_box_batch_list[batch_index][prediction_box_index][1]
-                prediction_box_y = prediction_box_batch_list[batch_index][prediction_box_index][2]
-                prediction_box_width = prediction_box_batch_list[batch_index][prediction_box_index][3]
-                prediction_box_height = prediction_box_batch_list[batch_index][prediction_box_index][4]
-                if BOX_IOU(bbox_x, bbox_y, bbox_width, bbox_height, prediction_box_x, prediction_box_y, prediction_box_width, prediction_box_height) > iou_threshold:
-                    average_accuracy += (1 / bbox_batch_size / batch_size)
-                    prediction_box_list.append((prediction_probability, prediction_box_x, prediction_box_y, prediction_box_width, prediction_box_height))
+            for prediction_box in prediction_box_batch_list[batch_index]:
+                prediction_probability = prediction_box[0]
+                prediction_box_x = prediction_box[1]
+                prediction_box_y = prediction_box[2]
+                prediction_box_width = prediction_box[3]
+                prediction_box_height = prediction_box[4]
+                if BOX_IOU(bbox_x, bbox_y, bbox_width, bbox_height, prediction_box_x, prediction_box_y,
+                           prediction_box_width, prediction_box_height) > iou_threshold:
+                    average_accuracy += (1 / one_batch_box_count / batch_size)
+                    prediction_box_list.append((prediction_probability, prediction_box_x, prediction_box_y,
+                                                prediction_box_width, prediction_box_height))
+
         prediction_box_batch_result_list.append(prediction_box_list)
 
     return (average_accuracy, prediction_box_batch_result_list)
-
-
 
 
 
