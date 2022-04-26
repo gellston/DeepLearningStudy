@@ -11,6 +11,7 @@ from torch.optim.lr_scheduler import CyclicLR
 from util.centernet_helper import batch_loader
 from util.centernet_helper import batch_accuracy
 from util.losses import CenterNetLoss
+from util.scheduler import WarmupConstantSchedule
 
 from model.CSPResnet18 import CSPResnet18
 from model.CSPResnet18CenterNet import CSPResnet18CenterNet
@@ -32,7 +33,7 @@ if device == 'cuda':
 training_epochs = 300
 batch_size = 22
 target_accuracy = 0.90
-learning_rate = 0.0001
+learning_rate = 0.00025
 accuracy_threshold = 0.5
 input_image_width = 512
 input_image_height = 512
@@ -89,9 +90,10 @@ print('total batch=', total_batch)
 
 CSPResnet18CenterNet.train()
 criterion = CenterNetLoss(alpha=1, gamma=1, beta=0.1)
-optimizer = torch.optim.SGD(CSPResnet18CenterNet.parameters(), lr=learning_rate, weight_decay=1e-6, momentum=0.9)
-scheduler = CyclicLR(optimizer, base_lr=learning_rate, max_lr=0.05, step_size_up=30, mode='triangular2')
-
+#optimizer = torch.optim.SGD(CSPResnet18CenterNet.parameters(), lr=learning_rate, weight_decay=1e-6, momentum=0.9)
+optimizer = torch.optim.Adam(CSPResnet18CenterNet.parameters(), lr=learning_rate, weight_decay=1e-6)
+#scheduler = CyclicLR(optimizer, base_lr=learning_rate, max_lr=0.05, step_size_up=30, mode='triangular2')
+#scheduler = WarmupConstantSchedule(optimizer, warmup_steps=3)
 
 
 print("object detection training start")
@@ -143,7 +145,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         validation = batch_accuracy(input_image_width=input_image_width,
                                     input_image_height=input_image_height,
                                     scale_factor=feature_map_scale_factor,
-                                    score_threshold=0.5,
+                                    score_threshold=0.3,
                                     iou_threshold=0.5,
                                     gaussian_map_batch=prediction_heatmap,
                                     size_map_batch=prediction_sizemap,
@@ -152,9 +154,9 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         accuracy = validation[0]
         prediction_result = validation[1]
         avg_acc += (accuracy / total_batch)
-       
         print('batch accuracy=', accuracy)
         """
+
 
         heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
         cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
@@ -201,8 +203,8 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         accuracy = correct_prediction.float().mean()
         avg_acc += (accuracy / total_batch)
         """
-    #Scheduler step
-    scheduler.step()
+
+    #scheduler.step()
 
     print("학습중간에 저장")
     ## no Train Model Save
