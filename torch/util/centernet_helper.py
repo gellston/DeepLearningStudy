@@ -128,21 +128,10 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             bbox_list.append((input_image_box_x, input_image_box_y, input_image_box_width, input_image_box_height))
 
             ##Clamping x,y
-            clamp_feature_box_x = np.clip(feature_box_x, 0, feature_map_width)
-            clamp_feature_box_y = np.clip(feature_box_y, 0, feature_map_height)
+            clamp_feature_box_x = np.clip(feature_box_x, 0, feature_map_width-1)
+            clamp_feature_box_y = np.clip(feature_box_y, 0, feature_map_height-1)
             clamp_feature_box_x = int(clamp_feature_box_x)
             clamp_feature_box_y = int(clamp_feature_box_y)
-
-
-            assign_area_min_x = (int)(clamp_feature_box_x) - 1
-            assign_area_max_x = (int)(clamp_feature_box_x) + 1
-            assign_area_min_y = (int)(clamp_feature_box_y) - 1
-            assign_area_max_y = (int)(clamp_feature_box_y) + 1
-
-            assign_area_min_x = (int)(np.clip(assign_area_min_x, 0, feature_map_width))
-            assign_area_max_x = (int)(np.clip(assign_area_max_x, 0, feature_map_width))
-            assign_area_min_y = (int)(np.clip(assign_area_min_y, 0, feature_map_height))
-            assign_area_max_y = (int)(np.clip(assign_area_max_y, 0, feature_map_height))
 
 
             ##Calculating offset x, y
@@ -150,12 +139,12 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             feature_box_offset_y = feature_box_y - clamp_feature_box_y
 
             ##Fill Size Map
-            size_map[0][0][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_width
-            size_map[0][1][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_height
+            size_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = feature_box_width
+            size_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = feature_box_height
 
             ##Fill Offset Map
-            offset_map[0][0][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_offset_x
-            offset_map[0][1][assign_area_min_y:assign_area_max_y][assign_area_min_x:assign_area_max_x] = feature_box_offset_y
+            offset_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = feature_box_offset_x
+            offset_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = feature_box_offset_y
 
             ##Gaussian Map
             generate_heatmap(gaussian_map[:, :, 0], clamp_feature_box_x, clamp_feature_box_y, feature_box_height, feature_box_width)
@@ -210,10 +199,11 @@ def batch_accuracy(input_image_width,
                 if gaussian_map[0, feature_y, feature_x].item() > score_threshold:
                     offset_x = offset_map[0, feature_y, feature_x].item()
                     offset_y = offset_map[1, feature_y, feature_x].item()
-                    final_box_x = (feature_x + offset_x) / feature_image_width * input_image_width
-                    final_box_y = (feature_y + offset_y) / feature_image_height * input_image_height
                     final_box_width = size_map[0, feature_y, feature_x].item() / feature_image_width * input_image_width
                     final_box_height = size_map[1, feature_y, feature_x].item() / feature_image_height * input_image_height
+                    final_box_x = (feature_x + offset_x) / feature_image_width * input_image_width - final_box_width / 2
+                    final_box_y = (feature_y + offset_y) / feature_image_height * input_image_height - final_box_height / 2
+
                     probability = gaussian_map[0, feature_y, feature_x].item()
                     if final_box_width != 0 and final_box_height != 0:
                         prediction_box_list.append((probability, final_box_x, final_box_y, final_box_width, final_box_height))

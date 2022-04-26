@@ -26,7 +26,7 @@ print("cudnn version:{}".format(torch.backends.cudnn.version()))
 training_epochs = 100
 batch_size = 100
 learning_rate = 0.0001
-target_accuracy = 0.98
+target_accuracy = 0.90
 
 
 # MNIST dataset

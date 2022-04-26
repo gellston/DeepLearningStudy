@@ -267,11 +267,7 @@ class CenterNetLoss(torch.nn.Module):
         self.alpha = alpha
         self.gamma = gamma
         self.beta = beta
-
         self.focal_loss = modified_focal_loss
-        self.size_loss = reg_l1_loss
-        self.offset_loss = reg_l1_loss
-
 
     def forward(self, prediction_features,  ##sigmoid focal loss함수에서 sigmoid를 쒸우기때문에 sigmoid없는 feature map 입력
                       prediction_sizemap,
@@ -280,9 +276,15 @@ class CenterNetLoss(torch.nn.Module):
                       label_sizemap,
                       label_offsetmap):
 
-
+        size_num = torch.sum((label_sizemap > 0)).item()
         sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
-        sum_size_loss = self.size_loss(prediction_sizemap, label_sizemap) * self.beta
-        sum_offset_loss = self.offset_loss(prediction_offsetmap, label_offsetmap) * self.gamma
+        sum_size_loss = F.smooth_l1_loss(prediction_sizemap,
+                                         label_sizemap,
+                                         reduction='sum',
+                                         beta=1.0) / size_num * self.beta
+        sum_offset_loss = F.smooth_l1_loss(prediction_offsetmap,
+                                           label_offsetmap,
+                                           reduction='sum',
+                                           beta=1.0) / size_num * self.gamma
 
         return sum_class_loss + sum_size_loss + sum_offset_loss
