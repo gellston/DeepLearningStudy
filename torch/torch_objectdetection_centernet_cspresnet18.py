@@ -213,7 +213,6 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     print('학습중간에 저장')
 
     print('total_batch = ', total_batch)
-    print('current learning rate=', optimizer.param_groups[0]['lr'])
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     if avg_acc > accuracy_threshold:
         break;
