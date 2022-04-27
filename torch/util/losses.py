@@ -110,7 +110,7 @@ def dice_loss(logits, true, eps=1e-7):
     return (1 - dice_loss)
 
 
-def jaccard_loss(true, logits, eps=1e-7):
+def jaccard_loss(logits, true, eps=1e-7):
     """Computes the Jaccard loss, a.k.a the IoU loss.
     Note that PyTorch optimizers minimize a loss. In this
     case, we would like to maximize the jaccard loss so we
@@ -276,8 +276,12 @@ class CenterNetLoss(torch.nn.Module):
                       label_sizemap,
                       label_offsetmap):
 
-        size_num = torch.sum((label_sizemap > 0)).item()
+
         sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
+        sum_size_loss = reg_l1_loss(prediction_sizemap, label_sizemap)
+        sum_offset_loss = reg_l1_loss(prediction_offsetmap, label_offsetmap)
+        iou_loss = jaccard_loss(prediction_features, (label_heatmap > 0.0).float().long())
+        """
         sum_size_loss = F.smooth_l1_loss(prediction_sizemap,
                                          label_sizemap,
                                          reduction='sum',
@@ -286,5 +290,5 @@ class CenterNetLoss(torch.nn.Module):
                                            label_offsetmap,
                                            reduction='sum',
                                            beta=1.0) / size_num * self.gamma
-
-        return sum_class_loss + sum_size_loss + sum_offset_loss
+        """
+        return sum_class_loss + sum_size_loss + sum_offset_loss + iou_loss

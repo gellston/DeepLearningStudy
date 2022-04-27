@@ -234,6 +234,7 @@ def batch_accuracy(input_image_width,
                     average_accuracy += (1 / one_batch_box_count / batch_size)
                     prediction_box_list.append((prediction_probability, prediction_box_x, prediction_box_y,
                                                 prediction_box_width, prediction_box_height))
+                    break;
 
         prediction_box_batch_result_list.append(prediction_box_list)
 

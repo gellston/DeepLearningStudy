@@ -31,15 +31,16 @@ if device == 'cuda':
 ## Hyper parameter
 training_epochs = 300
 batch_size = 22
-target_accuracy = 0.90
-learning_rate = 0.00005
-accuracy_threshold = 0.5
-class_score_threshold = 0.3,
-iou_threshold = 0.5,
+target_accuracy = 0.80
+learning_rate = 0.003
+accuracy_threshold = 0.7
+class_score_threshold = 0.5
+iou_threshold = 0.5
 input_image_width = 512
 input_image_height = 512
 feature_map_scale_factor = 4
-pretrained = False
+pretrained = True
+validation_check = True
 ## Hyper parameter
 
 
@@ -87,15 +88,16 @@ print('total batch=', total_batch)
 
 CSPResnet18CenterNet.train()
 criterion = CenterNetLoss(alpha=1, gamma=1, beta=0.1)
-optimizer = torch.optim.SGD(CSPResnet18CenterNet.parameters(), lr=learning_rate, weight_decay=1e-6, momentum=0.9)
-scheduler = CyclicLR(optimizer, base_lr=learning_rate, max_lr=0.05, step_size_up=10, mode='triangular2')
+#optimizer = torch.optim.SGD(CSPResnet18CenterNet.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(CSPResnet18CenterNet.parameters(), lr=learning_rate, amsgrad=True)
+#scheduler = CyclicLR(optimizer, base_lr=learning_rate, max_lr=0.05, step_size_up=10, mode='triangular2')
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
     avg_acc = 0
 
 
-    print('current learning rate =',  scheduler.get_last_lr())
+    #print('current learning rate =',  scheduler.get_last_lr())
     for batch_index in range(total_batch):
         batch = batch_loader(object_detection_data_loader,
                              batch_size,
@@ -137,21 +139,21 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         optimizer.step()
 
 
-        """
-        validation = batch_accuracy(input_image_width=input_image_width,
-                                    input_image_height=input_image_height,
-                                    scale_factor=feature_map_scale_factor,
-                                    score_threshold=class_score_threshold,
-                                    iou_threshold=iou_threshold,
-                                    gaussian_map_batch=prediction_heatmap,
-                                    size_map_batch=prediction_sizemap,
-                                    offset_map_batch=prediction_offsetmap,
-                                    bbox_list=label_bbox)
-        accuracy = validation[0]
-        prediction_result = validation[1]
-        avg_acc += (accuracy / total_batch)
-        print('batch accuracy=', accuracy)
-        """
+        if validation_check == True:
+            validation = batch_accuracy(input_image_width=input_image_width,
+                                        input_image_height=input_image_height,
+                                        scale_factor=feature_map_scale_factor,
+                                        score_threshold=class_score_threshold,
+                                        iou_threshold=iou_threshold,
+                                        gaussian_map_batch=prediction_heatmap,
+                                        size_map_batch=prediction_sizemap,
+                                        offset_map_batch=prediction_offsetmap,
+                                        bbox_list=label_bbox)
+            accuracy = validation[0]
+            prediction_result = validation[1]
+            avg_acc += (accuracy / total_batch)
+            print('batch accuracy=', accuracy)
+
 
 
         heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
@@ -199,7 +201,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         accuracy = correct_prediction.float().mean()
         avg_acc += (accuracy / total_batch)
         """
-    scheduler.step()
+    #scheduler.step()
 
     print("학습중간에 저장")
     ## no Train Model Save
