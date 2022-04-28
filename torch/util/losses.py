@@ -276,7 +276,6 @@ class CenterNetLoss(torch.nn.Module):
                       label_sizemap,
                       label_offsetmap):
 
-
         sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
         sum_size_loss = reg_l1_loss(prediction_sizemap, label_sizemap)
         sum_offset_loss = reg_l1_loss(prediction_offsetmap, label_offsetmap)

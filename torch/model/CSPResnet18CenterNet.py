@@ -26,35 +26,35 @@ class CSPResnet18CenterNet(torch.nn.Module):
 
         ##Feature Pyramid Network
         self.feature_extraction1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
-                                                                       out_channels=256,
+                                                                       out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation())  # 16x16
 
         self.feature_extraction2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=128,
-                                                                       out_channels=256,
+                                                                       out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation()) #32x32
 
         self.feature_extraction3 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=64,
-                                                                       out_channels=256,
+                                                                       out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation()) #64x64
 
         self.feature_extraction4 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=64,
-                                                                       out_channels=256,
+                                                                       out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation()) #128x128
 
 
@@ -63,35 +63,35 @@ class CSPResnet18CenterNet(torch.nn.Module):
         self.up_sample3 = torch.nn.UpsamplingBilinear2d(scale_factor=2)
 
 
-        self.feature_final_conv1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
-                                                                       out_channels=256,
+        self.feature_final_conv1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
+                                                                       out_channels=24,
                                                                        kernel_size=3,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation()) #16x16
 
 
-        self.feature_final_conv2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
-                                                                       out_channels=256,
+        self.feature_final_conv2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
+                                                                       out_channels=24,
                                                                        kernel_size=3,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation()) #32x32
 
-        self.feature_final_conv3 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
-                                                                       out_channels=256,
+        self.feature_final_conv3 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
+                                                                       out_channels=24,
                                                                        kernel_size=3,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(256),
+                                                       torch.nn.BatchNorm2d(24),
                                                        activation()) #64x64
         ##Feature Pyramid Network
 
 
         ##PredictionMap
-        self.class_heatmap = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
+        self.class_heatmap = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                                  out_channels=64,
                                                                  kernel_size=3,
                                                                  bias=False,
@@ -104,7 +104,7 @@ class CSPResnet18CenterNet(torch.nn.Module):
                                                                  bias=True,
                                                                  padding='same'))
 
-        self.size_map = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
+        self.size_map = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                             out_channels=64,
                                                             kernel_size=3,
                                                             bias=False,
@@ -118,7 +118,7 @@ class CSPResnet18CenterNet(torch.nn.Module):
                                                             padding='same'),
                                             torch.nn.ReLU())
 
-        self.offset_map = torch.nn.Sequential(torch.nn.Conv2d(in_channels=256,
+        self.offset_map = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                               out_channels=64,
                                                               kernel_size=3,
                                                               bias=False,

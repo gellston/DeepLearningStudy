@@ -29,18 +29,17 @@ if device == 'cuda':
 
 
 ## Hyper parameter
-training_epochs = 300
+training_epochs = 160
 batch_size = 22
-target_accuracy = 0.80
 learning_rate = 0.003
-accuracy_threshold = 0.7
+accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
-input_image_width = 512
-input_image_height = 512
+input_image_width = 640
+input_image_height = 640
 feature_map_scale_factor = 4
-pretrained = True
-validation_check = True
+pretrained = False
+validation_check = False
 ## Hyper parameter
 
 
@@ -48,20 +47,20 @@ validation_check = True
 #Model Setting
 CSPResnet18 = CSPResnet18(class_num=1, activation=torch.nn.SiLU).to(device)
 print('==== model info ====')
-summary(CSPResnet18, (3, 512, 512))
+summary(CSPResnet18, (3, 640, 640))
 print('====================')
 CSPResnet18CenterNet = CSPResnet18CenterNet(backbone=CSPResnet18,
                                             activation=torch.nn.SiLU,
                                             pretrained=False).to(device)
 if pretrained == True:
-    CSPResnet18CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPResnet18CenterNetBackBone).pt")
+    CSPResnet18CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CustomCSPResnet18CenterNetBackBone).pt")
     CSPResnet18.load_state_dict(CSPResnet18CenterNetBackBoneWeight.state_dict())
-    CSPResnet18CenterNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPResnet18CenterNet).pt")
+    CSPResnet18CenterNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CustomCSPResnet18CenterNet).pt")
     CSPResnet18CenterNet.load_state_dict(CSPResnet18CenterNetWeight.state_dict())
 
 
 print('==== model info ====')
-summary(CSPResnet18CenterNet, (3, 512, 512))
+summary(CSPResnet18CenterNet, (3, 640, 640))
 print('====================')
 #Model Setting
 
@@ -208,9 +207,9 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     CSPResnet18CenterNet.eval()
     CSPResnet18.eval()
     compiled_model_backbone = torch.jit.script(CSPResnet18)
-    torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPResnet18CenterNetBackBone).pt")
+    torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CustomCSPResnet18CenterNetBackBone).pt")
     compiled_model_head = torch.jit.script(CSPResnet18CenterNet)
-    torch.jit.save(compiled_model_head, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPResnet18CenterNet).pt")
+    torch.jit.save(compiled_model_head, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CustomCSPResnet18CenterNet).pt")
     ## no Train Model Save
     print('학습중간에 저장')
 
@@ -224,9 +223,9 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 CSPResnet18CenterNet.eval()
 CSPResnet18.eval()
 compiled_model_backbone = torch.jit.script(CSPResnet18)
-torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPResnet18CenterNetBackBone).pt")
+torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CustomCSPResnet18CenterNetBackBone).pt")
 compiled_model = torch.jit.script(CSPResnet18CenterNet)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPResnet18CenterNet).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CustomCSPResnet18CenterNet).pt")
 ## no Train Model Save
 
 print('Learning finished')
