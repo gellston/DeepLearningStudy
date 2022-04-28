@@ -38,7 +38,7 @@ iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
-pretrained = False
+pretrained = True
 validation_check = False
 ## Hyper parameter
 
