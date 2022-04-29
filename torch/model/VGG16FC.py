@@ -5,8 +5,12 @@ class VGG16FC(torch.nn.Module):
 
     def __init__(self, class_num=5):
         super(VGG16FC, self).__init__()
+
         self.drop_rate = 0.3
         self.class_num = class_num
+
+
+
 
         self.layer1 = torch.nn.Sequential(torch.nn.Conv2d(3, 64, kernel_size=3, stride=1, padding='same'),
                                           torch.nn.BatchNorm2d(64),
@@ -17,8 +21,8 @@ class VGG16FC(torch.nn.Module):
                                           torch.nn.MaxPool2d(kernel_size=2, stride=2))
 
         self.layer2 = torch.nn.Sequential(torch.nn.Conv2d(64, 128, kernel_size=3, stride=1, padding='same'),
-                                          torch.nn.BatchNorm2d(128),
                                           torch.nn.ReLU(),
+                                          torch.nn.BatchNorm2d(128),
                                           torch.nn.Conv2d(128, 128, kernel_size=3, stride=1, padding='same'),
                                           torch.nn.BatchNorm2d(128),
                                           torch.nn.ReLU(),
