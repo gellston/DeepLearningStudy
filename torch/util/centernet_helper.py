@@ -241,6 +241,61 @@ def batch_accuracy(input_image_width,
     return (average_accuracy, prediction_box_batch_result_list)
 
 
+def batch_prediction_loader(loader, batch_size, input_width, input_height, device, isNorm=True):
+    image_list = []
+    temp_batch_size = 0
+    for image, label in loader:
+        resized_color_image = ttf.resize(image, size=(input_width, input_height))
+        if isNorm == False:
+            resized_color_image = resized_color_image * 255
+        image_list.append(resized_color_image)
+        temp_batch_size = temp_batch_size+1
+        if temp_batch_size == batch_size:
+            break
+    image_batch = torch.cat(image_list, dim=0).to(device)
+    return image_batch
+
+
+def batch_box_extractor(input_image_width,
+                       input_image_height,
+                       scale_factor,
+                       score_threshold,
+                       gaussian_map_batch,
+                       size_map_batch,
+                       offset_map_batch):
+
+    feature_image_width = int(input_image_width / scale_factor)
+    feature_image_height = int(input_image_height / scale_factor)
+    prediction_box_batch_list = []
+
+    batch_size = gaussian_map_batch.size(0)
+    for batch_index in range(batch_size):
+        prediction_box_list = []
+        gaussian_map = gaussian_map_batch[batch_index]
+        size_map = size_map_batch[batch_index]
+        offset_map = offset_map_batch[batch_index]
+
+        ## Box extraction from feature map
+        for feature_y in range(feature_image_height):
+            for feature_x in range(feature_image_width):
+                if gaussian_map[0, feature_y, feature_x].item() > score_threshold:
+                    offset_x = offset_map[0, feature_y, feature_x].item()
+                    offset_y = offset_map[1, feature_y, feature_x].item()
+                    final_box_width = size_map[0, feature_y, feature_x].item() / feature_image_width * input_image_width
+                    final_box_height = size_map[1, feature_y, feature_x].item() / feature_image_height * input_image_height
+                    final_box_x = (feature_x + offset_x) / feature_image_width * input_image_width - final_box_width / 2
+                    final_box_y = (feature_y + offset_y) / feature_image_height * input_image_height - final_box_height / 2
+
+                    if final_box_width != 0 and final_box_height != 0:
+                        prediction_box_list.append((final_box_x, final_box_y, final_box_width, final_box_height))
+
+        prediction_box_batch_list.append(prediction_box_list)
+
+    prediction_box_batch_length = len(prediction_box_batch_list)
+    if prediction_box_batch_length == 0:
+        return
+
+    return prediction_box_batch_list
 
 def BOX_IOU(boxA_x, boxA_y, boxA_width, boxA_height,
             boxB_x, boxB_y, boxB_width, boxB_height):
