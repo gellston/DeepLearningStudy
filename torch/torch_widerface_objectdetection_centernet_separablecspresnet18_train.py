@@ -30,7 +30,7 @@ if device == 'cuda':
 ## Hyper parameter
 training_epochs = 160
 batch_size = 15
-learning_rate = 0.003
+learning_rate = 0.0005
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
