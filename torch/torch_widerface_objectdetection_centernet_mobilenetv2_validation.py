@@ -27,7 +27,7 @@ if device == 'cuda':
 
 
 ## Hyper parameter
-batch_size = 5
+batch_size = 2
 accuracy_threshold = 0.85
 class_score_threshold = 0.3
 iou_threshold = 0.5
@@ -46,7 +46,7 @@ summary(MobileNetV2, (3, 640, 640))
 print('====================')
 MobileNetV2CenterNet = MobileNetV2CenterNet(backbone=MobileNetV2,
                                             activation=torch.nn.ReLU,
-                                            pretrained=False).to(device)
+                                            pretrained=True).to(device)
 
 MobileNetV2BackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
 MobileNetV2.load_state_dict(MobileNetV2BackBoneWeight.state_dict())

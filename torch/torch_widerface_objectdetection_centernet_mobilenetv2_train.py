@@ -50,7 +50,7 @@ summary(MobileNetV2, (3, 640, 640))
 print('====================')
 MobileNetV2CenterNet = MobileNetV2CenterNet(backbone=MobileNetV2,
                                             activation=torch.nn.ReLU,
-                                            pretrained=False).to(device)
+                                            pretrained=True).to(device)
 if pretrained == True:
     MobileNetV2CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
     MobileNetV2.load_state_dict(MobileNetV2CenterNetBackBoneWeight.state_dict())
