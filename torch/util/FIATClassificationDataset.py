@@ -67,6 +67,8 @@ class FIATClassificationDataset(Dataset):
 
             image = cv2.imread(imageFile, flags=isOpencvColor)
             image = cv2.resize(image, dsize=(self.label_width, self.label_height), interpolation=cv2.INTER_AREA)
+            if self.isColor == False:
+                image = np.expand_dims(image, axis=2)
             image = image.transpose(2, 0, 1)  # (H, W, CH) -> (CH, H, W)
             image = np.ascontiguousarray(image)
             x = torch.tensor(image, dtype=torch.float32)

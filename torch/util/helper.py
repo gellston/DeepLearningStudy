@@ -502,7 +502,9 @@ class CSPInvertedBottleNect(torch.nn.Module):
 
         self.dim_equalizer = torch.nn.Conv2d(in_channels=self.part1_chnls,
                                              out_channels=self.part1_out_chnls,
-                                             kernel_size=1)
+                                             kernel_size=1,
+                                             stride=self.stride)
+
 
     def forward(self, x):
 
@@ -517,7 +519,7 @@ class CSPInvertedBottleNect(torch.nn.Module):
         if self.stride != 2 and self.in_channels == self.out_channels:
             out = out + part2
 
-        if self.part1_channels != self.part1_out_chnls:
+        if self.part1_chnls != self.part1_out_chnls:
             part1 = self.dim_equalizer(part1)
 
         out = torch.cat((part1, out), 1)
