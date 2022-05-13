@@ -3,10 +3,10 @@ import torch.nn.functional as F
 from util.helper import CSPInvertedBottleNect
 
 
-class MobileNetV2(torch.nn.Module):
+class CSPMobileNetV2(torch.nn.Module):
 
     def __init__(self, class_num=5, activation=torch.nn.ReLU6):
-        super(MobileNetV2, self).__init__()
+        super(CSPMobileNetV2, self).__init__()
 
         self.class_num = class_num
 
