@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import random
 import torchvision
+import gc
 
 from ptflops import get_model_complexity_info
 from torchsummary import summary
@@ -30,7 +31,7 @@ target_accuracy = 0.70
 learning_rate = 0.0001
 num_class = 1000
 save_step_batch_size = 100
-skip_batch_count = 40600
+skip_batch_count = 137300
 pretrained = True
 ## Hyper parameter
 
@@ -126,8 +127,10 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
             model.eval()
             compiled_model = torch.jit.script(model)
             torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(CSPMobileNetV2).pt")
+            gc.collect()
             ## no Train Model Save
         print('current batch=', current_batch)
+
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     if avg_acc > target_accuracy:

@@ -269,8 +269,8 @@ class DenseBlock(torch.nn.Module):
                                     droprate=droprate,
                                     activation=activation)
             self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
-
         self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
+
 
     def forward(self, x):
         x = self.dense_block(x)
@@ -528,3 +528,185 @@ class CSPInvertedBottleNect(torch.nn.Module):
         out = torch.cat((part1, out), 1)
 
         return out
+
+
+class SEBlock(torch.nn.Module):
+    def __init__(self, in_channels, reduction_ratio=16, activation=torch.nn.ReLU):
+        super().__init__()
+        self.squeeze = torch.nn.AdaptiveAvgPool2d((1, 1))
+        self.excitation = torch.nn.Sequential(
+            torch.nn.Linear(in_channels, in_channels//reduction_ratio),
+            activation(),
+            torch.nn.Linear(in_channels//reduction_ratio, in_channels),
+            torch.nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        x = self.squeeze(x)
+        x = x.view(x.size(0), -1)
+        x = self.excitation(x)
+        x = x.view(x.size(0), x.size(1), 1, 1)
+        return x
+
+
+class SESeparableConv2d(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False):
+        super(SESeparableConv2d, self).__init__()
+
+        self.depthwise = torch.nn.Conv2d(in_channels,
+                                         in_channels,
+                                         kernel_size=kernel_size,
+                                         groups=in_channels,
+                                         bias=bias,
+                                         stride=stride,
+                                         padding=padding)
+
+        self.pointwise = torch.nn.Conv2d(in_channels,
+                                         out_channels,
+                                         kernel_size=1,
+                                         bias=bias)
+
+        self.seblock = SEBlock(in_channels=out_channels)
+
+    def forward(self, x):
+        out = self.depthwise(x)
+        out = self.pointwise(out)
+        out = self.seblock(out) * out
+        return out
+
+class SESeparableActivationConv2d(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU):
+        super(SESeparableActivationConv2d, self).__init__()
+
+        self.depthwise = torch.nn.Conv2d(in_channels,
+                                         in_channels,
+                                         kernel_size=kernel_size,
+                                         groups=in_channels,
+                                         bias=bias,
+                                         stride=stride,
+                                         padding=padding)
+
+        self.pointwise = torch.nn.Conv2d(in_channels,
+                                         out_channels,
+                                         kernel_size=1,
+                                         bias=bias)
+
+        self.bn1 = torch.nn.BatchNorm2d(in_channels)
+        self.activation1 = activation()
+
+        self.bn2 = torch.nn.BatchNorm2d(out_channels)
+        self.activation2 = activation()
+
+        self.seblock = SEBlock(in_channels=out_channels, activation=activation)
+
+
+    def forward(self, x):
+        out = self.depthwise(x)
+        out = self.bn1(out)
+        out = self.activation1(out)
+        out = self.pointwise(out)
+        out = self.bn2(out)
+        out = self.activation2(out)
+        out = self.seblock(out) * out
+        return out
+
+
+class SEInvertedBottleNect(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, expansion_rate=4, stride=1, activation=torch.nn.ReLU6):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.expansion_rate = expansion_rate
+        self.stride = stride
+
+        self.expansion_out = int(self.in_channels * self.expansion_rate)
+
+        self.conv_expansion = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
+                                                                  in_channels=self.in_channels,
+                                                                  out_channels=self.expansion_out,
+                                                                  bias=False,
+                                                                  stride=self.stride),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.conv_depthwise = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=3,
+                                                                  in_channels=self.expansion_out,
+                                                                  out_channels=self.expansion_out,
+                                                                  groups=self.expansion_out,
+                                                                  bias=False,
+                                                                  padding=1,
+                                                                  stride=1),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.conv_projection = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
+                                                                   in_channels=self.expansion_out,
+                                                                   out_channels=self.out_channels,
+                                                                   bias=False),
+                                                   torch.nn.BatchNorm2d(self.out_channels))
+
+        self.seblock = SEBlock(in_channels=self.out_channels, activation=activation)
+
+
+    def forward(self, x):
+        out = self.conv_expansion(x)
+        out = self.conv_depthwise(out)
+        out = self.conv_projection(out)
+        out = self.seblock(out) * out
+        if self.stride != 2 and self.in_channels == self.out_channels:
+            out = out + x
+        return out
+
+
+
+class SEDenseBottleNeck(torch.nn.Module):
+    def __init__(self, in_channels, growth_rate=32, expansion_rate=4, droprate=0.2, activation=torch.nn.ReLU):
+        super().__init__()
+
+        inner_channels = expansion_rate * growth_rate           ##expansion_size=32*4
+        self.droprate = droprate
+
+        self.residual = torch.nn.Sequential(
+            torch.nn.BatchNorm2d(in_channels),                  ##ex:128
+            activation(),
+            torch.nn.Conv2d(in_channels, inner_channels, 1, stride=1, padding=0, bias=False),##32*4 #expansion layer
+            torch.nn.BatchNorm2d(inner_channels),
+            activation(),
+            torch.nn.Conv2d(inner_channels, growth_rate, 3, stride=1, padding=1, bias=False) ##32
+        )
+        self.seblock = SEBlock(in_channels=inner_channels, activation=activation)
+        self.shortcut = torch.nn.Sequential()
+
+    def forward(self, x):
+        #output = F.dropout(self.residual(x), p=self.droprate, inplace=False, training=self.training)
+        residual = self.residual(x)
+        x = self.seblock(residual)
+        x = torch.cat([self.shortcut(x), residual], 1)
+        return x
+
+
+
+class SEDenseBlock(torch.nn.Module):
+
+    def __init__(self, num_input_features, num_layers, expansion_rate, growth_rate, droprate, activation=torch.nn.ReLU):
+        super(SEDenseBlock, self).__init__()
+
+        self.dense_block = torch.nn.Sequential()
+        self.droprate = droprate
+
+        for i in range(num_layers):
+            layer = SEDenseBottleNeck(in_channels=num_input_features + i * growth_rate,
+                                      growth_rate=growth_rate,
+                                      expansion_rate=expansion_rate,
+                                      droprate=droprate,
+                                      activation=activation)
+            self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
+        #self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
+
+
+    def forward(self, x):
+        x = self.dense_block(x)
+        #x = self.spatial_dropout(x)
+        #if self.droprate > 0:
+            #x = F.dropout(x, p=self.droprate, inplace=False, training=self.training)
+        return x
