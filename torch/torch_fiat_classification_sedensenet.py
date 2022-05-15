@@ -26,15 +26,16 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 40
-batch_size = 5
-target_accuracy = 0.99
-learning_rate = 0.0003
+batch_size = 90
+target_accuracy = 0.999
+learning_rate = 0.0001
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
 model = SEDenseNet(class_num=4,
-                   block_config=(6, 12, 24, 16),
+                   #Custom config, originally (6, 12, 24, 16)
+                   block_config=(3, 4, 8, 6),
                    expansion_rate=4,                       ##Bottleneck exansion size
                    growth_rate=12,
                    activation=torch.nn.SiLU).to(device)

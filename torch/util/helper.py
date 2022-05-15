@@ -141,6 +141,7 @@ class DenseBottleNeck(torch.nn.Module):
         return torch.cat([self.shortcut(x), self.residual(x)], 1)
 
 
+
 class ResidualBottleNeck(torch.nn.Module):
     def __init__(self, in_channels, inner_channels, out_channels, stride=1, activation=torch.nn.ReLU):
         super().__init__()
@@ -248,9 +249,6 @@ class Transition(torch.nn.Module):
 
     def forward(self, x):
         output = self.down_sample(x)
-        #output = self.spatial_dropout(output)
-        #if self.droprate > 0:
-        #    output = F.dropout(output, p=self.droprate, inplace=False, training=self.training)
         return output
 
 
@@ -658,31 +656,24 @@ class SEInvertedBottleNect(torch.nn.Module):
         return out
 
 
-
 class SEDenseBottleNeck(torch.nn.Module):
     def __init__(self, in_channels, growth_rate=32, expansion_rate=4, droprate=0.2, activation=torch.nn.ReLU):
         super().__init__()
 
-        inner_channels = expansion_rate * growth_rate           ##expansion_size=32*4
+        inner_channels = expansion_rate * growth_rate  ##expansion_size=32*4
         self.droprate = droprate
 
         self.residual = torch.nn.Sequential(
-            torch.nn.BatchNorm2d(in_channels),                  ##ex:128
-            activation(),
-            torch.nn.Conv2d(in_channels, inner_channels, 1, stride=1, padding=0, bias=False),##32*4 #expansion layer
+            torch.nn.Conv2d(in_channels, inner_channels, 1, stride=1, padding=0, bias=False),  ##32*4 #expansion layer
             torch.nn.BatchNorm2d(inner_channels),
             activation(),
-            torch.nn.Conv2d(inner_channels, growth_rate, 3, stride=1, padding=1, bias=False) ##32
+            torch.nn.Conv2d(inner_channels, growth_rate, 3, stride=1, padding=1, bias=False),  ##32
+            torch.nn.BatchNorm2d(growth_rate),
+            activation(),
         )
-        self.seblock = SEBlock(in_channels=inner_channels, activation=activation)
-        self.shortcut = torch.nn.Sequential()
 
     def forward(self, x):
-        #output = F.dropout(self.residual(x), p=self.droprate, inplace=False, training=self.training)
-        residual = self.residual(x)
-        x = self.seblock(residual)
-        x = torch.cat([self.shortcut(x), residual], 1)
-        return x
+        return torch.cat([x, self.residual(x)], 1)
 
 
 
@@ -701,12 +692,21 @@ class SEDenseBlock(torch.nn.Module):
                                       droprate=droprate,
                                       activation=activation)
             self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
-        #self.spatial_dropout = torch.nn.Dropout2d(p=self.droprate)
+        self.seblock = SEBlock(in_channels=num_input_features + num_layers * growth_rate)
 
 
     def forward(self, x):
         x = self.dense_block(x)
-        #x = self.spatial_dropout(x)
-        #if self.droprate > 0:
-            #x = F.dropout(x, p=self.droprate, inplace=False, training=self.training)
+        x = self.seblock(x) * x
         return x
+
+class NCTransition(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.down_sample = torch.nn.Sequential(
+            torch.nn.AvgPool2d(2, stride=2)
+        )
+
+    def forward(self, x):
+        output = self.down_sample(x)
+        return output

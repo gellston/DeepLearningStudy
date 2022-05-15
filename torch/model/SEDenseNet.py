@@ -1,6 +1,6 @@
 import torch
-from util.helper import DenseBlock
-from util.helper import Transition
+from util.helper import NCTransition
+from util.helper import SEDenseBlock
 
 class SEDenseNet(torch.nn.Module):
 
@@ -16,43 +16,46 @@ class SEDenseNet(torch.nn.Module):
 
         self.conv1 = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=3,
+                            out_channels=32,
+                            kernel_size=3,
+                            stride=2,
+                            padding=1,
+                            bias=False),
+            torch.nn.BatchNorm2d(num_features=32),
+            activation(),
+            torch.nn.Conv2d(in_channels=32,
                             out_channels=growth_rate * 2,
                             kernel_size=3,
                             stride=2,
                             padding=1,
-                            bias=False)
+                            bias=False),
+            torch.nn.BatchNorm2d(num_features=growth_rate * 2),
+            activation(),
         )
 
         self.features = torch.nn.Sequential()
 
         inner_channels = growth_rate * 2
         for i, num_layers in enumerate(block_config):
-            block = DenseBlock(num_input_features=inner_channels,
-                               num_layers=num_layers,
-                               expansion_rate=self.expansion_rate,
-                               growth_rate=self.growth_rate,
-                               droprate=droprate,
-                               activation=activation)
+            block = SEDenseBlock(num_input_features=inner_channels,
+                                 num_layers=num_layers,
+                                 expansion_rate=self.expansion_rate,
+                                 growth_rate=self.growth_rate,
+                                 droprate=droprate,
+                                 activation=activation)
 
             self.features.add_module("denseblock_%d" % (i+1), block)
             inner_channels = inner_channels + num_layers * growth_rate
 
             if i != len(block_config) - 1:
-                transition = Transition(in_channels=inner_channels,
-                                        out_channels=int(inner_channels / 2),
-                                        droprate=droprate,
-                                        activation=activation)
+                transition = NCTransition()
                 self.features.add_module("transition_%d" % (i + 1), transition)
-                inner_channels = int(inner_channels / 2)
 
-        self.features.add_module("final_norm", torch.nn.BatchNorm2d(inner_channels))
-        self.features.add_module("final_relu", activation())
         self.class_conv = torch.nn.Conv2d(in_channels=inner_channels,
                                           out_channels=self.class_num,
                                           kernel_size=3,
-                                          bias=False,
+                                          bias=True,
                                           padding='same')
-        self.final_batch_norm = torch.nn.BatchNorm2d(self.class_num)
         self.global_average_pooling = torch.nn.AdaptiveAvgPool2d(1)
         self.softmax = torch.nn.Softmax(dim=1)
 
@@ -69,7 +72,6 @@ class SEDenseNet(torch.nn.Module):
         x = self.conv1(x)
         x = self.features(x)
         x = self.class_conv(x)
-        x = self.final_batch_norm(x)
         x = self.global_average_pooling(x)
         x = x.view([-1, self.class_num])
         x = self.softmax(x)
