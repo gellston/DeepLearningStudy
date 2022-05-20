@@ -3,6 +3,8 @@ import torch.nn as nn
 import random
 import torchvision
 import gc
+import cv2 as cv2
+import numpy as np
 
 
 from ptflops import get_model_complexity_info
@@ -31,7 +33,7 @@ if device == 'cuda':
 training_epochs = 10
 batch_size = 7
 target_accuracy = 0.90
-learning_rate = 0.0001
+learning_rate = 0.003
 num_class = 1000
 save_step_batch_size = 100
 skip_batch_count = 0
@@ -77,12 +79,13 @@ torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//Image
 
 
 transform = torchvision.transforms.Compose([
-                torchvision.transforms.Grayscale(num_output_channels=3),
+                #torchvision.transforms.Grayscale(num_output_channels=3),
                 torchvision.transforms.Resize((640, 640)),
                 torchvision.transforms.ToTensor()
             ])
 
 classificationDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
+                                                      split='val',
                                                       transform=transform)
 
 # dataset loader
@@ -91,10 +94,7 @@ data_loader = DataLoader(dataset=classificationDataset,
                          shuffle=True,
                          drop_last=True)
 
-#for X, Y in data_loader:
-#    skip_batch_count -= 1
-#    if skip_batch_count == 0:
-#        break
+
 
 model.train()
 criterion = nn.CrossEntropyLoss()
@@ -127,10 +127,6 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
         current_batch += 1
         if current_batch % save_step_batch_size == 0:
-            print('current batch accuracy=', accuracy.item())
-            print('current batch cost=', cost.item())
-            print('avg batch accuracy=', avg_acc.item())
-            print('avg batch cost=', avg_cost.item())
             ## no Train Model Save
             model.eval()
             compiled_model = torch.jit.script(model)
@@ -138,6 +134,10 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
             gc.collect()
             ## no Train Model Save
         print('current batch=', current_batch)
+
+        #input_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        #cv2.imshow('input', input_image)
+        #cv2.waitKey(10)
 
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))

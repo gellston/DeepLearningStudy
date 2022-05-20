@@ -56,5 +56,5 @@ class CSPMobileNetV2(torch.nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.view([-1, self.class_num])
-        x = torch.sigmoid(x)
+        x = torch.softmax(x, dim=1)
         return x
