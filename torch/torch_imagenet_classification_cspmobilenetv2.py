@@ -4,6 +4,7 @@ import random
 import torchvision
 import gc
 
+
 from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
@@ -17,6 +18,7 @@ device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 �
 print("다음 기기로 학습합니다:", device)
 
 
+
 # for reproducibility
 random.seed(777)
 torch.manual_seed(777)
@@ -24,15 +26,16 @@ if device == 'cuda':
     torch.cuda.manual_seed_all(777)
 
 
+
 ## Hyper parameter
-training_epochs = 30
+training_epochs = 10
 batch_size = 7
-target_accuracy = 0.70
+target_accuracy = 0.90
 learning_rate = 0.0001
 num_class = 1000
 save_step_batch_size = 100
-skip_batch_count = 137300
-pretrained = True
+skip_batch_count = 0
+pretrained = False
 ## Hyper parameter
 
 
@@ -55,6 +58,7 @@ def init_weights(m):
     if isinstance(m, nn.Linear):
         torch.nn.init.xavier_uniform(m.weight)
 model.apply(init_weights)
+
 ## no Train Model Save
 
 if pretrained == True:
@@ -87,10 +91,10 @@ data_loader = DataLoader(dataset=classificationDataset,
                          shuffle=True,
                          drop_last=True)
 
-for X, Y in data_loader:
-    skip_batch_count -= 1
-    if skip_batch_count == 0:
-        break
+#for X, Y in data_loader:
+#    skip_batch_count -= 1
+#    if skip_batch_count == 0:
+#        break
 
 model.train()
 criterion = nn.CrossEntropyLoss()
@@ -122,7 +126,11 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         avg_acc += (accuracy / total_batch)
 
         current_batch += 1
-        if current_batch %save_step_batch_size == 0:
+        if current_batch % save_step_batch_size == 0:
+            print('current batch accuracy=', accuracy.item())
+            print('current batch cost=', cost.item())
+            print('avg batch accuracy=', avg_acc.item())
+            print('avg batch cost=', avg_cost.item())
             ## no Train Model Save
             model.eval()
             compiled_model = torch.jit.script(model)
