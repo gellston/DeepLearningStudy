@@ -87,10 +87,6 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     total_batch = len(data_loader)
     print('total_batch = ', total_batch)
     for X, Y in data_loader:
-        if X.size(0) == 1:
-            tempx = torch.cat((X, X, X), 0)
-            X = tempx
-
         gpu_X = X.to(device)
         gpu_Y = Y.to(device)
         gpu_Y = torch.nn.functional.one_hot(gpu_Y, num_classes=257).float()

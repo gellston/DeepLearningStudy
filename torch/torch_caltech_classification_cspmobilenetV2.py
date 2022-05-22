@@ -26,11 +26,10 @@ if device == 'cuda':
 
 
 ## Hyper parameter
-training_epochs = 20
-batch_size = 7
+training_epochs = 100
+batch_size = 10
 target_accuracy = 0.90
-learning_rate = 0.0001
-accuracy_threshold = 0.5
+learning_rate = 0.01
 ## Hyper parameter
 
 
@@ -74,25 +73,29 @@ classificationDataset = torchvision.datasets.Caltech256(root="C://Github//Datase
 # dataset loader
 data_loader = DataLoader(dataset=classificationDataset,
                          batch_size=batch_size,  # 배치 크기는 100
-                         shuffle=False,
+                         shuffle=True,
                          drop_last=True)
+total_batch = len(data_loader)
 
 model.train()
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
+criterion = nn.BCELoss()
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
     avg_acc = 0
-    total_batch = len(data_loader)
+
     print('total_batch = ', total_batch)
-
+    current_batch = 0
     for X, Y in data_loader:
-
-        input_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
-        cv2.imshow('input', input_image)
-        cv2.waitKey(10)
+        current_batch+=1
+        if current_batch % 100 == 0:
+            print('current_batch=', current_batch)
+            ## no Train Model Save
+            model.eval()
+            compiled_model = torch.jit.script(model)
+            torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_CALTECH256(CSPMobileNetV2).pt")
+            ## no Train Model Save
 
         gpu_X = X.to(device)
         gpu_Y = Y.to(device)
@@ -101,12 +104,13 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 
         model.train()
-        optimizer.zero_grad()
         hypothesis = model(gpu_X)
         cost = criterion(hypothesis, gpu_Y)
         cost.backward()
         avg_cost += (cost / total_batch)
         optimizer.step()
+        optimizer.zero_grad()
+
 
         model.eval()
         hypothesis = model(gpu_X)

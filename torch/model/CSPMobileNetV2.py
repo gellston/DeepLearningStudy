@@ -36,7 +36,7 @@ class CSPMobileNetV2(torch.nn.Module):
             CSPInvertedBottleNect(in_channels=160, out_channels=160, expansion_rate=6, stride=1, part_ratio=0.5, activation=torch.nn.ReLU6),
             CSPInvertedBottleNect(in_channels=160, out_channels=160, expansion_rate=6, stride=1, part_ratio=0.5, activation=torch.nn.ReLU6),
             CSPInvertedBottleNect(in_channels=160, out_channels=320, expansion_rate=6, stride=1, part_ratio=0.5, activation=torch.nn.ReLU6),
-            torch.nn.Conv2d(in_channels=320, out_channels=1280, kernel_size=1, stride=1, bias=False),
+            torch.nn.Conv2d(in_channels=320, out_channels=1280, kernel_size=1, stride=1, bias=True),
             torch.nn.AdaptiveAvgPool2d(1),
             torch.nn.Conv2d(in_channels=1280,
                             out_channels=self.class_num,
@@ -45,12 +45,22 @@ class CSPMobileNetV2(torch.nn.Module):
         )
 
         # module 초기화
+        self.initialize_weights()
+
+    def initialize_weights(self):
+        # track all layers
         for m in self.modules():
             if isinstance(m, torch.nn.Conv2d):
-                torch.nn.init.xavier_uniform_(m.weight)
-            elif isinstance(m, torch.nn.BatchNorm2d):  # shifting param이랑 scaling param 초기화(?)
-                m.weight.data.fill_(1)  #
-                m.bias.data.zero_()
+                torch.nn.init.kaiming_uniform_(m.weight)
+                if m.bias is not None:
+                    torch.nn.init.constant_(m.bias, 0)
+            elif isinstance(m, torch.nn.BatchNorm2d):
+                torch.nn.init.constant_(m.weight, 1)
+                torch.nn.init.constant_(m.bias, 0)
+
+            elif isinstance(m, torch.nn.Linear):
+                torch.nn.init.kaiming_uniform_(m.weight)
+                torch.nn.init.constant_(m.bias, 0)
 
 
     def forward(self, x):

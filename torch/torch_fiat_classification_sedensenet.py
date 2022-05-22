@@ -84,7 +84,7 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 
 model.train()
-criterion = nn.CrossEntropyLoss()
+criterion = nn.BCELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 

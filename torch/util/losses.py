@@ -291,3 +291,36 @@ class CenterNetLoss(torch.nn.Module):
                                            beta=1.0) / size_num * self.gamma
         """
         return sum_class_loss + sum_size_loss + sum_offset_loss + iou_loss
+
+
+class CenterNetLossV2(torch.nn.Module):
+    def __init__(self, alpha=1.0, gamma=1.0, beta=0.1):
+        super(CenterNetLossV2, self).__init__()
+
+        self.alpha = alpha
+        self.gamma = gamma
+        self.beta = beta
+        self.focal_loss = modified_focal_loss
+
+    def forward(self, prediction_features,  ##sigmoid focal loss함수에서 sigmoid를 쒸우기때문에 sigmoid없는 feature map 입력
+                      prediction_sizemap,
+                      prediction_offsetmap,
+                      label_heatmap,
+                      label_sizemap,
+                      label_offsetmap):
+
+        sum_class_loss = torchvision.ops.sigmoid_focal_loss(prediction_features, label_heatmap, reduction='mean') * self.alpha
+        sum_size_loss = F.smooth_l1_loss(prediction_sizemap, label_sizemap)
+        sum_offset_loss = F.smooth_l1_loss(prediction_offsetmap, label_offsetmap)
+        #iou_loss = jaccard_loss(prediction_features, (label_heatmap > 0.0).float().long())
+        """
+        sum_size_loss = F.smooth_l1_loss(prediction_sizemap,
+                                         label_sizemap,
+                                         reduction='sum',
+                                         beta=1.0) / size_num * self.beta
+        sum_offset_loss = F.smooth_l1_loss(prediction_offsetmap,
+                                           label_offsetmap,
+                                           reduction='sum',
+                                           beta=1.0) / size_num * self.gamma
+        """
+        return sum_class_loss + sum_size_loss + sum_offset_loss #+ iou_loss
