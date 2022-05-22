@@ -8,7 +8,6 @@ class CSPMobileNetV2CenterNet(torch.nn.Module):
 
     def __init__(self,
                  backbone = CSPMobileNetV2(class_num=257, activation=torch.nn.ReLU6),
-                 activation=torch.nn.ReLU,
                  pretrained=True):
 
         super(CSPMobileNetV2CenterNet, self).__init__()
@@ -29,65 +28,58 @@ class CSPMobileNetV2CenterNet(torch.nn.Module):
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(24),
-                                                       activation())  # 16x16
+                                                       torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                                       torch.nn.ReLU())  # 16x16
 
         self.feature_extraction2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=64,
                                                                        out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(24),
-                                                       activation()) #32x32
+                                                       torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                                       torch.nn.ReLU()) #32x32
 
         self.feature_extraction3 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=32,
                                                                        out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(24),
-                                                       activation()) #64x64
+                                                       torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                                       torch.nn.ReLU()) #64x64
 
         self.feature_extraction4 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                                        out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
                                                                        padding='same'),
-                                                       torch.nn.BatchNorm2d(24),
-                                                       activation()) #128x128
+                                                       torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                                       torch.nn.ReLU()) #128x128
 
 
-        self.up_sample1 = torch.nn.ConvTranspose2d(in_channels=24, out_channels=24, dilation=1, bias=True,
-                                                   kernel_size=2, stride=2)
-        self.up_sample2 = torch.nn.ConvTranspose2d(in_channels=24, out_channels=24, dilation=1, bias=True,
-                                                   kernel_size=2, stride=2)
-        self.up_sample3 = torch.nn.ConvTranspose2d(in_channels=24, out_channels=24, dilation=1, bias=True,
-                                                   kernel_size=2, stride=2)
+        self.up_sample1 = torch.nn.Sequential(torch.nn.ConvTranspose2d(in_channels=24, out_channels=24, bias=False,
+                                                                       kernel_size=2, stride=2),
+                                              torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                              torch.nn.ReLU())
+        self.up_sample2 = torch.nn.Sequential(torch.nn.ConvTranspose2d(in_channels=24, out_channels=24, bias=False,
+                                                                       kernel_size=2, stride=2),
+                                              torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                              torch.nn.ReLU())
+        self.up_sample3 = torch.nn.Sequential(torch.nn.ConvTranspose2d(in_channels=24, out_channels=24, bias=False,
+                                                                       kernel_size=2, stride=2),
+                                              torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
+                                              torch.nn.ReLU())
 
 
 
 
-        self.feature_final1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
+        self.feature_final = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                                  out_channels=24,
                                                                  kernel_size=3,
                                                                  bias=False,
                                                                  padding='same'),
-                                                 torch.nn.BatchNorm2d(24),
-                                                 activation()) #16x16
-        self.feature_final2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
-                                                                 out_channels=24,
-                                                                 kernel_size=3,
-                                                                 bias=False,
-                                                                 padding='same'),
-                                                 torch.nn.BatchNorm2d(24),
-                                                 activation()) #16x16
-        self.feature_final3 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
-                                                                 out_channels=24,
-                                                                 kernel_size=3,
-                                                                 bias=False,
-                                                                 padding='same'),
-                                                 torch.nn.BatchNorm2d(24),
-                                                 activation()) #16x16
+                                                 torch.nn.BatchNorm2d(24, eps=1e-5, momentum=0.99),
+                                                 torch.nn.ReLU()) #16x16
+
         ##Feature Pyramid Network
 
 
@@ -102,15 +94,13 @@ class CSPMobileNetV2CenterNet(torch.nn.Module):
                                                             out_channels=2,
                                                             kernel_size=1,
                                                             bias=True,
-                                                            padding='same'),
-                                            torch.nn.ReLU())
+                                                            padding='same'))
 
         self.offset_map = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                               out_channels=2,
                                                               kernel_size=1,
                                                               bias=True,
-                                                              padding='same'),
-                                              torch.nn.ReLU())
+                                                              padding='same'))
         ##PredictionMap
 
 
@@ -164,13 +154,11 @@ class CSPMobileNetV2CenterNet(torch.nn.Module):
 
         # 32x32x128
         up_sample1 = self.up_sample1(feature1) + feature2
-        final_feature1 = self.feature_final1(up_sample1)
         # 64x64x128
-        up_sample2 = self.up_sample1(final_feature1) + feature3
-        final_feature2 = self.feature_final2(up_sample2)
+        up_sample2 = self.up_sample1(up_sample1) + feature3
         # 128x128x128
-        up_sample3 = self.up_sample1(final_feature2) + feature4
-        final_feature3 = self.feature_final3(up_sample3)
+        up_sample3 = self.up_sample1(up_sample2) + feature4
+        final_feature3 = self.feature_final(up_sample3)
 
         ##Feature Pyramid
         class_feature = self.class_heatmap(final_feature3)

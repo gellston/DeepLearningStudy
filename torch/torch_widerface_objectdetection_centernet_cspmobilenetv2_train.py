@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 from util.centernet_helper import batch_loader
 from util.centernet_helper import batch_accuracy
-from util.losses import CenterNetLossV2
+from util.losses import CenterNetLoss
 
 from model.CSPMobileNetV2 import CSPMobileNetV2
 from model.CSPMobileNetV2CenterNet import CSPMobileNetV2CenterNet
@@ -30,8 +30,8 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 20
-learning_rate = 0.01
+batch_size = 18
+learning_rate = 0.003
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
@@ -39,7 +39,7 @@ input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
 pretrained_centernet = False
-pretrained_backbone = True
+pretrained_backbone = False
 validation_check = False
 ## Hyper parameter
 
@@ -51,11 +51,10 @@ print('==== model info ====')
 summary(CSPMobileNetV2, (3, 640, 640))
 print('====================')
 CSPMobileNetV2CenterNet = CSPMobileNetV2CenterNet(backbone=CSPMobileNetV2,
-                                                  activation=torch.nn.ReLU,
                                                   pretrained=False).to(device)
 
 if pretrained_backbone == True:
-    CSPMobileNetV2CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_CALTECH256(CSPMobileNetV2).pt")
+    CSPMobileNetV2CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPMobileNetV2CenterNetBackBone).pt")
     CSPMobileNetV2.load_state_dict(CSPMobileNetV2CenterNetBackBoneWeight.state_dict())
 
 if pretrained_centernet == True:
@@ -90,7 +89,7 @@ print('total batch=', total_batch)
 
 
 CSPMobileNetV2CenterNet.train()
-criterion = CenterNetLossV2(alpha=1, gamma=1, beta=0.1)
+criterion = CenterNetLoss(alpha=1, gamma=1, beta=0.1)
 optimizer = torch.optim.RAdam(CSPMobileNetV2CenterNet.parameters(), lr=learning_rate)
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
