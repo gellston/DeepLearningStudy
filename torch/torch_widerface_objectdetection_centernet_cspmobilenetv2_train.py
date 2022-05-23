@@ -30,16 +30,16 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 18
-learning_rate = 0.003
+batch_size = 10
+learning_rate = 0.0003
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
-pretrained_centernet = False
-pretrained_backbone = False
+pretrained_centernet = True
+pretrained_backbone = True
 validation_check = False
 ## Hyper parameter
 
