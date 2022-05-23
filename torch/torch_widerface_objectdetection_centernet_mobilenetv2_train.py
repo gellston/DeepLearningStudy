@@ -29,15 +29,15 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 10
-learning_rate = 0.0005
+batch_size = 15
+learning_rate = 0.0003
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
-pretrained = True
+pretrained = False
 validation_check = False
 ## Hyper parameter
 
@@ -86,7 +86,7 @@ print('total batch=', total_batch)
 
 MobileNetV2CenterNet.train()
 criterion = CenterNetLoss(alpha=1, gamma=1, beta=0.1)
-optimizer = torch.optim.Adam(MobileNetV2CenterNet.parameters(), lr=learning_rate, amsgrad=True)
+optimizer = torch.optim.RAdam(MobileNetV2CenterNet.parameters(), lr=learning_rate)
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
