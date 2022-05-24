@@ -8,7 +8,6 @@ class MobileNetV2CenterNet(torch.nn.Module):
 
     def __init__(self,
                  backbone = MobileNetV2(class_num=257, activation=torch.nn.ReLU6),
-                 activation=torch.nn.ReLU,
                  pretrained=True):
 
         super(MobileNetV2CenterNet, self).__init__()
@@ -24,7 +23,7 @@ class MobileNetV2CenterNet(torch.nn.Module):
                 param.requires_grad = True
 
         ##Feature Pyramid Network
-        self.feature_extraction1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=160,
+        self.feature_extraction1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=320,
                                                                        out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
@@ -32,7 +31,7 @@ class MobileNetV2CenterNet(torch.nn.Module):
                                                        torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
                                                        torch.nn.ReLU())  # 16x16
 
-        self.feature_extraction2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=64,
+        self.feature_extraction2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=96,
                                                                        out_channels=24,
                                                                        kernel_size=1,
                                                                        bias=False,
@@ -69,29 +68,13 @@ class MobileNetV2CenterNet(torch.nn.Module):
                                               torch.nn.BatchNorm2d(24, eps=0.001, momentum=0.9),
                                               torch.nn.ReLU())
 
-        self.feature_final1 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
+        self.feature_final = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
                                                                  out_channels=24,
                                                                  kernel_size=3,
                                                                  bias=False,
                                                                  padding='same'),
                                                  torch.nn.BatchNorm2d(24, eps=1e-5, momentum=0.99),
-                                                 torch.nn.ReLU())  # 16x16
-
-        self.feature_final2 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
-                                                                 out_channels=24,
-                                                                 kernel_size=3,
-                                                                 bias=False,
-                                                                 padding='same'),
-                                                 torch.nn.BatchNorm2d(24, eps=1e-5, momentum=0.99),
-                                                 torch.nn.ReLU())  # 16x16
-
-        self.feature_final3 = torch.nn.Sequential(torch.nn.Conv2d(in_channels=24,
-                                                                 out_channels=24,
-                                                                 kernel_size=3,
-                                                                 bias=False,
-                                                                 padding='same'),
-                                                 torch.nn.BatchNorm2d(24, eps=1e-5, momentum=0.99),
-                                                 torch.nn.ReLU())  # 16x16
+                                                 torch.nn.ReLU())
 
         ##Feature Pyramid Network
 
@@ -154,27 +137,29 @@ class MobileNetV2CenterNet(torch.nn.Module):
         conv15 = self.backbone.features[14](conv14)  # 40x40x64,
         conv16 = self.backbone.features[15](conv15)  # 40x40x96,
         conv17 = self.backbone.features[16](conv16)  # 20x20x160
+        conv18 = self.backbone.features[17](conv17)  # 20x20x160
+        conv19 = self.backbone.features[18](conv18)  # 20x20x160
+        conv20 = self.backbone.features[19](conv19)  # 20x20x320
         ##Feature Extraction
 
-        ##Feature Pyramid
-        feature1 = self.feature_extraction1(conv17)  # 20x20x160
-        feature2 = self.feature_extraction2(conv10)  # 40x40x64
-        feature3 = self.feature_extraction3(conv9)  # 80x80x32
-        feature4 = self.feature_extraction4(conv6)  # 160x160x24
 
-        # 32x32x128
+        ##Feature Pyramid
+        feature1 = self.feature_extraction1(conv20)  # 20x20x320  -> 24
+        feature2 = self.feature_extraction2(conv14)  # 20x20x160  -> 24
+        feature3 = self.feature_extraction3(conv7)  # 40x40x64   -> 24
+        feature4 = self.feature_extraction4(conv5)  # 80x80x24    -> 24
+
+
         up_sample1 = self.up_sample1(feature1) + feature2
-        final_feature1 = self.feature_final1(up_sample1)
-        # 64x64x128
-        up_sample2 = self.up_sample1(final_feature1) + feature3
-        final_feature2 = self.feature_final2(up_sample2)
-        # 128x128x128
-        up_sample3 = self.up_sample1(final_feature2) + feature4
-        final_feature3 = self.feature_final3(up_sample3)
-
+        up_sample2 = self.up_sample2(up_sample1) + feature3
+        up_sample3 = self.up_sample3(up_sample2) + feature4
+        final_feature3 = self.feature_final(up_sample3)
         ##Feature Pyramid
+
+        ##Feature Head
         class_feature = self.class_heatmap(final_feature3)
         size_map = self.size_map(final_feature3)
         offset_map = self.offset_map(final_feature3)
+        ##Feature Head
 
         return torch.sigmoid(class_feature), class_feature, size_map, offset_map

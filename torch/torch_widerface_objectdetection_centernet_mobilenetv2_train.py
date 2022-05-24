@@ -1,5 +1,4 @@
 import torch
-import random
 import torchvision
 import numpy as np
 import cv2
@@ -29,7 +28,7 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 15
+batch_size = 7
 learning_rate = 0.0005
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
@@ -49,8 +48,7 @@ print('==== model info ====')
 summary(MobileNetV2, (3, 640, 640))
 print('====================')
 MobileNetV2CenterNet = MobileNetV2CenterNet(backbone=MobileNetV2,
-                                            activation=torch.nn.ReLU,
-                                            pretrained=True).to(device)
+                                            pretrained=False).to(device)
 if pretrained == True:
     MobileNetV2CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
     MobileNetV2.load_state_dict(MobileNetV2CenterNetBackBoneWeight.state_dict())
@@ -158,13 +156,13 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('heatmap', input_image_width, input_image_height)
         cv2.imshow('heatmap', heatmap_image)
-        cv2.waitKey(10)
+
 
         heatmap_label = label_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
         cv2.namedWindow("heatmap_label", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('heatmap_label', input_image_width, input_image_height)
         cv2.imshow('heatmap_label', heatmap_label)
-        cv2.waitKey(10)
+
 
 
         input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy()
@@ -199,7 +197,6 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         accuracy = correct_prediction.float().mean()
         avg_acc += (accuracy / total_batch)
         """
-    #scheduler.step()
 
     print("학습중간에 저장")
     ## no Train Model Save

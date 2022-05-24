@@ -22,24 +22,24 @@ print("다음 기기로 학습합니다:", device)
 
 
 # for reproducibility
-random.seed(777)
-torch.manual_seed(777)
-if device == 'cuda':
-    torch.cuda.manual_seed_all(777)
+#random.seed(777)
+#torch.manual_seed(777)
+#if device == 'cuda':
+#   torch.cuda.manual_seed_all(777)
 
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 17
-learning_rate = 0.0001
+batch_size = 7
+learning_rate = 0.0005
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
-pretrained_centernet = True
-pretrained_backbone = True
+pretrained_centernet = False
+pretrained_backbone = False
 validation_check = False
 ## Hyper parameter
 
@@ -162,13 +162,13 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('heatmap', input_image_width, input_image_height)
         cv2.imshow('heatmap', heatmap_image)
-        cv2.waitKey(10)
+
 
         heatmap_label = label_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
         cv2.namedWindow("heatmap_label", cv2.WINDOW_NORMAL)
         cv2.resizeWindow('heatmap_label', input_image_width, input_image_height)
         cv2.imshow('heatmap_label', heatmap_label)
-        cv2.waitKey(10)
+
 
 
         input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy()
