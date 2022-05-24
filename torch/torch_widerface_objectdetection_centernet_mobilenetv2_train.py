@@ -21,23 +21,23 @@ print("다음 기기로 학습합니다:", device)
 
 
 # for reproducibility
-random.seed(777)
-torch.manual_seed(777)
-if device == 'cuda':
-    torch.cuda.manual_seed_all(777)
+#random.seed(777)
+#torch.manual_seed(777)
+#if device == 'cuda':
+#    torch.cuda.manual_seed_all(777)
 
 
 ## Hyper parameter
 training_epochs = 160
 batch_size = 15
-learning_rate = 0.0003
+learning_rate = 0.0005
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
-pretrained = False
+pretrained = True
 validation_check = False
 ## Hyper parameter
 

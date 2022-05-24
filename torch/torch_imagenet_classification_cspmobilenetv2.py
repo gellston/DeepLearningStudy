@@ -22,10 +22,10 @@ print("다음 기기로 학습합니다:", device)
 
 
 # for reproducibility
-random.seed(777)
-torch.manual_seed(777)
-if device == 'cuda':
-    torch.cuda.manual_seed_all(777)
+#random.seed(777)
+#torch.manual_seed(777)
+#if device == 'cuda':
+#    torch.cuda.manual_seed_all(777)
 
 
 
@@ -85,7 +85,7 @@ transform = torchvision.transforms.Compose([
             ])
 
 classificationDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
-                                                      split='val',
+                                                      split='train',
                                                       transform=transform)
 
 # dataset loader
@@ -97,8 +97,8 @@ data_loader = DataLoader(dataset=classificationDataset,
 
 
 model.train()
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+criterion = nn.BCELoss()
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
     avg_acc = 0
@@ -133,12 +133,17 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
             torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(CSPMobileNetV2).pt")
             gc.collect()
             ## no Train Model Save
-        print('current batch=', current_batch)
+        print('current batch=', current_batch, ', current accuracy=', accuracy.item())
 
         #input_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
         #cv2.imshow('input', input_image)
         #cv2.waitKey(10)
 
+    ## no Train Model Save
+    model.eval()
+    compiled_model = torch.jit.script(model)
+    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(CSPMobileNetV2).pt")
+    ## no Train Model Save
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     if avg_acc > target_accuracy:
