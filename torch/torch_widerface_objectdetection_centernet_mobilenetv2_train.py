@@ -19,16 +19,11 @@ device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 �
 print("다음 기기로 학습합니다:", device)
 
 
-# for reproducibility
-#random.seed(777)
-#torch.manual_seed(777)
-#if device == 'cuda':
-#    torch.cuda.manual_seed_all(777)
-
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 7
+batch_size = 10
+accumulation_steps = 20
 learning_rate = 0.0005
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
@@ -90,8 +85,9 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     avg_cost = 0
     avg_acc = 0
 
-
-    #print('current learning rate =',  scheduler.get_last_lr())
+    MobileNetV2.zero_grad()
+    MobileNetV2CenterNet.zero_grad()
+    optimizer.zero_grad()
     for batch_index in range(total_batch):
         batch = batch_loader(object_detection_data_loader,
                              batch_size,
@@ -114,7 +110,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
         MobileNetV2.train()
         MobileNetV2CenterNet.train()
-        optimizer.zero_grad()
+
 
         prediction = MobileNetV2CenterNet(gpu_label_image)
         prediction_heatmap = prediction[0]
@@ -128,9 +124,16 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
                          gpu_label_heatmap,
                          gpu_label_sizemap,
                          gpu_label_offsetmap)
-        cost.backward()
         avg_cost += (cost / total_batch)
-        optimizer.step()
+        cost = cost / accumulation_steps
+        cost.backward()
+        if (batch_index + 1) % accumulation_steps == 0:
+            optimizer.step()
+            MobileNetV2.zero_grad()
+            MobileNetV2CenterNet.zero_grad()
+            optimizer.zero_grad()
+            print('current batch = ', batch_index, ' accumulated gradient ')
+
 
 
         if validation_check == True:
