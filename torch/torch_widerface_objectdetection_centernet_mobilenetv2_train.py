@@ -22,7 +22,7 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 10
+batch_size = 7
 accumulation_steps = 20
 learning_rate = 0.0005
 accuracy_threshold = 0.85

@@ -10,6 +10,26 @@ def IOU(target, prediction):
     return iou_score
 
 
+def channel_shuffle(x, groups):
+    batchsize, num_channels, height, width = x.data.size()
+
+    channels_per_group = num_channels // groups
+
+    # reshape
+    x = x.view(batchsize, groups,
+               channels_per_group, height, width)
+
+    # transpose
+    # - contiguous() required if transpose() is used before view().
+    #   See https://github.com/pytorch/pytorch/issues/764
+    x = torch.transpose(x, 1, 2).contiguous()
+
+    # flatten
+    x = x.view(batchsize, -1, height, width)
+
+    return x
+
+
 class SeparableConv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False):
         super(SeparableConv2d, self).__init__()
@@ -709,4 +729,54 @@ class NCTransition(torch.nn.Module):
 
     def forward(self, x):
         output = self.down_sample(x)
+        return output
+
+
+
+class ShuffleUnit(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride=1,
+                 groups=3,
+                 grouped_conv=True,
+                 combine='add',
+                 activation=torch.nn.ReLU):
+        super().__init__()
+
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.group_conv = grouped_conv
+        self.groups = groups
+        self.stride = stride
+        self.bottleneck_channels = self.in_channels // 4
+
+
+
+        self.group_compress_convolution = torch.nn.Sequential(
+            torch.nn.Conv2d(kernel_size=1,
+                            in_channels=self.in_channels,
+                            out_channels=self.bottleneck_channels,
+                            groups=self.groups,
+                            bias=False),
+            torch.nn.BatchNorm2d(num_features=self.bottleneck_channels),
+            activation()
+        )
+
+        self.depthwise_conv = torch.nn.Sequential(
+            torch.nn.Conv2d(kernel_size=3,
+                            in_channels=self.bottleneck_channels,
+                            out_channels=self.bottleneck_channels,
+                            stride=self.stride,
+                            padding=1,
+                            groups=self.bottleneck_channels,
+                            bias=False),
+            torch.nn.BatchNorm2d(num_features=self.bottleneck_channels),
+            activation()
+        )
+
+    def forward(self, x):
+        output = self.group_compress_convolution(x)
+        output = channel_shuffle(output, self.groups)
+
         return output
