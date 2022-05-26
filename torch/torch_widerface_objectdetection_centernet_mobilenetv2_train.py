@@ -22,7 +22,7 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 7
+batch_size = 10
 accumulation_steps = 20
 learning_rate = 0.0005
 accuracy_threshold = 0.85
@@ -118,21 +118,22 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         prediction_sizemap = prediction[2]
         prediction_offsetmap = prediction[3]
 
-        cost = criterion(prediction_features,
-                         prediction_sizemap,
-                         prediction_offsetmap,
-                         gpu_label_heatmap,
-                         gpu_label_sizemap,
-                         gpu_label_offsetmap)
-        avg_cost += (cost / total_batch)
-        cost = cost / accumulation_steps
-        cost.backward()
-        if (batch_index + 1) % accumulation_steps == 0:
-            optimizer.step()
-            MobileNetV2.zero_grad()
-            MobileNetV2CenterNet.zero_grad()
-            optimizer.zero_grad()
-            print('current batch = ', batch_index, ' accumulated gradient ')
+        if validation_check == False:
+            cost = criterion(prediction_features,
+                             prediction_sizemap,
+                             prediction_offsetmap,
+                             gpu_label_heatmap,
+                             gpu_label_sizemap,
+                             gpu_label_offsetmap)
+            avg_cost += (cost / total_batch)
+            cost = cost / accumulation_steps
+            cost.backward()
+            if (batch_index + 1) % accumulation_steps == 0:
+                optimizer.step()
+                MobileNetV2.zero_grad()
+                MobileNetV2CenterNet.zero_grad()
+                optimizer.zero_grad()
+                print('current batch = ', batch_index, ' accumulated gradient ')
 
 
 
@@ -201,16 +202,17 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         avg_acc += (accuracy / total_batch)
         """
 
-    print("학습중간에 저장")
-    ## no Train Model Save
-    MobileNetV2CenterNet.eval()
-    MobileNetV2.eval()
-    compiled_model_backbone = torch.jit.script(MobileNetV2)
-    torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
-    compiled_model_head = torch.jit.script(MobileNetV2CenterNet)
-    torch.jit.save(compiled_model_head, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNet).pt")
-    ## no Train Model Save
-    print('학습중간에 저장')
+    if validation_check == False:
+        print("학습중간에 저장")
+        ## no Train Model Save
+        MobileNetV2CenterNet.eval()
+        MobileNetV2.eval()
+        compiled_model_backbone = torch.jit.script(MobileNetV2)
+        torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
+        compiled_model_head = torch.jit.script(MobileNetV2CenterNet)
+        torch.jit.save(compiled_model_head, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNet).pt")
+        ## no Train Model Save
+        print('학습중간에 저장')
 
     print('total_batch = ', total_batch)
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
@@ -218,13 +220,14 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         break;
 
 
-## no Train Model Save
-MobileNetV2CenterNet.eval()
-MobileNetV2.eval()
-compiled_model_backbone = torch.jit.script(MobileNetV2)
-torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
-compiled_model = torch.jit.script(MobileNetV2CenterNet)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNet).pt")
-## no Train Model Save
+if validation_check == False:
+    ## no Train Model Save
+    MobileNetV2CenterNet.eval()
+    MobileNetV2.eval()
+    compiled_model_backbone = torch.jit.script(MobileNetV2)
+    torch.jit.save(compiled_model_backbone, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
+    compiled_model = torch.jit.script(MobileNetV2CenterNet)
+    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNet).pt")
+    ## no Train Model Save
 
 print('Learning finished')
