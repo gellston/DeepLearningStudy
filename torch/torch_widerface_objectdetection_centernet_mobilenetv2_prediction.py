@@ -46,7 +46,6 @@ print('==== model info ====')
 summary(MobileNetV2, (3, 640, 640))
 print('====================')
 MobileNetV2CenterNet = MobileNetV2CenterNet(backbone=MobileNetV2,
-                                            activation=torch.nn.ReLU,
                                             pretrained=False).to(device)
 
 MobileNetV2BackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV2CenterNetBackBone).pt")
@@ -81,11 +80,6 @@ print('total batch=', total_batch)
 
 avg_acc = 0
 for batch_index in range(total_batch):
-
-
-
-
-
 
     input_image = batch_prediction_loader(object_detection_data_loader,
                                          batch_size,
@@ -123,7 +117,8 @@ for batch_index in range(total_batch):
     input_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
     ##BBox Visualization
     for bbox in box_extraction[0]:
-        if len(box_extraction) == 0 : break;
+        if len(box_extraction) == 0:
+            break
         bbox_x = int(bbox[0])
         bbox_y = int(bbox[1])
         bbox_width = int(bbox[2])

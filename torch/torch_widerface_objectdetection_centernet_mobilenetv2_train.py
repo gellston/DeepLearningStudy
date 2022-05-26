@@ -22,7 +22,7 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 10
+batch_size = 1
 accumulation_steps = 20
 learning_rate = 0.0005
 accuracy_threshold = 0.85
@@ -32,7 +32,7 @@ input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
 pretrained = True
-validation_check = False
+validation_check = True
 ## Hyper parameter
 
 
