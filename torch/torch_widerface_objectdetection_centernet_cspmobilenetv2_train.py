@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 from util.centernet_helper import batch_loader
 from util.centernet_helper import batch_accuracy
-from util.losses import CenterNetLoss
+from util.losses import CenterNetLossV2
 
 from model.CSPMobileNetV2 import CSPMobileNetV2
 from model.CSPMobileNetV2CenterNet import CSPMobileNetV2CenterNet
@@ -46,7 +46,7 @@ validation_check = False
 
 
 #Model Setting
-CSPMobileNetV2 = CSPMobileNetV2(class_num=257, activation=torch.nn.ReLU6).to(device)
+CSPMobileNetV2 = CSPMobileNetV2(class_num=1, activation=torch.nn.ReLU6).to(device)
 print('==== model info ====')
 summary(CSPMobileNetV2, (3, 640, 640))
 print('====================')
@@ -89,7 +89,7 @@ print('total batch=', total_batch)
 
 
 CSPMobileNetV2CenterNet.train()
-criterion = CenterNetLoss(alpha=1, gamma=1, beta=0.1)
+criterion = CenterNetLossV2(alpha=1, gamma=1, beta=0.1)
 optimizer = torch.optim.RAdam(CSPMobileNetV2CenterNet.parameters(), lr=learning_rate)
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.

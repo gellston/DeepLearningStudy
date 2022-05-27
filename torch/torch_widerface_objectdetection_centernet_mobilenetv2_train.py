@@ -25,7 +25,7 @@ print("다음 기기로 학습합니다:", device)
 training_epochs = 160
 batch_size = 7
 accumulation_steps = 1
-learning_rate = 0.00005
+learning_rate = 0.000005
 accuracy_threshold = 0.85
 class_score_threshold = 0.3
 iou_threshold = 0.5
@@ -65,7 +65,7 @@ object_detection_transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor()
     ])
 objectDetectionDataset = torchvision.datasets.WIDERFace(root="C://Github//Dataset//",
-                                                        split="val",
+                                                        split="train",
                                                         transform=object_detection_transform,
                                                         download=False)
 object_detection_data_loader = DataLoader(dataset=objectDetectionDataset,

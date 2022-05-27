@@ -312,7 +312,7 @@ class CenterNetLossV2(torch.nn.Module):
         sum_class_loss = torchvision.ops.sigmoid_focal_loss(prediction_features, label_heatmap, reduction='mean') * self.alpha
         sum_size_loss = F.smooth_l1_loss(prediction_sizemap, label_sizemap)
         sum_offset_loss = F.smooth_l1_loss(prediction_offsetmap, label_offsetmap)
-        iou_loss = jaccard_loss(prediction_features, (label_heatmap > 0.5).float().long())
+        #iou_loss = jaccard_loss(prediction_features, (label_heatmap > 0.5).float().long())
         """
         sum_size_loss = F.smooth_l1_loss(prediction_sizemap,
                                          label_sizemap,
@@ -323,4 +323,4 @@ class CenterNetLossV2(torch.nn.Module):
                                            reduction='sum',
                                            beta=1.0) / size_num * self.gamma
         """
-        return sum_class_loss + sum_size_loss + sum_offset_loss + iou_loss
+        return sum_class_loss + sum_size_loss + sum_offset_loss #+ iou_loss
