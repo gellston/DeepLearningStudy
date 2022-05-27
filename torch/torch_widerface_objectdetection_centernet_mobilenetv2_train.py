@@ -2,6 +2,7 @@ import torch
 import torchvision
 import numpy as np
 import cv2
+import gc
 
 from torchsummary import summary
 from torch.utils.data import DataLoader
@@ -22,17 +23,17 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 160
-batch_size = 1
-accumulation_steps = 20
-learning_rate = 0.0005
+batch_size = 7
+accumulation_steps = 1
+learning_rate = 0.00005
 accuracy_threshold = 0.85
-class_score_threshold = 0.5
+class_score_threshold = 0.3
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
 pretrained = True
-validation_check = True
+validation_check = False
 ## Hyper parameter
 
 
@@ -64,7 +65,7 @@ object_detection_transform = torchvision.transforms.Compose([
         torchvision.transforms.ToTensor()
     ])
 objectDetectionDataset = torchvision.datasets.WIDERFace(root="C://Github//Dataset//",
-                                                        split="train",
+                                                        split="val",
                                                         transform=object_detection_transform,
                                                         download=False)
 object_detection_data_loader = DataLoader(dataset=objectDetectionDataset,
@@ -185,7 +186,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         cv2.resizeWindow('input', input_image_width, input_image_height)
         cv2.imshow('input', input_image)
         cv2.waitKey(10)
-
+        gc.collect()
         """
         model.train()
         optimizer.zero_grad()
