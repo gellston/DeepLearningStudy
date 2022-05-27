@@ -21,15 +21,11 @@ device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 �
 print("다음 기기로 학습합니다:", device)
 
 
-# for reproducibility
-#random.seed(777)
-#torch.manual_seed(777)
-#if device == 'cuda':
-#   torch.cuda.manual_seed_all(777)
+
 
 
 ## Hyper parameter
-training_epochs = 160
+training_epochs = 140
 batch_size = 7
 learning_rate = 0.0005
 accuracy_threshold = 0.85
@@ -71,7 +67,6 @@ print('====================')
 
 # object detection dataset loader
 object_detection_transform = torchvision.transforms.Compose([
-        #torchvision.transforms.Grayscale(num_output_channels=3),
         torchvision.transforms.ToTensor()
     ])
 objectDetectionDataset = torchvision.datasets.WIDERFace(root="C://Github//Dataset//",
@@ -87,7 +82,6 @@ print('total batch=', total_batch)
 # object detection dataset loader
 
 
-
 CSPMobileNetV2CenterNet.train()
 criterion = CenterNetLossV2(alpha=1, gamma=1, beta=0.1)
 optimizer = torch.optim.RAdam(CSPMobileNetV2CenterNet.parameters(), lr=learning_rate)
@@ -96,8 +90,11 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     avg_cost = 0
     avg_acc = 0
 
+    if epoch > 90 and epoch < 120:
+        learning_rate = learning_rate / 10
+        for g in optimizer.param_groups:
+            g['lr'] = learning_rate
 
-    #print('current learning rate =',  scheduler.get_last_lr())
     for batch_index in range(total_batch):
         batch = batch_loader(object_detection_data_loader,
                              batch_size,
