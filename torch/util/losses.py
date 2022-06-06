@@ -300,9 +300,11 @@ class CenterNetLossV2(torch.nn.Module):
                       label_offsetmap):
 
 
+        heatmap_num_points = label_heatmap.eq(1).float().sum()
+
         size_mask = (label_sizemap > 0).float()
         coordinate_num_points = torch.sum(size_mask)
-        heatmap_num_points = coordinate_num_points / 2
+
 
         sum_class_loss = torchvision.ops.sigmoid_focal_loss(prediction_features, label_heatmap, reduction='sum') / heatmap_num_points * self.alpha
         sum_size_loss = F.smooth_l1_loss(prediction_sizemap, label_sizemap, reduction='sum') / coordinate_num_points * self.beta

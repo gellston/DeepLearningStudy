@@ -26,17 +26,19 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 140
+current_epoch = 41
 batch_size = 7
 learning_rate = 0.0005
-accuracy_threshold = 0.85
+accuracy_threshold = 0.80
 class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
 feature_map_scale_factor = 4
-pretrained_centernet = False
-pretrained_backbone = False
+pretrained_centernet = True
+pretrained_backbone = True
 validation_check = False
+training_check = False
 ## Hyper parameter
 
 
@@ -86,7 +88,7 @@ CSPMobileNetV2CenterNet.train()
 criterion = CenterNetLossV2(alpha=1, gamma=1, beta=0.1)
 optimizer = torch.optim.RAdam(CSPMobileNetV2CenterNet.parameters(), lr=learning_rate)
 
-for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
+for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
     avg_acc = 0
 
@@ -154,36 +156,37 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
             print('batch accuracy=', accuracy)
 
 
-
-        heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
-        cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('heatmap', input_image_width, input_image_height)
-        cv2.imshow('heatmap', heatmap_image)
-
-
-        heatmap_label = label_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
-        cv2.namedWindow("heatmap_label", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('heatmap_label', input_image_width, input_image_height)
-        cv2.imshow('heatmap_label', heatmap_label)
+        if training_check == True:
+            heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+            cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow('heatmap', input_image_width, input_image_height)
+            cv2.imshow('heatmap', heatmap_image)
 
 
+            heatmap_label = label_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+            cv2.namedWindow("heatmap_label", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow('heatmap_label', input_image_width, input_image_height)
+            cv2.imshow('heatmap_label', heatmap_label)
 
-        input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy()
-        input_image = input_image
-        input_image = input_image.astype(np.uint8)
-        input_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
-        ##BBox Visualization
-        for bbox in label_bbox[0]:
-            bbox_x = int(bbox[0])
-            bbox_y = int(bbox[1])
-            bbox_width = int(bbox[2])
-            bbox_height = int(bbox[3])
-            cv2.rectangle(input_image, (bbox_x, bbox_y), (bbox_x + bbox_width, bbox_y + bbox_height), (255, 0, 0))
-        ##BBox Visualization
-        cv2.namedWindow("input", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('input', input_image_width, input_image_height)
-        cv2.imshow('input', input_image)
-        cv2.waitKey(10)
+
+
+            input_image = label_image[0].detach().permute(1, 2, 0).cpu().numpy()
+            input_image = input_image
+            input_image = input_image.astype(np.uint8)
+            input_image = cv2.cvtColor(input_image, cv2.COLOR_RGB2BGR)
+            ##BBox Visualization
+            for bbox in label_bbox[0]:
+                bbox_x = int(bbox[0])
+                bbox_y = int(bbox[1])
+                bbox_width = int(bbox[2])
+                bbox_height = int(bbox[3])
+                cv2.rectangle(input_image, (bbox_x, bbox_y), (bbox_x + bbox_width, bbox_y + bbox_height), (255, 0, 0))
+            ##BBox Visualization
+            cv2.namedWindow("input", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow('input', input_image_width, input_image_height)
+            cv2.imshow('input', input_image)
+            cv2.waitKey(10)
+
         gc.collect()
 
     print("학습중간에 저장")
