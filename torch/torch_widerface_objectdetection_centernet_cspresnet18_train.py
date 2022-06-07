@@ -28,9 +28,9 @@ if device == 'cuda':
 
 
 ## Hyper parameter
-training_epochs = 160
+training_epochs = 140
 batch_size = 22
-learning_rate = 0.003
+learning_rate = 0.0005
 accuracy_threshold = 0.85
 class_score_threshold = 0.5
 iou_threshold = 0.5
@@ -86,14 +86,16 @@ print('total batch=', total_batch)
 
 CSPResnet18CenterNet.train()
 criterion = CenterNetLoss(alpha=1, gamma=1, beta=0.1)
-#optimizer = torch.optim.SGD(CSPResnet18CenterNet.parameters(), lr=learning_rate)
-optimizer = torch.optim.Adam(CSPResnet18CenterNet.parameters(), lr=learning_rate, amsgrad=True)
-#scheduler = CyclicLR(optimizer, base_lr=learning_rate, max_lr=0.05, step_size_up=10, mode='triangular2')
+optimizer = torch.optim.RAdam(CSPResnet18CenterNet.parameters(), lr=learning_rate, amsgrad=True)
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
     avg_acc = 0
 
+    if epoch > 90 and epoch < 120:
+        learning_rate = learning_rate / 10
+        for g in optimizer.param_groups:
+            g['lr'] = learning_rate
 
     #print('current learning rate =',  scheduler.get_last_lr())
     for batch_index in range(total_batch):
