@@ -26,9 +26,9 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 140
-current_epoch = 93
+current_epoch = 132
 batch_size = 7
-learning_rate = 0.0000005
+learning_rate = 0.00005
 accuracy_threshold = 0.80
 class_score_threshold = 0.5
 iou_threshold = 0.5
@@ -92,7 +92,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
     avg_cost = 0
     avg_acc = 0
 
-    if epoch > 90 and epoch < 120:
+    if epoch == 90 or epoch == 120:
         learning_rate = learning_rate / 10
         print('learning rate configuration = ', learning_rate)
         for g in optimizer.param_groups:
