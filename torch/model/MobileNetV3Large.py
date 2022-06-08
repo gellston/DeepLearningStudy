@@ -62,10 +62,6 @@ class MobileNetV3Large(torch.nn.Module):
                                  kernel_size=3,
                                  activation=torch.nn.Hardswish),
 
-            InvertedBottleNectV3(in_channels=112, expansion_out=480, out_channels=112, stride=1, use_se=True,
-                                 kernel_size=3,
-                                 activation=torch.nn.Hardswish),
-
             InvertedBottleNectV3(in_channels=112, expansion_out=672, out_channels=112, stride=1, use_se=True,
                                  kernel_size=3,
                                  activation=torch.nn.Hardswish),
