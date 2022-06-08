@@ -26,11 +26,11 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 140
-current_epoch = 53
+current_epoch = 107
 batch_size = 8
-learning_rate = 0.0005
+learning_rate = 0.00005
 accuracy_threshold = 0.80
-class_score_threshold = 0.3
+class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
@@ -53,7 +53,7 @@ print('==== model info ====')
 summary(CSPMobileNetV2, (3, 640, 640))
 print('====================')
 CSPMobileNetV2CenterNet = CSPMobileNetV2CenterNet(backbone=CSPMobileNetV2,
-                                                  pretrained=True).to(device)
+                                                  pretrained=False).to(device)
 
 
 
