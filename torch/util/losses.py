@@ -190,67 +190,7 @@ def tversky_loss(true, logits, alpha, beta, eps=1e-7):
 
 
 ####Centernet
-"""
-class CenterNetLoss(torch.nn.Module):
-    def __init__(self, alpha=1.0, gamma=1.0, beta=0.1):
-        super(CenterNetLoss, self).__init__()
 
-        self.alpha = alpha
-        self.gamma = gamma
-        self.beta = beta
-
-        self.size_loss = torch.nn.SmoothL1Loss(reduction='sum')
-        self.offset_loss = torch.nn.SmoothL1Loss(reduction='sum')
-        self.focal_loss = modified_focal_loss
-
-
-    def forward(self, prediction_features,  ##sigmoid focal loss함수에서 sigmoid를 쒸우기때문에 sigmoid없는 feature map 입력
-                      prediction_sizemap,
-                      prediction_offsetmap,
-                      label_heatmap,
-                      label_sizemap,
-                      label_offsetmap,
-                      label_bbox_count):
-
-        #class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
-        class_loss = self.focal_loss(prediction_features, label_heatmap) * self.alpha
-        size_loss = self.size_loss(prediction_sizemap, label_sizemap) / label_bbox_count * self.beta
-        offset_loss = self.offset_loss(prediction_offsetmap, label_offsetmap) / label_bbox_count * self.gamma
-
-        return class_loss + size_loss + offset_loss
-    
-"""
-
-
-"""
-class CenterNetLoss(torch.nn.Module):
-    def __init__(self, alpha=1.0, gamma=1.0, beta=0.1):
-        super(CenterNetLoss, self).__init__()
-
-        self.alpha = alpha
-        self.gamma = gamma
-        self.beta = beta
-
-        self.size_loss = torch.nn.SmoothL1Loss(reduction='sum')
-        self.offset_loss = torch.nn.SmoothL1Loss(reduction='sum')
-
-    def forward(self, prediction_features,  ##sigmoid focal loss함수에서 sigmoid를 쒸우기때문에 sigmoid없는 feature map 입력
-                      prediction_sizemap,
-                      prediction_offsetmap,
-                      label_heatmap,
-                      label_sizemap,
-                      label_offsetmap,
-                      label_bbox_count):
-
-        #class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
-        focal_loss_point_count = (label_heatmap == 1.).sum().item()
-        class_loss = torchvision.ops.sigmoid_focal_loss(prediction_features, label_heatmap, reduction='sum') * self.alpha / focal_loss_point_count
-        size_loss = self.size_loss(prediction_sizemap, label_sizemap) * self.beta / label_bbox_count
-        offset_loss = self.offset_loss(prediction_offsetmap, label_offsetmap) * self.gamma / label_bbox_count
-
-
-        return class_loss + size_loss + offset_loss
-"""
 
 def reg_l1_loss(prediction, label):
     mask = (label > 0).float()
@@ -258,6 +198,31 @@ def reg_l1_loss(prediction, label):
     loss = torch.abs(prediction - label) * mask
     loss = torch.sum(loss) / num_pos
     return loss
+
+
+
+def modified_smooth_l1_loss(input: torch.Tensor, target: torch.Tensor, beta: float) -> torch.Tensor:
+
+    mask = (target > 0).float()
+    coordinate_num_points = torch.sum(mask)
+
+    if beta < 1e-5:
+        # if beta == 0, then torch.where will result in nan gradients when
+        # the chain rule is applied due to pytorch implementation details
+        # (the False branch "0.5 * n ** 2 / 0" has an incoming gradient of
+        # zeros, rather than "no gradient"). To avoid this issue, we define
+        # small values of beta to be exactly l1 loss.
+        loss = torch.abs(input - target) * mask
+    else:
+        n = torch.abs(input - target) * mask
+        cond = n < beta
+        loss = torch.where(cond, 0.5 * n**2 / beta, n - 0.5 * beta)
+
+
+    loss = loss.sum()/coordinate_num_points
+
+    return loss
+
 
 
 class CenterNetLoss(torch.nn.Module):
@@ -299,15 +264,8 @@ class CenterNetLossV2(torch.nn.Module):
                       label_sizemap,
                       label_offsetmap):
 
+        sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
+        sum_size_loss = modified_smooth_l1_loss(prediction_sizemap, label_sizemap, beta=1)
+        sum_offset_loss = modified_smooth_l1_loss(prediction_offsetmap, label_offsetmap, beta=1)
 
-        heatmap_num_points = label_heatmap.eq(1).float().sum()
-
-        size_mask = (label_sizemap > 0).float()
-        coordinate_num_points = torch.sum(size_mask)
-
-
-        sum_class_loss = torchvision.ops.sigmoid_focal_loss(prediction_features, label_heatmap, reduction='sum') / heatmap_num_points * self.alpha
-        sum_size_loss = F.smooth_l1_loss(prediction_sizemap, label_sizemap, reduction='sum') / coordinate_num_points * self.beta
-        sum_offset_loss = F.smooth_l1_loss(prediction_offsetmap, label_offsetmap, reduction='sum') / coordinate_num_points * self.beta
-
-        return sum_class_loss + sum_size_loss + sum_offset_loss
+        return sum_class_loss + (sum_size_loss * self.beta) + (sum_offset_loss * self.beta)

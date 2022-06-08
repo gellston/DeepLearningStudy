@@ -76,7 +76,7 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 model.train()
 criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
 
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.

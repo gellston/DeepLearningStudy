@@ -852,3 +852,85 @@ class DarknetResidualBlock(torch.nn.Module):
         x = self.layer2(x)
         x = x + skip
         return x
+
+
+
+class HardSwishSEBlock(torch.nn.Module):
+    def __init__(self, in_channels, reduction_ratio=16, activation=torch.nn.ReLU):
+        super().__init__()
+        self.squeeze = torch.nn.AdaptiveAvgPool2d((1, 1))
+        self.excitation = torch.nn.Sequential(
+            torch.nn.Linear(in_channels, in_channels//reduction_ratio, bias=False),
+            activation(),
+            torch.nn.Linear(in_channels//reduction_ratio, in_channels, bias=False),
+            torch.nn.Hardswish()
+        )
+
+    def forward(self, x):
+        x = self.squeeze(x)
+        x = x.view(x.size(0), -1)
+        x = self.excitation(x)
+        x = x.view(x.size(0), x.size(1), 1, 1)
+
+        return x
+
+
+class InvertedBottleNectV3(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 expansion_out,
+                 out_channels,
+                 stride=1,
+                 kernel_size=3,
+                 use_se=False,
+                 activation=torch.nn.ReLU6):
+        super().__init__()
+
+        self.in_channels = in_channels
+        self.stride = stride
+        self.use_se = use_se
+        self.expansion_out = expansion_out
+        self.out_channels = out_channels
+        self.padding = (kernel_size - 1) // 2
+
+        self.conv_expansion = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
+                                                                  in_channels=self.in_channels,
+                                                                  out_channels=self.expansion_out,
+                                                                  bias=False,
+                                                                  stride=self.stride),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.conv_depthwise = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=kernel_size,
+                                                                  in_channels=self.expansion_out,
+                                                                  out_channels=self.expansion_out,
+                                                                  groups=self.expansion_out,
+                                                                  bias=False,
+                                                                  padding=self.padding,
+                                                                  stride=1),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.squeeze_layer = HardSwishSEBlock(in_channels=self.expansion_out,
+                                              reduction_ratio=4)
+
+        self.conv_projection = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
+                                                                   in_channels=self.expansion_out,
+                                                                   out_channels=self.out_channels,
+                                                                   bias=False),
+                                                   torch.nn.BatchNorm2d(self.out_channels))
+
+
+    def forward(self, x):
+        out = self.conv_expansion(x)
+        out = self.conv_depthwise(out)
+
+        if self.use_se is True:
+            out = self.squeeze_layer(out) * out
+
+        out = self.conv_projection(out)
+
+        if self.stride != 2 and self.in_channels == self.out_channels:
+            out = out + x
+
+        return out

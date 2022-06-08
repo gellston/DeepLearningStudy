@@ -26,11 +26,11 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 140
-current_epoch = 132
-batch_size = 7
-learning_rate = 0.00005
+current_epoch = 33
+batch_size = 8
+learning_rate = 0.0005
 accuracy_threshold = 0.80
-class_score_threshold = 0.5
+class_score_threshold = 0.3
 iou_threshold = 0.5
 input_image_width = 640
 input_image_height = 640
@@ -44,16 +44,18 @@ training_check = False
 
 
 #Model Setting
-CSPMobileNetV2 = CSPMobileNetV2(class_num=1, activation=torch.nn.ReLU6).to(device)
+CSPMobileNetV2 = CSPMobileNetV2(class_num=1000, activation=torch.nn.ReLU6).to(device)
+if pretrained_backbone == True:
+    CSPMobileNetV2CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPMobileNetV2CenterNetBackBone).pt")
+    CSPMobileNetV2.load_state_dict(CSPMobileNetV2CenterNetBackBoneWeight.state_dict())
+
 print('==== model info ====')
 summary(CSPMobileNetV2, (3, 640, 640))
 print('====================')
 CSPMobileNetV2CenterNet = CSPMobileNetV2CenterNet(backbone=CSPMobileNetV2,
-                                                  pretrained=False).to(device)
+                                                  pretrained=True).to(device)
 
-if pretrained_backbone == True:
-    CSPMobileNetV2CenterNetBackBoneWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPMobileNetV2CenterNetBackBone).pt")
-    CSPMobileNetV2.load_state_dict(CSPMobileNetV2CenterNetBackBoneWeight.state_dict())
+
 
 if pretrained_centernet == True:
     CSPMobileNetV2CenterNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(CSPMobileNetV2CenterNet).pt")

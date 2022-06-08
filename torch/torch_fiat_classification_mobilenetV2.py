@@ -57,11 +57,11 @@ model.apply(init_weights)
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MobileNetV1).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MobileNetV2).pt")
 
 trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
-torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MobileNetV1)_Trace.pt")
+torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MobileNetV2)_Trace.pt")
 
 ## no Train Model Save
 
@@ -76,7 +76,7 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 model.train()
 criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
 
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
@@ -109,7 +109,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(MobileNetV1).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(MobileNetV2).pt")
 ## no Train Model Save
 
 print('Learning finished')
