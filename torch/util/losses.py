@@ -249,11 +249,11 @@ class CenterNetLoss(torch.nn.Module):
 
 
 class CenterNetLossV2(torch.nn.Module):
-    def __init__(self, alpha=1.0, gamma=1.0, beta=0.1):
+    def __init__(self, lambda_offset=1.0, lambda_size=0.1, beta=1.0):
         super(CenterNetLossV2, self).__init__()
 
-        self.alpha = alpha
-        self.gamma = gamma
+        self.lambda_offset = lambda_offset
+        self.lambda_size = lambda_size
         self.beta = beta
         self.focal_loss = modified_focal_loss
 
@@ -264,8 +264,8 @@ class CenterNetLossV2(torch.nn.Module):
                       label_sizemap,
                       label_offsetmap):
 
-        sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap) * self.alpha
-        sum_size_loss = modified_smooth_l1_loss(prediction_sizemap, label_sizemap, beta=1)
-        sum_offset_loss = modified_smooth_l1_loss(prediction_offsetmap, label_offsetmap, beta=1)
+        sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap)
+        sum_size_loss = modified_smooth_l1_loss(prediction_sizemap, label_sizemap, beta=self.beta)
+        sum_offset_loss = modified_smooth_l1_loss(prediction_offsetmap, label_offsetmap, beta=self.beta)
 
-        return sum_class_loss + (sum_size_loss * self.beta) + (sum_offset_loss * self.beta)
+        return sum_class_loss + (sum_size_loss * self.lambda_size) + (sum_offset_loss * self.lambda_offset)

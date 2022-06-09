@@ -135,12 +135,12 @@ class CSPResnet18CenterNet(torch.nn.Module):
 
 
         # module 초기화
-        for m in self.modules():
-            if isinstance(m, torch.nn.Conv2d):
-                torch.nn.init.xavier_uniform_(m.weight)
-            elif isinstance(m, torch.nn.BatchNorm2d):  # shifting param이랑 scaling param 초기화(?)
-                m.weight.data.fill_(1)  #
-                m.bias.data.zero_()
+        #for m in self.modules():
+        #    if isinstance(m, torch.nn.Conv2d):
+        #        torch.nn.init.xavier_uniform_(m.weight)
+        #    elif isinstance(m, torch.nn.BatchNorm2d):  # shifting param이랑 scaling param 초기화(?)
+        #        m.weight.data.fill_(1)  #
+        #        m.bias.data.zero_()
 
 
 
