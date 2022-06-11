@@ -201,7 +201,7 @@ def reg_l1_loss(prediction, label):
 
 
 
-def modified_smooth_l1_loss(input: torch.Tensor, target: torch.Tensor, beta: float) -> torch.Tensor:
+def modified_smooth_l1_loss(input: torch.Tensor, target: torch.Tensor, beta: float, weight_mask=None) -> torch.Tensor:
 
     mask = (target > 0).float()
     coordinate_num_points = torch.sum(mask)
@@ -219,7 +219,10 @@ def modified_smooth_l1_loss(input: torch.Tensor, target: torch.Tensor, beta: flo
         loss = torch.where(cond, 0.5 * n**2 / beta, n - 0.5 * beta)
 
 
-    loss = loss.sum()/coordinate_num_points
+    if weight_mask is not None:
+        loss = loss * mask
+
+    loss = loss.sum() / (coordinate_num_points + 1e-4)
 
     return loss
 
@@ -262,10 +265,13 @@ class CenterNetLossV2(torch.nn.Module):
                       prediction_offsetmap,
                       label_heatmap,
                       label_sizemap,
-                      label_offsetmap):
+                      label_offsetmap,
+                      label_weight_mask):
 
         sum_class_loss = self.focal_loss(torch.sigmoid(prediction_features), label_heatmap)
-        sum_size_loss = modified_smooth_l1_loss(prediction_sizemap, label_sizemap, beta=self.beta)
-        sum_offset_loss = modified_smooth_l1_loss(prediction_offsetmap, label_offsetmap, beta=self.beta)
+        sum_size_loss = modified_smooth_l1_loss(prediction_sizemap, label_sizemap, beta=self.beta,
+                                                weight_mask=label_weight_mask)
+        sum_offset_loss = modified_smooth_l1_loss(prediction_offsetmap, label_offsetmap, beta=self.beta,
+                                                  weight_mask=label_weight_mask)
 
         return sum_class_loss + (sum_size_loss * self.lambda_size) + (sum_offset_loss * self.lambda_offset)

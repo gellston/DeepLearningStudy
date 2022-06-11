@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 
 
 
-## new
+
 def gaussian_radius(det_size, min_overlap=0.7):
     height, width = det_size
 
@@ -63,13 +63,10 @@ def draw_umich_gaussian(heatmap, center, radius, k=1):
 
 
 def generate_heatmap(heatmap, center_x, center_y, bboxes_h, bboxes_w):
-
     radius = gaussian_radius((np.ceil(bboxes_h), np.ceil(bboxes_w)))
     radius = max(0, int(radius))
-
     draw_umich_gaussian(heatmap, (center_x, center_y), radius)
 
-## new
 
 
 
@@ -81,6 +78,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
     image_list = []
     size_map_list = []
     offset_map_list = []
+    weight_mask_map_list = []
     gaussian_map_list = []
     resized_bbox_list = []
     image_size_list = []
@@ -109,6 +107,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
         size_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
         offset_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
         gaussian_map = np.zeros((int(feature_map_height), int(feature_map_width), 1), dtype=np.float32)
+        weight_mask_map = torch.zeros([1, 2, int(feature_map_height), int(feature_map_width)], dtype=torch.float)
 
         bbox = label['bbox'][0]
         bbox_count = bbox.size(dim=0)
@@ -146,8 +145,31 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
             offset_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = feature_box_offset_x
             offset_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = feature_box_offset_y
 
+            gaussian_map[clamp_feature_box_y][clamp_feature_box_x][0] = 1
+
+            weight_mask_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = 1
+            weight_mask_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = 1
+
+            if feature_box_width * feature_box_height <= 40:
+                weight_mask_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = 5
+                weight_mask_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = 5
+            if feature_box_width * feature_box_height <= 20:
+                weight_mask_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = 10
+                weight_mask_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = 10
+            if feature_box_width * feature_box_height <= 10:
+                weight_mask_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = 15
+                weight_mask_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = 15
+            if feature_box_width * feature_box_height <= 4:
+                weight_mask_map[0][0][clamp_feature_box_y][clamp_feature_box_x] = 0.1
+                weight_mask_map[0][1][clamp_feature_box_y][clamp_feature_box_x] = 0.1
+
+
             ##Gaussian Map
-            generate_heatmap(gaussian_map[:, :, 0], clamp_feature_box_x, clamp_feature_box_y, feature_box_height, feature_box_width)
+            generate_heatmap(gaussian_map[:, :, 0],
+                             clamp_feature_box_x,
+                             clamp_feature_box_y,
+                             feature_box_height,
+                             feature_box_width)
             ##Gaussian Map
 
         resized_bbox_list.append(bbox_list)
@@ -156,6 +178,7 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
         size_map_list.append(size_map)
         offset_map_list.append(offset_map)
         gaussian_map_list.append(gaussian_map_tensor)
+        weight_mask_map_list.append(weight_mask_map)
 
         temp_batch_size = temp_batch_size+1
         if temp_batch_size == batch_size:
@@ -165,8 +188,9 @@ def batch_loader(loader, batch_size, input_width, input_height, feature_map_scal
     gaussian_map_batch = torch.cat(gaussian_map_list, dim=0).to(device)
     size_map_batch = torch.cat(size_map_list, dim=0).to(device)
     offset_map_batch = torch.cat(offset_map_list, dim=0).to(device)
+    weight_mask_map_batch = torch.cat(weight_mask_map_list, dim=0).to(device)
 
-    return (image_batch, resized_bbox_list, gaussian_map_batch, size_map_batch, offset_map_batch)
+    return (image_batch, resized_bbox_list, gaussian_map_batch, size_map_batch, offset_map_batch, weight_mask_map_batch)
 
 
 def batch_accuracy(input_image_width,

@@ -22,16 +22,17 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 140
-current_epoch = 34
+current_epoch = 95
 batch_size = 8
-learning_rate = 0.0005
+learning_rate = 0.00005
+weight_decay = 0.0005
 accuracy_threshold = 0.80
 class_score_threshold = 0.5
 iou_threshold = 0.5
 input_image_width = 800
 input_image_height = 800
 feature_map_scale_factor = 4
-pretrained_centernet = False
+pretrained_centernet = True
 validation_check = False
 training_check = True
 ## Hyper parameter
@@ -71,7 +72,7 @@ print('total batch=', total_batch)
 
 MobileNetV3CenterNet.train_mode()
 criterion = CenterNetLossV2(lambda_size=0.1, lambda_offset=1.0, beta=1.0)
-optimizer = torch.optim.RAdam(MobileNetV3CenterNet.parameters(), lr=learning_rate)
+optimizer = torch.optim.RAdam(MobileNetV3CenterNet.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
 for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
@@ -96,11 +97,13 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
         label_heatmap = batch[2]        #Gaussian Heatmap
         label_sizemap = batch[3]        #Size Map
         label_offsetmap = batch[4]      #Offset Map
+        label_weight_mask = batch[5]      #weight mask Map
 
         gpu_label_image = label_image.to(device)
         gpu_label_heatmap = label_heatmap.to(device)
         gpu_label_sizemap = label_sizemap.to(device)
         gpu_label_offsetmap = label_offsetmap.to(device)
+        gpu_weight_mask_map = label_weight_mask.to(device)
 
 
         MobileNetV3CenterNet.train_mode()
@@ -117,7 +120,8 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
                          prediction_offsetmap,
                          gpu_label_heatmap,
                          gpu_label_sizemap,
-                         gpu_label_offsetmap)
+                         gpu_label_offsetmap,
+                         gpu_weight_mask_map)
         cost.backward()
         avg_cost += (cost / total_batch)
         optimizer.step()

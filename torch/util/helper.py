@@ -934,3 +934,78 @@ class InvertedBottleNectV3(torch.nn.Module):
             out = out + x
 
         return out
+
+
+class SEConvBlock(torch.nn.Module):
+    def __init__(self, in_channels, channels, se_rate=12):
+        super(SEConvBlock, self).__init__()
+        self.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
+        self.fc = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels, channels // se_rate, kernel_size=1, padding=0),
+            torch.nn.BatchNorm2d(channels // se_rate),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.Conv2d(channels // se_rate, channels, kernel_size=1, padding=0),
+            torch.nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.avg_pool(x)
+        y = self.fc(y)
+        return x * y
+
+
+class RexNetLinearBottleNeck(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 use_se,
+                 stride,
+                 expand_rate=6,
+                 se_rate=12):
+        super(RexNetLinearBottleNeck, self).__init__()
+
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.expand_channels = self.in_channels * expand_rate
+        self.use_se = use_se
+        self.stride = stride
+        self.se_rate = se_rate
+
+        self.use_skip = self.stride == 1 and self.in_channels <= self.out_channels
+
+        self.features = torch.nn.Sequential(
+            torch.nn.Conv2d(kernel_size=1,
+                            in_channels=self.in_channels,
+                            out_channels=self.expand_channels,
+                            bias=False,
+                            stride=1),
+            torch.nn.BatchNorm2d(num_features=self.expand_channels),
+            torch.nn.SiLU(),
+            torch.nn.Conv2d(kernel_size=3,
+                            in_channels=self.expand_channels,
+                            out_channels=self.expand_channels,
+                            bias=False,
+                            stride=self.stride,
+                            groups=self.expand_channels,
+                            padding=1),
+            torch.nn.BatchNorm2d(num_features=self.expand_channels)
+        )
+
+        if self.use_se == True:
+            self.features.add_module('se_module',
+                                     SEConvBlock(in_channels=self.expand_channels,
+                                                 channels=self.expand_channels,
+                                                 se_rate=self.se_rate))
+        self.features.add_module('relu6_layer', torch.nn.ReLU6())
+        self.features.add_module('project_conv', torch.nn.Conv2d(kernel_size=1,
+                                                                 in_channels=self.expand_channels,
+                                                                 out_channels=self.out_channels,
+                                                                 bias=False,
+                                                                 stride=1))
+        self.features.add_module('project_batch_norm', torch.nn.BatchNorm2d(num_features=self.out_channels))
+
+    def forward(self, x):
+        out = self.features(x)
+        if self.use_skip == True:
+            out[:, 0:self.in_channels] += x
+        return out
