@@ -213,9 +213,9 @@ def batch_accuracy(input_image_width,
     batch_size = gaussian_map_batch.size(0)
     for batch_index in range(batch_size):
         prediction_box_list = []
-        gaussian_map = gaussian_map_batch[batch_index]
-        size_map = size_map_batch[batch_index]
-        offset_map = offset_map_batch[batch_index]
+        gaussian_map = gaussian_map_batch[batch_index].cpu().detach().numpy()
+        size_map = size_map_batch[batch_index].cpu().detach().numpy()
+        offset_map = offset_map_batch[batch_index].cpu().detach().numpy()
 
         ## Box extraction from feature map
         for feature_y in range(feature_image_height):
@@ -295,9 +295,9 @@ def batch_box_extractor(input_image_width,
     batch_size = gaussian_map_batch.size(0)
     for batch_index in range(batch_size):
         prediction_box_list = []
-        gaussian_map = gaussian_map_batch[batch_index]
-        size_map = size_map_batch[batch_index]
-        offset_map = offset_map_batch[batch_index]
+        gaussian_map = gaussian_map_batch[batch_index].cpu().detach().numpy()
+        size_map = size_map_batch[batch_index].cpu().detach().numpy()
+        offset_map = offset_map_batch[batch_index].cpu().detach().numpy()
 
         ## Box extraction from feature map
         for feature_y in range(feature_image_height):

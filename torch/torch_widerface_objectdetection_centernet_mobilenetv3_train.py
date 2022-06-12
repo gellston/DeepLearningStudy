@@ -24,17 +24,18 @@ print("다음 기기로 학습합니다:", device)
 training_epochs = 140
 current_epoch = 95
 batch_size = 8
-learning_rate = 0.00005
+learning_rate = 0.0005
 weight_decay = 0.0005
 accuracy_threshold = 0.80
-class_score_threshold = 0.5
+class_score_threshold = 0.15
 iou_threshold = 0.5
 input_image_width = 800
 input_image_height = 800
 feature_map_scale_factor = 4
 pretrained_centernet = True
-validation_check = False
-training_check = True
+validation_check = True
+training_enable = True
+visual_check = True
 ## Hyper parameter
 
 
@@ -105,27 +106,25 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
         gpu_label_offsetmap = label_offsetmap.to(device)
         gpu_weight_mask_map = label_weight_mask.to(device)
 
-
         MobileNetV3CenterNet.train_mode()
         optimizer.zero_grad()
-
         prediction = MobileNetV3CenterNet(gpu_label_image)
         prediction_heatmap = prediction[0]
         prediction_features = prediction[1]
         prediction_sizemap = prediction[2]
         prediction_offsetmap = prediction[3]
 
-        cost = criterion(prediction_features,
-                         prediction_sizemap,
-                         prediction_offsetmap,
-                         gpu_label_heatmap,
-                         gpu_label_sizemap,
-                         gpu_label_offsetmap,
-                         gpu_weight_mask_map)
-        cost.backward()
-        avg_cost += (cost / total_batch)
-        optimizer.step()
-
+        if training_enable == True:
+            cost = criterion(prediction_features,
+                             prediction_sizemap,
+                             prediction_offsetmap,
+                             gpu_label_heatmap,
+                             gpu_label_sizemap,
+                             gpu_label_offsetmap,
+                             gpu_weight_mask_map)
+            cost.backward()
+            avg_cost += (cost / total_batch)
+            optimizer.step()
 
         if validation_check == True:
             MobileNetV3CenterNet.eval_mode()
@@ -143,8 +142,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
             avg_acc += (accuracy / total_batch)
             print('batch accuracy=', accuracy)
 
-
-        if training_check == True:
+        if visual_check == True:
             heatmap_image = prediction_heatmap[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
             cv2.namedWindow("heatmap", cv2.WINDOW_NORMAL)
             cv2.resizeWindow('heatmap', input_image_width, input_image_height)
@@ -176,23 +174,24 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
 
         gc.collect()
 
-    print("학습중간에 저장")
-    ## no Train Model
-    MobileNetV3CenterNet.eval_mode()
-    compiled_model_head = torch.jit.script(MobileNetV3CenterNet)
-    torch.jit.save(compiled_model_head, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV3SmallCenterNet).pt")
-    ## no Train Model Save
-    print('학습중간에 저장')
+    if training_enable == True:
+        print("학습중간에 저장")
+        ## no Train Model
+        MobileNetV3CenterNet.eval_mode()
+        compiled_model_head = torch.jit.script(MobileNetV3CenterNet)
+        torch.jit.save(compiled_model_head, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV3SmallCenterNet).pt")
+        ## no Train Model Save
+        print('학습중간에 저장')
 
     print('total_batch = ', total_batch)
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     if avg_acc > accuracy_threshold:
         break
 
-
-## no Train Model Save
-MobileNetV3CenterNet.eval_mode()
-compiled_model = torch.jit.script(MobileNetV3CenterNet)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV3SmallCenterNet).pt")
-## no Train Model Save
+if training_enable == True:
+    ## no Train Model Save
+    MobileNetV3CenterNet.eval_mode()
+    compiled_model = torch.jit.script(MobileNetV3CenterNet)
+    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_WIDERFACE(MobileNetV3SmallCenterNet).pt")
+    ## no Train Model Save
 print('Learning finished')
