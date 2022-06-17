@@ -32,7 +32,7 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = Resnet18(class_num=4, activation=torch.nn.SiLU).to(device)
+model = Resnet18(class_num=4, activation=torch.nn.ReLU).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

@@ -26,9 +26,9 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 30
-batch_size = 50
+batch_size = 10
 target_accuracy = 0.99
-learning_rate = 0.00003
+learning_rate = 0.003
 accuracy_threshold = 0.5
 ## Hyper parameter
 
@@ -67,7 +67,7 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 model.train()
 criterion = nn.BCELoss()
-optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 optimizer = AGC(model.parameters(), optimizer, model=model, ignore_agc=['fc'])
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
