@@ -1,22 +1,21 @@
 import torch
-import torch.nn.functional as F
-from util.helper import WSConv2d
+from util.helper import ScaledStdConv2d
 from util.helper import NFResidualBlock
-
 
 class NFResNet18(torch.nn.Module):
 
-    def __init__(self, class_num=5):
+    def __init__(self,
+                 class_num=5):
         super(NFResNet18, self).__init__()
 
         self.class_num = class_num
 
         self.layer1 = torch.nn.Sequential(
-            WSConv2d(in_channels=3,
-                     out_channels=64,
-                     stride=2,
-                     padding=1,
-                     kernel_size=7),
+            ScaledStdConv2d(in_channels=3,
+                            out_channels=64,
+                            stride=2,
+                            padding=3,
+                            kernel_size=7),
             torch.nn.MaxPool2d(kernel_size=3,
                                padding=1,
                                stride=2)
@@ -32,7 +31,6 @@ class NFResNet18(torch.nn.Module):
                             out_dim=64,
                             stride=1),
         )
-
 
         self.layer3 = torch.nn.Sequential(
             NFResidualBlock(in_dim=64,
@@ -66,9 +64,9 @@ class NFResNet18(torch.nn.Module):
                             stride=1),
         )
         self.gap = torch.nn.AdaptiveAvgPool2d(1)
-        self.conv_class = torch.nn.Conv2d(kernel_size=1,
-                                          in_channels=512,
-                                          out_channels=class_num)
+        self.fc = torch.nn.Conv2d(kernel_size=1,
+                                  in_channels=512,
+                                  out_channels=class_num)
 
         for m in self.modules():
             if isinstance(m, torch.nn.Conv2d):
@@ -96,7 +94,7 @@ class NFResNet18(torch.nn.Module):
         x = self.layer4(x)
         x = self.layer5(x)
         x = self.gap(x)
-        x = self.conv_class(x)
+        x = self.fc(x)
         x = x.view([-1, self.class_num])
         x = torch.softmax(x, dim=1)
         return x

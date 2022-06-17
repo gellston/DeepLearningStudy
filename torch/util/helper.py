@@ -1155,20 +1155,14 @@ class NFSEConvBlock(torch.nn.Module):
     def __init__(self,
                  in_channels,
                  channels,
-                 se_rate=12,
-                 relu_gamma=1.7139588594436646,
-                 sigmoid_gamma=4.803835391998291):
+                 se_rate=12):
         super(NFSEConvBlock, self).__init__()
         self.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
-        self.relu_gamma = relu_gamma
-        self.sigmoid_gamma = sigmoid_gamma
         self.fc = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels, channels // se_rate, kernel_size=1, padding=0),
-            GammaActivation(gamma=self.relu_gamma,
-                            activation=torch.nn.ReLU),
+            torch.nn.ReLU(),
             torch.nn.Conv2d(channels // se_rate, channels, kernel_size=1, padding=0),
-            GammaActivation(gamma=self.sigmoid_gamma,
-                            activation=torch.nn.Sigmoid))
+            torch.nn.Sigmoid())
 
     def forward(self, x):
         y = self.avg_pool(x)
@@ -1191,29 +1185,31 @@ class NFResidualBlock(torch.nn.Module):
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
-        self.features = torch.nn.Sequential(torch.nn.WSConv2d(in_dim,
-                                                             mid_dim,
-                                                             kernel_size=3,
-                                                             stride=self.stride,
-                                                             padding=1,
-                                                             bias=False),
+        self.features = torch.nn.Sequential(GammaActivation(activation=activation,
+                                                            gamma=self.gamma),
+                                            ScaledStdConv2d(in_dim,
+                                                            mid_dim,
+                                                            kernel_size=3,
+                                                            stride=self.stride,
+                                                            padding=1,
+                                                            bias=False),
                                             GammaActivation(activation=activation,
                                                             gamma=self.gamma),
-                                            torch.nn.WSConv2d(mid_dim,
-                                                             out_dim,
-                                                             kernel_size=3,
-                                                             padding='same',
-                                                             bias=False))
+                                            ScaledStdConv2d(mid_dim,
+                                                            out_dim,
+                                                            kernel_size=3,
+                                                            padding='same',
+                                                            bias=False),
+                                            NFSEConvBlock(in_channels=out_dim,
+                                                          channels=out_dim))
 
-        self.down_skip_connection = torch.nn.Conv2d(in_channels=in_dim,
+        self.down_skip_connection = ScaledStdConv2d(in_channels=in_dim,
                                                     out_channels=out_dim,
                                                     kernel_size=1,
                                                     stride=self.stride)
-        self.dim_equalizer = torch.nn.Conv2d(in_channels=in_dim,
+        self.dim_equalizer = ScaledStdConv2d(in_channels=in_dim,
                                              out_channels=out_dim,
                                              kernel_size=1)
-        self.final_activation = GammaActivation(activation=activation,
-                                                gamma=self.gamma)
 
     def forward(self, x):
         x = x * self.beta
@@ -1222,6 +1218,7 @@ class NFResidualBlock(torch.nn.Module):
             out = self.features(x)
             out = out * self.alpha
             out = out + down
+            return out
 
         else:
             out = self.features(x)
@@ -1229,8 +1226,35 @@ class NFResidualBlock(torch.nn.Module):
                 x = self.dim_equalizer(x)
             out = out * self.alpha
             out = out + x
+            return out
 
-        out = self.final_activation(out)
-        return out
+class ScaledStdConv2d(torch.nn.Conv2d):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1,
+                 bias=True, gain=True, gamma=1.0, eps=1e-5, use_layernorm=False):
+        super().__init__(
+            in_channels, out_channels, kernel_size, stride=stride,
+            padding=padding, dilation=dilation, groups=groups, bias=bias)
+        self.gain = torch.nn.Parameter(torch.ones(
+            self.out_channels, 1, 1, 1)) if gain else None
+        # gamma * 1 / sqrt(fan-in)
+        self.scale = gamma * self.weight[0].numel() ** -0.5
+        self.eps = eps ** 2 if use_layernorm else eps
+        # experimental, slightly faster/less GPU memory use
+        self.use_layernorm = use_layernorm
 
+    def get_weight(self):
+        if self.use_layernorm:
+            weight = self.scale * \
+                F.layer_norm(self.weight, self.weight.shape[1:], eps=self.eps)
+        else:
+            mean = torch.mean(
+                self.weight, dim=[1, 2, 3], keepdim=True)
+            std = torch.std(
+                self.weight, dim=[1, 2, 3], keepdim=True, unbiased=False)
+            weight = self.scale * (self.weight - mean) / (std + self.eps)
+        if self.gain is not None:
+            weight = weight * self.gain
+        return weight
 
+    def forward(self, x):
+        return F.conv2d(x, self.get_weight(), self.bias, self.stride, self.padding, self.dilation, self.groups)

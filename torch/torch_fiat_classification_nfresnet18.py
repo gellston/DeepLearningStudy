@@ -26,9 +26,9 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 30
-batch_size = 30
+batch_size = 50
 target_accuracy = 0.99
-learning_rate = 0.003
+learning_rate = 0.00003
 accuracy_threshold = 0.5
 ## Hyper parameter
 
@@ -51,9 +51,9 @@ print('{:<30}  {:<8}'.format('Number of parameters: ', params))
 
 
 ## no Train Model Save
-
 model.eval()
-
+compiled_model = torch.jit.script(model)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(NFResNet18).pt")
 ## no Train Model Save
 
 
@@ -67,8 +67,8 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 model.train()
 criterion = nn.BCELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-optimizer_agc = AGC(model.parameters(), optimizer)
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
+optimizer = AGC(model.parameters(), optimizer, model=model, ignore_agc=['fc'])
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0
@@ -80,12 +80,12 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         gpu_Y = Y.to(device)
 
         model.train()
-        optimizer_agc.zero_grad()
+        optimizer.zero_grad()
         hypothesis = model(gpu_X)
         cost = criterion(hypothesis, gpu_Y)
         cost.backward()
         avg_cost += (cost / total_batch)
-        optimizer_agc.step()
+        optimizer.step()
 
         model.eval()
         prediction = model(gpu_X)
@@ -95,12 +95,12 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     if avg_acc > target_accuracy:
-        break;
+        break
 
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(NFResNet18).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(NFResNet18).pt")
 ## no Train Model Save
 
 print('Learning finished')
