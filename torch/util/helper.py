@@ -1230,7 +1230,9 @@ class NFResidualBlock(torch.nn.Module):
                                                             padding='same',
                                                             bias=False),
                                             GammaActivation(activation=activation,
-                                                            gamma=self.gamma))
+                                                            gamma=self.gamma),
+                                            NFSEConvBlock(in_channels=out_dim,
+                                                          out_channels=out_dim))
 
         self.down_skip_connection = ScaledStdConv2d(in_channels=in_dim,
                                                     out_channels=out_dim,
