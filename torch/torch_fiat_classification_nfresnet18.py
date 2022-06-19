@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import random
 
-
 from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
@@ -11,24 +10,16 @@ from model.NFResNet18 import NFResNet18
 from util.FIATClassificationDataset import FIATClassificationDataset
 from util.nf_helper import AGC
 
-
 USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
 device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
 print("다음 기기로 학습합니다:", device)
 
 
-# for reproducibility
-random.seed(777)
-torch.manual_seed(777)
-if device == 'cuda':
-    torch.cuda.manual_seed_all(777)
-
-
 ## Hyper parameter
 training_epochs = 30
-batch_size = 10
-target_accuracy = 0.99
-learning_rate = 0.003
+batch_size = 64
+target_accuracy = 0.999
+learning_rate = 0.0001
 accuracy_threshold = 0.5
 ## Hyper parameter
 
@@ -45,9 +36,6 @@ macs, params = get_model_complexity_info(model,
                                          print_per_layer_stat=True, verbose=True)
 print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
 print('{:<30}  {:<8}'.format('Number of parameters: ', params))
-
-
-
 
 
 ## no Train Model Save
@@ -67,8 +55,8 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 model.train()
 criterion = nn.BCELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-optimizer = AGC(model.parameters(), optimizer, model=model, ignore_agc=['fc'])
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate * batch_size / 255)
+optimizer = AGC(model.parameters(), optimizer, model=model, ignore_agc=['fc'], clipping=0.1)
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
     avg_cost = 0

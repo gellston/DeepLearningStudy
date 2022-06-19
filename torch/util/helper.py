@@ -1065,12 +1065,8 @@ class WSConv1d(torch.nn.Conv1d):
             self.weight.size()[0], requires_grad=True))
 
     def standardize_weight(self, eps):
-        #weight 평균
         mean = torch.mean(self.weight, dim=(1, 2), keepdims=True)
-        #weight 분산
         var = torch.std(self.weight, dim=(1, 2), keepdims=True, unbiased=False) ** 2
-
-        #input neuron 갯수
         fan_in = torch.prod(torch.tensor(self.weight.shape))
 
         scale = torch.rsqrt(torch.max(
@@ -1182,23 +1178,27 @@ class ScaledStdConv2d(torch.nn.Conv2d):
     def forward(self, x):
         return F.conv2d(x, self.get_weight(), self.bias, self.stride, self.padding, self.dilation, self.groups)
 
+
 class NFSEConvBlock(torch.nn.Module):
     def __init__(self,
                  in_channels,
-                 channels,
-                 se_rate=12):
+                 out_channels,
+                 se_rate=0.5):
         super(NFSEConvBlock, self).__init__()
         self.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
+        self.hidden_channels = max(1, int(in_channels * se_rate))
+
         self.fc = torch.nn.Sequential(
-            torch.nn.Conv2d(in_channels, channels // se_rate, kernel_size=1, padding=0),
+            torch.nn.Conv2d(in_channels, self.hidden_channels, kernel_size=1, padding=0),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(channels // se_rate, channels, kernel_size=1, padding=0),
+            torch.nn.Conv2d(self.hidden_channels, out_channels, kernel_size=1, padding=0),
             torch.nn.Sigmoid())
 
     def forward(self, x):
         y = self.avg_pool(x)
         y = self.fc(y)
         return x * y
+
 
 class NFResidualBlock(torch.nn.Module):
     def __init__(self,
@@ -1216,9 +1216,7 @@ class NFResidualBlock(torch.nn.Module):
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
-        self.features = torch.nn.Sequential(GammaActivation(activation=activation,
-                                                            gamma=self.gamma),
-                                            ScaledStdConv2d(in_dim,
+        self.features = torch.nn.Sequential(ScaledStdConv2d(in_dim,
                                                             mid_dim,
                                                             kernel_size=3,
                                                             stride=self.stride,
@@ -1231,31 +1229,29 @@ class NFResidualBlock(torch.nn.Module):
                                                             kernel_size=3,
                                                             padding='same',
                                                             bias=False),
-                                            NFSEConvBlock(in_channels=out_dim,
-                                                          channels=out_dim))
+                                            GammaActivation(activation=activation,
+                                                            gamma=self.gamma))
 
         self.down_skip_connection = ScaledStdConv2d(in_channels=in_dim,
                                                     out_channels=out_dim,
                                                     kernel_size=1,
-                                                    stride=self.stride)
-        self.dim_equalizer = ScaledStdConv2d(in_channels=in_dim,
-                                             out_channels=out_dim,
-                                             kernel_size=1)
+                                                    stride=self.stride,
+                                                    bias=False)
 
     def forward(self, x):
-        x = x * self.beta
+        indentity = x
         if self.stride == 2:
-            down = self.down_skip_connection(x)
+            x = x * self.beta
+            down = self.down_skip_connection(indentity)
             out = self.features(x)
             out = out * self.alpha
             out = out + down
             return out
 
         else:
+            x = x * self.beta
             out = self.features(x)
-            if x.size() is not out.size():
-                x = self.dim_equalizer(x)
             out = out * self.alpha
-            out = out + x
+            out = out + indentity
             return out
 
