@@ -1200,28 +1200,32 @@ class NFSEConvBlock(torch.nn.Module):
         return x * y
 
 
-class NFResidualBlock(torch.nn.Module):
+class NFBasicResidualBlock(torch.nn.Module):
     def __init__(self,
                  in_dim,
                  mid_dim,
                  out_dim,
                  stride=1,
+                 groups=32,
                  activation=torch.nn.ReLU,
                  alpha=0.2,
                  beta=1.0,
                  gamma=1.7139588594436646):
-        super(NFResidualBlock, self).__init__()
+        super(NFBasicResidualBlock, self).__init__()
 
         self.stride = stride
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
+        self.groups = groups
+        self.channel_per_group = max(1, int(in_dim / self.groups))
         self.features = torch.nn.Sequential(ScaledStdConv2d(in_dim,
                                                             mid_dim,
                                                             kernel_size=3,
                                                             stride=self.stride,
                                                             padding=1,
-                                                            bias=False),
+                                                            bias=False,
+                                                            groups=self.channel_per_group),
                                             GammaActivation(activation=activation,
                                                             gamma=self.gamma),
                                             ScaledStdConv2d(mid_dim,
@@ -1257,3 +1261,63 @@ class NFResidualBlock(torch.nn.Module):
             out = out + indentity
             return out
 
+
+
+class ResNextResidualBottleNeck(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 inner_channels,
+                 out_channels,
+                 stride=1,
+                 groups=32,
+                 activation=torch.nn.ReLU
+                 ):
+        super().__init__()
+
+        self.stride = stride
+        self.channels_per_groups = max(1, int(inner_channels / groups))
+
+        self.features = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=inner_channels,
+                            kernel_size=1,
+                            stride=self.stride,
+                            bias=False),
+            torch.nn.BatchNorm2d(inner_channels),                  ##ex:128
+            activation(),
+            torch.nn.Conv2d(inner_channels,
+                            inner_channels,
+                            kernel_size=3,
+                            stride=1,
+                            padding=1,
+                            bias=False,
+                            groups=self.channels_per_groups),
+            torch.nn.BatchNorm2d(inner_channels),
+            activation(),
+            torch.nn.Conv2d(inner_channels, out_channels, kernel_size=1, stride=1, bias=False),
+            torch.nn.BatchNorm2d(out_channels),
+
+        )
+
+        self.final_activation = activation()
+        self.down_skip_connection = torch.nn.Conv2d(in_channels=in_channels,
+                                                    out_channels=out_channels,
+                                                    kernel_size=1,
+                                                    stride=self.stride)
+        self.dim_equalizer = torch.nn.Conv2d(in_channels=in_channels,
+                                             out_channels=out_channels,
+                                             kernel_size=1)
+
+    def forward(self, x):
+        if self.stride == 2:
+            down = self.down_skip_connection(x)
+            out = self.features(x)
+            out = out + down
+
+        else:
+            out = self.features(x)
+            if x.size() is not out.size():
+                x = self.dim_equalizer(x)
+            out = out + x
+        out = self.final_activation(out)
+        return out

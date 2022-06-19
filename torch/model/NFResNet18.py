@@ -1,12 +1,13 @@
 import torch
 from util.helper import ScaledStdConv2d
-from util.helper import NFResidualBlock
+from util.helper import NFBasicResidualBlock
 
 
 class NFResNet18(torch.nn.Module):
 
     def __init__(self,
-                 class_num=5):
+                 class_num=5,
+                 groups=32):
         super(NFResNet18, self).__init__()
 
         self.class_num = class_num
@@ -40,12 +41,13 @@ class NFResNet18(torch.nn.Module):
 
         for block_index, (in_dim, mid_dim, out_dim, stride) in enumerate(block_args):
             beta = 1. / expected_std
-            blocks.append(NFResidualBlock(in_dim=in_dim,
-                                          mid_dim=mid_dim,
-                                          out_dim=out_dim,
-                                          stride=stride,
-                                          beta=beta,
-                                          alpha=alpha))
+            blocks.append(NFBasicResidualBlock(in_dim=in_dim,
+                                               mid_dim=mid_dim,
+                                               out_dim=out_dim,
+                                               stride=stride,
+                                               beta=beta,
+                                               alpha=alpha,
+                                               groups=groups))
             if block_index == 0:
                 expected_std = 1.0
             expected_std = (expected_std ** 2 + alpha ** 2) ** 0.5

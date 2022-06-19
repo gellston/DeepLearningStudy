@@ -17,14 +17,15 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 30
-batch_size = 64
+batch_size = 96
 target_accuracy = 0.99
 learning_rate = 0.0001
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = NFResNet18(class_num=4).to(device)
+model = NFResNet18(class_num=4,
+                   groups=32).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')
