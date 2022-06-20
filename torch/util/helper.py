@@ -1046,37 +1046,6 @@ class GammaActivation(torch.nn.Module):
         x = self.activation(x) * self.gamma
         return x
 
-class WSConv1d(torch.nn.Conv1d):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 padding=0,
-                 dilation=1,
-                 groups=1,
-                 bias=True,
-                 padding_mode='zeros'):
-        super().__init__(in_channels, out_channels, kernel_size, stride=stride, padding=padding,
-                         dilation=dilation, groups=groups, bias=bias, padding_mode=padding_mode)
-
-        torch.nn.init.kaiming_normal_(self.weight)
-        self.gain = torch.nn.Parameter(torch.ones(
-            self.weight.size()[0], requires_grad=True))
-
-    def standardize_weight(self, eps):
-        mean = torch.mean(self.weight, dim=(1, 2), keepdims=True)
-        var = torch.std(self.weight, dim=(1, 2), keepdims=True, unbiased=False) ** 2
-        fan_in = torch.prod(torch.tensor(self.weight.shape))
-
-        scale = torch.rsqrt(torch.max(
-            var * fan_in, torch.tensor(eps).to(var.device))) * self.gain.view_as(var).to(var.device)
-        shift = mean * scale
-        return self.weight * scale - shift
-
-    def forward(self, input, eps=1e-4):
-        weight = self.standardize_weight(eps)
-        return F.conv1d(input, weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
 
 class WSConv2d(torch.nn.Conv2d):
@@ -1091,26 +1060,37 @@ class WSConv2d(torch.nn.Conv2d):
                  groups=1,
                  bias=True,
                  eps=1e-4,
-                 padding_mode='zeros'):
+                 padding_mode='zeros',
+                 gain=True,
+                 gamma=1.0,
+                 use_layernorm=False):
         super().__init__(in_channels, out_channels, kernel_size, stride=stride, padding=padding,
                          dilation=dilation, groups=groups, bias=bias, padding_mode=padding_mode)
-        self.eps = eps
+
         torch.nn.init.kaiming_normal_(self.weight)
-        self.gain = torch.nn.Parameter(torch.ones(self.weight.size(0), requires_grad=True))
+        self.gain = torch.nn.Parameter(torch.ones(self.out_channels, 1, 1, 1)) if gain else None
+        # gamma * 1 / sqrt(fan-in)
+        self.scale = gamma * self.weight[0].numel() ** -0.5
+        self.eps = eps ** 2 if use_layernorm else eps
+        # experimental, slightly faster/less GPU memory use
+        self.use_layernorm = use_layernorm
 
-    def standardize_weight(self, eps):
-        mean = torch.mean(self.weight, dim=(1, 2, 3), keepdims=True)
-        var = torch.std(self.weight, dim=(1, 2, 3), keepdims=True) ** 2
-        fan_in = torch.prod(torch.tensor(self.weight.shape[1:]))
-
-        scale = torch.rsqrt(torch.max(
-            var * fan_in, torch.tensor(eps).to(var.device))) * self.gain.view_as(var).to(var.device)
-        shift = mean * scale
-        return self.weight * scale - shift
+    def get_weight(self):
+        if self.use_layernorm:
+            weight = self.scale * \
+                F.layer_norm(self.weight, self.weight.shape[1:], eps=self.eps)
+        else:
+            mean = torch.mean(
+                self.weight, dim=[1, 2, 3], keepdim=True)
+            std = torch.std(
+                self.weight, dim=[1, 2, 3], keepdim=True, unbiased=False)
+            weight = self.scale * (self.weight - mean) / (std + self.eps)
+        if self.gain is not None:
+            weight = weight * self.gain
+        return weight
 
     def forward(self, input):
-        weight = self.standardize_weight(self.eps)
-        return F.conv2d(input, weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
+        return F.conv2d(input, self.get_weight(), self.bias, self.stride, self.padding, self.dilation, self.groups)
 
 
 class WSConvTranspose2d(torch.nn.ConvTranspose2d):
@@ -1124,27 +1104,41 @@ class WSConvTranspose2d(torch.nn.ConvTranspose2d):
                  groups: int = 1,
                  bias: bool = True,
                  dilation: int = 1,
-                 padding_mode: str = 'zeros'):
+                 padding_mode: str = 'zeros',
+                 gain=True,
+                 gamma=1.0,
+                 eps=1e-5,
+                 use_layernorm=False):
+
         super().__init__(in_channels, out_channels, kernel_size, stride=stride, padding=padding,
                          output_padding=output_padding, groups=groups, bias=bias, dilation=dilation,
                          padding_mode=padding_mode)
 
         torch.nn.init.kaiming_normal_(self.weight)
-        self.gain = torch.nn.Parameter(torch.ones(self.weight.size(0), requires_grad=True))
+        self.gain = torch.nn.Parameter(torch.ones(
+            self.out_channels, 1, 1, 1)) if gain else None
+        # gamma * 1 / sqrt(fan-in)
+        self.scale = gamma * self.weight[0].numel() ** -0.5
+        self.eps = eps ** 2 if use_layernorm else eps
+        # experimental, slightly faster/less GPU memory use
+        self.use_layernorm = use_layernorm
 
-    def standardize_weight(self, eps):
-        mean = torch.mean(self.weight, dim=(1, 2, 3), keepdims=True)
-        var = torch.std(self.weight, dim=(1, 2, 3), keepdims=True) ** 2
-        fan_in = torch.prod(torch.tensor(self.weight.shape[1:]))
-
-        scale = torch.rsqrt(torch.max(
-            var * fan_in, torch.tensor(eps).to(var.device))) * self.gain.view_as(var).to(var.device)
-        shift = mean * scale
-        return self.weight * scale - shift
+    def get_weight(self):
+        if self.use_layernorm:
+            weight = self.scale * \
+                F.layer_norm(self.weight, self.weight.shape[1:], eps=self.eps)
+        else:
+            mean = torch.mean(
+                self.weight, dim=[1, 2, 3], keepdim=True)
+            std = torch.std(
+                self.weight, dim=[1, 2, 3], keepdim=True, unbiased=False)
+            weight = self.scale * (self.weight - mean) / (std + self.eps)
+        if self.gain is not None:
+            weight = weight * self.gain
+        return weight
 
     def forward(self, input: Tensor, output_size: Optional[List[int]] = None, eps: float = 1e-4) -> Tensor:
-        weight = self.standardize_weight(eps)
-        return F.conv_transpose2d(input, weight, self.bias, self.stride, self.padding, self.output_padding,
+        return F.conv_transpose2d(input, self.get_weight(), self.bias, self.stride, self.padding, self.output_padding,
                                   self.groups, self.dilation)
 
 class ScaledStdConv2d(torch.nn.Conv2d):
@@ -1219,30 +1213,30 @@ class NFBasicResidualBlock(torch.nn.Module):
         self.gamma = gamma
         self.groups = groups
         self.channel_per_group = max(1, int(in_dim / self.groups))
-        self.features = torch.nn.Sequential(ScaledStdConv2d(in_dim,
-                                                            mid_dim,
-                                                            kernel_size=3,
-                                                            stride=self.stride,
-                                                            padding=1,
-                                                            bias=False,
-                                                            groups=self.channel_per_group),
+        self.features = torch.nn.Sequential(WSConv2d(in_dim,
+                                                     mid_dim,
+                                                     kernel_size=3,
+                                                     stride=self.stride,
+                                                     padding=1,
+                                                     bias=False,
+                                                     groups=self.channel_per_group),
                                             GammaActivation(activation=activation,
                                                             gamma=self.gamma),
-                                            ScaledStdConv2d(mid_dim,
-                                                            out_dim,
-                                                            kernel_size=3,
-                                                            padding='same',
-                                                            bias=False),
+                                            WSConv2d(mid_dim,
+                                                     out_dim,
+                                                     kernel_size=3,
+                                                     padding='same',
+                                                     bias=False),
                                             GammaActivation(activation=activation,
                                                             gamma=self.gamma),
                                             NFSEConvBlock(in_channels=out_dim,
                                                           out_channels=out_dim))
 
-        self.down_skip_connection = ScaledStdConv2d(in_channels=in_dim,
-                                                    out_channels=out_dim,
-                                                    kernel_size=1,
-                                                    stride=self.stride,
-                                                    bias=False)
+        self.down_skip_connection = WSConv2d(in_channels=in_dim,
+                                             out_channels=out_dim,
+                                             kernel_size=1,
+                                             stride=self.stride,
+                                             bias=False)
 
     def forward(self, x):
         indentity = x
@@ -1260,6 +1254,46 @@ class NFBasicResidualBlock(torch.nn.Module):
             out = out * self.alpha
             out = out + indentity
             return out
+
+
+class NFSeparableConv2d(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 padding=1,
+                 stride=1,
+                 bias=False,
+                 gamma=1.7139588594436646):
+        super(NFSeparableConv2d, self).__init__()
+
+        self.gamma = gamma
+        #There is no experimental gamma value for relu6 so we used relu gamma value 1.7139588594436646
+
+        self.depthwise = WSConv2d(in_channels,
+                                  in_channels,
+                                  kernel_size=kernel_size,
+                                  groups=in_channels,
+                                  bias=bias,
+                                  stride=stride,
+                                  padding=padding)
+
+        self.pointwise = WSConv2d(in_channels,
+                                  out_channels,
+                                  kernel_size=1,
+                                  bias=bias)
+
+
+        self.activation1 = torch.nn.ReLU6()
+        self.activation2 = torch.nn.ReLU6()
+
+
+    def forward(self, x):
+        out = self.depthwise(x)
+        out = self.activation1(out) * self.gamma
+        out = self.pointwise(out)
+        out = self.activation2(out) * self.gamma
+        return out
 
 
 
@@ -1321,3 +1355,10 @@ class ResNextResidualBottleNeck(torch.nn.Module):
             out = out + x
         out = self.final_activation(out)
         return out
+
+
+
+
+
+
+

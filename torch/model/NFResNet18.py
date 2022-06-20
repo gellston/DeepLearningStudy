@@ -1,5 +1,5 @@
 import torch
-from util.helper import ScaledStdConv2d
+from util.helper import WSConv2d
 from util.helper import NFBasicResidualBlock
 
 
@@ -24,11 +24,11 @@ class NFResNet18(torch.nn.Module):
         )
 
         self.stem = torch.nn.Sequential(
-            ScaledStdConv2d(in_channels=3,
-                            out_channels=64,
-                            stride=2,
-                            padding=3,
-                            kernel_size=7),
+            WSConv2d(in_channels=3,
+                     out_channels=64,
+                     stride=2,
+                     padding=3,
+                     kernel_size=7),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=3,
                                padding=1,
