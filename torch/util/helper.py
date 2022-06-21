@@ -1295,6 +1295,8 @@ class NFSeparableConv2d(torch.nn.Module):
         out = self.activation2(out) * self.gamma
         return out
 
+#NFNet Normalization Free Module
+
 
 
 class ResNextResidualBottleNeck(torch.nn.Module):
@@ -1356,6 +1358,27 @@ class ResNextResidualBottleNeck(torch.nn.Module):
         out = self.final_activation(out)
         return out
 
+
+
+
+
+class StochasticDepth(torch.nn.Module):
+    def __init__(self,
+                 probability):
+        super().__init__()
+
+        self.probability = 1 - probability
+
+    def forward(self, x):
+        if self.training:
+            if not torch.bernoulli(self.probability):
+                return x
+
+        B, C, W, H = x.shape
+        x = torch.bernoulli(self.probability)
+        torch.tensor()
+
+        return x
 
 
 
