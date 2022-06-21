@@ -7,7 +7,7 @@ import random
 import cv2 as cv2
 
 from torch.utils.data import DataLoader
-from model.LenetModel import LenetModel
+from model.LeNet import LeNet
 
 USE_CUDA = torch.cuda.is_available()  # GPU를 사용가능하면 True, 아니라면 False를 리턴
 device = torch.device("cuda" if USE_CUDA else "cpu")  # GPU 사용 가능하면 사용하고 아니면 CPU 사용
@@ -45,7 +45,7 @@ data_loader = DataLoader(dataset=mnist_train,
                          drop_last=True)
 
 # MNIST data image of shape 28 * 28 = 784
-model = LenetModel().to(device)
+model = LeNet().to(device)
 
 # 비용 함수와 옵티마이저 정의
 loss_fn = nn.CrossEntropyLoss().to(device) # 내부적으로 소프트맥스 함수를 포함하고 있음.

@@ -3,10 +3,10 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 
-class LenetModel(torch.nn.Module):
+class LeNet(torch.nn.Module):
 
     def __init__(self):
-        super(LenetModel, self).__init__()
+        super(LeNet, self).__init__()
 
         ##28x28
         self.conv1 = nn.Conv2d(in_channels=1,
