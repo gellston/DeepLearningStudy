@@ -6,7 +6,7 @@ from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.NFResNet18 import NFResNet18
+from model.NFResNet import NFResNet18
 from util.FIATClassificationDataset import FIATClassificationDataset
 from util.nf_helper import AGC
 
@@ -19,13 +19,14 @@ print("다음 기기로 학습합니다:", device)
 training_epochs = 30
 batch_size = 37
 target_accuracy = 0.99
-learning_rate = 0.0001
+learning_rate = 0.0003
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
 model = NFResNet18(class_num=4,
-                   groups=32).to(device)
+                   stochastic_probability=0.25).to(device)
+
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

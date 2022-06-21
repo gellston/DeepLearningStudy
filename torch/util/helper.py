@@ -304,7 +304,7 @@ class CSPResidualBlock(torch.nn.Module):
         self.part1_out_chnls = int(out_dim * part_ratio)
         self.part2_out_chnls = out_dim - self.part1_out_chnls
 
-        self.stride = stride;
+        self.stride = stride
         self.residual_block = torch.nn.Sequential(torch.nn.Conv2d(self.part2_chnls,
                                                                   mid_dim,
                                                                   kernel_size=3,
@@ -1047,7 +1047,6 @@ class GammaActivation(torch.nn.Module):
         return x
 
 
-
 class WSConv2d(torch.nn.Conv2d):
 
     def __init__(self,
@@ -1204,6 +1203,7 @@ class NFBasicResidualBlock(torch.nn.Module):
                  activation=torch.nn.ReLU,
                  alpha=0.2,
                  beta=1.0,
+                 stochastic_probability=0.25,
                  gamma=1.7139588594436646):
         super(NFBasicResidualBlock, self).__init__()
 
@@ -1230,7 +1230,8 @@ class NFBasicResidualBlock(torch.nn.Module):
                                             GammaActivation(activation=activation,
                                                             gamma=self.gamma),
                                             NFSEConvBlock(in_channels=out_dim,
-                                                          out_channels=out_dim))
+                                                          out_channels=out_dim),
+                                            StochasticDepth(probability=stochastic_probability))
 
         self.down_skip_connection = WSConv2d(in_channels=in_dim,
                                              out_channels=out_dim,
@@ -1359,9 +1360,6 @@ class ResNextResidualBottleNeck(torch.nn.Module):
         return out
 
 
-
-
-
 class StochasticDepth(torch.nn.Module):
     def __init__(self,
                  probability):
@@ -1371,14 +1369,12 @@ class StochasticDepth(torch.nn.Module):
 
     def forward(self, x):
         if self.training:
-            if not torch.bernoulli(self.probability):
-                return x
+            pmask = torch.bernoulli(torch.tensor(self.probability))
+            x = x * pmask
+            return x
+        else:
+            return x
 
-        B, C, W, H = x.shape
-        x = torch.bernoulli(self.probability)
-        torch.tensor()
-
-        return x
 
 
 

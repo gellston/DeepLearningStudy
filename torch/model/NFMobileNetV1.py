@@ -6,7 +6,8 @@ from util.helper import WSConv2d
 
 class NFMobileNetV1(torch.nn.Module):
 
-    def __init__(self, class_num=5):
+    def __init__(self,
+                 class_num=5):
         super(NFMobileNetV1, self).__init__()
 
         self.class_num = class_num
