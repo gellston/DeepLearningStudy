@@ -111,8 +111,8 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
     avg_validation_cost = 0
     avg_validation_acc = 0
 
-    total_batch = len(train_data_loader)
-    print('total_batch = ', total_batch)
+    total_train_batch = len(train_data_loader)
+    print('train total_batch = ', total_train_batch)
 
     total_validation_batch = len(validation_data_loader)
     print('validation total_batch = ', total_validation_batch)
@@ -128,17 +128,17 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
         hypothesis = model(gpu_X)
         cost = criterion(hypothesis, gpu_Y)
         cost.backward()
-        avg_train_cost += (cost / total_batch)
+        avg_train_cost += (cost / total_train_batch)
         optimizer.step()
 
         model.eval()
         hypothesis = model(gpu_X)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(gpu_Y, 1)
         accuracy = correct_prediction.float().mean()
-        avg_train_acc += (accuracy / total_batch)
+        avg_train_acc += (accuracy / total_train_batch)
 
         current_batch += 1
-        print('current train batch=', current_batch, '/', total_validation_batch, ' accuracy=', accuracy.item(), ' cost=', cost.item())
+        print('current train batch=', current_batch, '/', total_train_batch, ' accuracy=', accuracy.item(), ' cost=', cost.item())
 
 
     current_batch = 0
