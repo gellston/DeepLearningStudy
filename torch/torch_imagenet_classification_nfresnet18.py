@@ -111,7 +111,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
     avg_validation_cost = 0
     avg_validation_acc = 0
 
-    total_batch = len(data_loader)
+    total_batch = len(train_data_loader)
     print('total_batch = ', total_batch)
 
     total_validation_batch = len(validation_data_loader)
