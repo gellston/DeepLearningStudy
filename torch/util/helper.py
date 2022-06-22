@@ -860,10 +860,12 @@ _nonlin_table = dict(
 )
 
 class GammaActivation(torch.nn.Module):
-    def __init__(self, activation='relu'):
+    def __init__(self,
+                 activation='relu',
+                 inplace=False):
         super(GammaActivation, self).__init__()
 
-        self.activation = _nonlin_table[activation]()
+        self.activation = _nonlin_table[activation](inplace=inplace)
         self.gamma = _nonlin_gamma[activation]
 
     def forward(self, x):
@@ -1007,7 +1009,7 @@ class NFSEConvBlock(torch.nn.Module):
 
         self.fc = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels, self.hidden_channels, kernel_size=1, padding=0),
-            torch.nn.ReLU(),
+            torch.nn.ReLU(inplace=True),
             torch.nn.Conv2d(self.hidden_channels, out_channels, kernel_size=1, padding=0),
             torch.nn.Sigmoid())
 
@@ -1042,13 +1044,15 @@ class NFBasicResidualBlock(torch.nn.Module):
                                                      padding=1,
                                                      bias=False,
                                                      groups=self.channel_per_group),
-                                            GammaActivation(activation=activation),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
                                             WSConv2d(mid_dim,
                                                      out_dim,
                                                      kernel_size=3,
                                                      padding='same',
                                                      bias=False),
-                                            GammaActivation(activation=activation),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
                                             NFSEConvBlock(in_channels=out_dim,
                                                           out_channels=out_dim),
                                             StochasticDepth(probability=stochastic_probability))
@@ -1099,19 +1103,22 @@ class NFResidualBottleNeck(torch.nn.Module):
                                                      kernel_size=1,
                                                      stride=self.stride,
                                                      bias=False),
-                                            GammaActivation(activation=activation),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
                                             WSConv2d(mid_dim,
                                                      mid_dim,
                                                      kernel_size=3,
                                                      padding=1,
                                                      bias=False,
                                                      groups=self.channel_per_group),
-                                            GammaActivation(activation=activation),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
                                             WSConv2d(mid_dim,
                                                      out_dim,
                                                      kernel_size=1,
                                                      bias=False),
-                                            GammaActivation(activation=activation),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
                                             NFSEConvBlock(in_channels=out_dim,
                                                           out_channels=out_dim),
                                             StochasticDepth(probability=stochastic_probability))
@@ -1174,8 +1181,10 @@ class NFSeparableConv2d(torch.nn.Module):
                                   bias=bias)
 
 
-        self.activation1 = GammaActivation(activation=activation)
-        self.activation2 = GammaActivation(activation=activation)
+        self.activation1 = GammaActivation(activation=activation,
+                                           inplace=True)
+        self.activation2 = GammaActivation(activation=activation,
+                                           inplace=True)
 
 
     def forward(self, x):

@@ -23,7 +23,8 @@ class NFResNet(torch.nn.Module):
                      stride=2,
                      padding=3,
                      kernel_size=7),
-            GammaActivation(activation='relu'),
+            GammaActivation(activation='relu',
+                            inplace=True),
             torch.nn.MaxPool2d(kernel_size=3,
                                padding=1,
                                stride=2)
