@@ -204,7 +204,7 @@ class ResidualBottleNeck(torch.nn.Module):
         return out
 
 
-class InvertedBottleNect(torch.nn.Module):
+class InvertedBottleNeck(torch.nn.Module):
     def __init__(self, in_channels, out_channels, expansion_rate=4, stride=1, activation=torch.nn.ReLU6):
         super().__init__()
         self.in_channels = in_channels
@@ -396,152 +396,6 @@ class CSPDenseBlock(torch.nn.Module):
 
 
 
-class CSPSeparableResidualBlock(torch.nn.Module):
-
-    def __init__(self, in_dim, mid_dim, out_dim, stride=1, part_ratio=0.5, activation=torch.nn.SiLU):
-        super(CSPSeparableResidualBlock, self).__init__()
-
-        self.check_different = mid_dim != out_dim
-
-        self.part1_chnls = int(in_dim * part_ratio)
-        self.part2_chnls = in_dim - self.part1_chnls                ##Residual Layer Channel Calculation
-
-        self.part1_out_chnls = int(out_dim * part_ratio)
-        self.part2_out_chnls = out_dim - self.part1_out_chnls
-
-        self.stride = stride;
-        self.residual_block = torch.nn.Sequential(SeparableConv2d(self.part2_chnls,
-                                                                  mid_dim,
-                                                                  kernel_size=3,
-                                                                  stride=self.stride,
-                                                                  padding=1,
-                                                                  bias=False),
-                                                  torch.nn.BatchNorm2d(num_features=mid_dim),
-                                                  activation(),
-                                                  SeparableConv2d(mid_dim,
-                                                                  self.part2_out_chnls,
-                                                                  kernel_size=3,
-                                                                  padding='same',
-                                                                  bias=False),
-                                                  torch.nn.BatchNorm2d(num_features=self.part2_out_chnls))
-
-        self.projection1 = torch.nn.Conv2d(in_channels=self.part2_chnls,            ##Residual Projection
-                                           out_channels=self.part2_out_chnls,
-                                           kernel_size=1,
-                                           stride=self.stride)
-
-        self.projection2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
-                                           out_channels=self.part1_out_chnls,
-                                           kernel_size=1,
-                                           stride=self.stride)
-
-        self.dim_equalizer1 = torch.nn.Conv2d(in_channels=self.part2_chnls,
-                                              out_channels=self.part2_out_chnls,
-                                              kernel_size=1)
-
-        self.dim_equalizer2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
-                                              out_channels=self.part1_out_chnls,
-                                              kernel_size=1)
-
-        self.activation = activation()
-
-    def forward(self, x):
-
-        part1 = x[:, :self.part1_chnls, :, :] #part1 channel 자르기
-        part2 = x[:, self.part1_chnls:, :, :] #part2 channel 자르기
-        skip_connection = part2
-
-        if self.stride == 2:
-            skip_connection = self.projection1(skip_connection)
-            part1 = self.projection2(part1)
-        else:
-            if self.part1_chnls != self.part1_out_chnls:
-                skip_connection = self.dim_equalizer1(skip_connection)
-                part1 = self.dim_equalizer2(part1)
-
-        residual = self.residual_block(part2)  # F(x)
-        residual = torch.add(residual, skip_connection)
-        residual = self.activation(residual)
-        out = torch.cat((part1, residual), 1)
-
-        return out
-
-
-
-
-
-
-class CSPInvertedBottleNect(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, expansion_rate=4, stride=1, part_ratio=0.5, activation=torch.nn.ReLU6):
-        super().__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.expansion_rate = expansion_rate
-        self.stride = stride
-
-
-
-
-        self.part1_chnls = int(in_channels * part_ratio)
-        self.part2_chnls = in_channels - self.part1_chnls                ##Residual Layer Channel Calculation
-
-        self.part1_out_chnls = int(out_channels * part_ratio)
-        self.part2_out_chnls = out_channels - self.part1_out_chnls
-
-        self.expansion_out = int(self.part2_chnls * self.expansion_rate)
-
-
-        self.conv_expansion = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
-                                                                  in_channels=self.part2_chnls,
-                                                                  out_channels=self.expansion_out,
-                                                                  bias=False,
-                                                                  stride=self.stride),
-                                                  torch.nn.BatchNorm2d(self.expansion_out),
-                                                  activation())
-
-        self.conv_depthwise = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=3,
-                                                                  in_channels=self.expansion_out,
-                                                                  out_channels=self.expansion_out,
-                                                                  groups=self.expansion_out,
-                                                                  bias=False,
-                                                                  padding=1,
-                                                                  stride=1),
-                                                  torch.nn.BatchNorm2d(self.expansion_out),
-                                                  activation())
-
-        self.conv_projection = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=1,
-                                                                   in_channels=self.expansion_out,
-                                                                   out_channels=self.part2_out_chnls,
-                                                                   bias=False),
-                                                   torch.nn.BatchNorm2d(self.part2_out_chnls))
-
-
-        self.dim_equalizer = torch.nn.Conv2d(in_channels=self.part1_chnls,
-                                             out_channels=self.part1_out_chnls,
-                                             kernel_size=1,
-                                             stride=self.stride)
-
-
-    def forward(self, x):
-
-        part1 = x[:, :self.part1_chnls, :, :] #part1 channel 자르기
-        part2 = x[:, self.part1_chnls:, :, :] #part2 channel 자르기
-
-
-        out = self.conv_expansion(part2)
-        out = self.conv_depthwise(out)
-        out = self.conv_projection(out)
-
-        if self.stride != 2 and self.in_channels == self.out_channels:
-            out = out + part2
-
-        if self.part1_chnls != self.part1_out_chnls:
-            part1 = self.dim_equalizer(part1)
-
-        out = torch.cat((part1, out), 1)
-
-        return out
-
 
 class SEBlock(torch.nn.Module):
     def __init__(self, in_channels, reduction_ratio=16, activation=torch.nn.ReLU):
@@ -561,31 +415,6 @@ class SEBlock(torch.nn.Module):
         x = x.view(x.size(0), x.size(1), 1, 1)
         return x
 
-
-class SESeparableConv2d(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False):
-        super(SESeparableConv2d, self).__init__()
-
-        self.depthwise = torch.nn.Conv2d(in_channels,
-                                         in_channels,
-                                         kernel_size=kernel_size,
-                                         groups=in_channels,
-                                         bias=bias,
-                                         stride=stride,
-                                         padding=padding)
-
-        self.pointwise = torch.nn.Conv2d(in_channels,
-                                         out_channels,
-                                         kernel_size=1,
-                                         bias=bias)
-
-        self.seblock = SEBlock(in_channels=out_channels)
-
-    def forward(self, x):
-        out = self.depthwise(x)
-        out = self.pointwise(out)
-        out = self.seblock(out) * out
-        return out
 
 class SESeparableActivationConv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU):
@@ -691,30 +520,6 @@ class SEDenseBottleNeck(torch.nn.Module):
         return torch.cat([x, self.residual(x)], 1)
 
 
-
-class SEDenseBlock(torch.nn.Module):
-
-    def __init__(self, num_input_features, num_layers, expansion_rate, growth_rate, droprate, activation=torch.nn.ReLU):
-        super(SEDenseBlock, self).__init__()
-
-        self.dense_block = torch.nn.Sequential()
-        self.droprate = droprate
-
-        for i in range(num_layers):
-            layer = SEDenseBottleNeck(in_channels=num_input_features + i * growth_rate,
-                                      growth_rate=growth_rate,
-                                      expansion_rate=expansion_rate,
-                                      droprate=droprate,
-                                      activation=activation)
-            self.dense_block.add_module('denselayer_%d' % (i + 1), layer)
-        self.seblock = SEBlock(in_channels=num_input_features + num_layers * growth_rate)
-
-
-    def forward(self, x):
-        x = self.dense_block(x)
-        x = self.seblock(x) * x
-        return x
-
 class NCTransition(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -725,7 +530,6 @@ class NCTransition(torch.nn.Module):
     def forward(self, x):
         output = self.down_sample(x)
         return output
-
 
 
 class ShuffleUnit(torch.nn.Module):
