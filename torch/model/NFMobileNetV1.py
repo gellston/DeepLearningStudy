@@ -1,13 +1,14 @@
 import torch
-import torch.nn.functional as F
+
 from util.helper import NFSeparableConv2d
 from util.helper import WSConv2d
-
+from util.helper import GammaActivation
 
 class NFMobileNetV1(torch.nn.Module):
 
     def __init__(self,
-                 class_num=5):
+                 class_num=5,
+                 dropblock_probability=0.2):
         super(NFMobileNetV1, self).__init__()
 
         self.class_num = class_num
@@ -33,17 +34,23 @@ class NFMobileNetV1(torch.nn.Module):
                      out_channels=32,
                      stride=2,
                      padding=1,
-                     kernel_size=3),
-            torch.nn.ReLU6()
+                     kernel_size=3,
+                     bias=False),
+            GammaActivation(activation='relu6')
         )
 
         blocks = []
+        num_blocks = len(block_args)
         for block_index, (in_dim, out_dim, stride) in enumerate(block_args):
+            block_dropblock_probability = dropblock_probability * (block_index + 1) / num_blocks
             blocks.append(NFSeparableConv2d(in_channels=in_dim,
                                             out_channels=out_dim,
                                             stride=stride,
                                             kernel_size=3,
+                                            activation='relu6',
                                             bias=False))
+            if block_index > 8:
+                blocks.append(torch.nn.Dropout2d(p=block_dropblock_probability)) #Dropblock 적용
 
         self.body = torch.nn.Sequential(*blocks)
         self.gap = torch.nn.AdaptiveAvgPool2d(1)

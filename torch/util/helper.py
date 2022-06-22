@@ -840,11 +840,31 @@ _nonlin_gamma = dict(
     tanh=1.5939117670059204,
 )
 
+
+_nonlin_table = dict(
+    identity=torch.nn.Identity,
+    celu=torch.nn.CELU,
+    elu=torch.nn.ELU,
+    gelu=torch.nn.GELU,
+    leaky_relu=torch.nn.LeakyReLU,
+    log_sigmoid=torch.nn.LogSigmoid,
+    log_softmax=torch.nn.LogSoftmax,
+    relu=torch.nn.ReLU,
+    relu6=torch.nn.ReLU6,
+    selu=torch.nn.SELU,
+    sigmoid=torch.nn.Sigmoid,
+    silu=torch.nn.SiLU,
+    softsign=torch.nn.Softsign,
+    softplus=torch.nn.Softplus,
+    tanh=torch.nn.Tanh,
+)
+
 class GammaActivation(torch.nn.Module):
-    def __init__(self, activation=torch.nn.ReLU, gamma=1.7139588594436646):
+    def __init__(self, activation='relu'):
         super(GammaActivation, self).__init__()
-        self.gamma = gamma
-        self.activation = activation()
+
+        self.activation = _nonlin_table[activation]()
+        self.gamma = _nonlin_gamma[activation]
 
     def forward(self, x):
         x = self.activation(x) * self.gamma
@@ -1004,17 +1024,15 @@ class NFBasicResidualBlock(torch.nn.Module):
                  out_dim,
                  stride=1,
                  groups=32,
-                 activation=torch.nn.ReLU,
                  alpha=0.2,
                  beta=1.0,
-                 stochastic_probability=0.25,
-                 gamma=1.7139588594436646):
+                 activation='relu',
+                 stochastic_probability=0.25):
         super(NFBasicResidualBlock, self).__init__()
 
         self.stride = stride
         self.alpha = alpha
         self.beta = beta
-        self.gamma = gamma
         self.groups = groups
         self.channel_per_group = max(1, int(in_dim / self.groups))
         self.features = torch.nn.Sequential(WSConv2d(in_dim,
@@ -1024,15 +1042,13 @@ class NFBasicResidualBlock(torch.nn.Module):
                                                      padding=1,
                                                      bias=False,
                                                      groups=self.channel_per_group),
-                                            GammaActivation(activation=activation,
-                                                            gamma=self.gamma),
+                                            GammaActivation(activation=activation),
                                             WSConv2d(mid_dim,
                                                      out_dim,
                                                      kernel_size=3,
                                                      padding='same',
                                                      bias=False),
-                                            GammaActivation(activation=activation,
-                                                            gamma=self.gamma),
+                                            GammaActivation(activation=activation),
                                             NFSEConvBlock(in_channels=out_dim,
                                                           out_channels=out_dim),
                                             StochasticDepth(probability=stochastic_probability))
@@ -1052,11 +1068,82 @@ class NFBasicResidualBlock(torch.nn.Module):
             out = out * self.alpha
             out = out + down
             return out
+        else:
+            x = x * self.beta
+            out = self.features(x)
+            out = out * self.alpha
+            out = out + indentity
+            return out
+
+
+class NFResidualBottleNeck(torch.nn.Module):
+    def __init__(self,
+                 in_dim,
+                 mid_dim,
+                 out_dim,
+                 stride=1,
+                 groups=32,
+                 alpha=0.2,
+                 beta=1.0,
+                 activation='relu',
+                 stochastic_probability=0.25):
+        super(NFResidualBottleNeck, self).__init__()
+
+        self.stride = stride
+        self.alpha = alpha
+        self.beta = beta
+        self.groups = groups
+        self.channel_per_group = max(1, int(mid_dim / self.groups))
+        self.features = torch.nn.Sequential(WSConv2d(in_dim,
+                                                     mid_dim,
+                                                     kernel_size=1,
+                                                     stride=self.stride,
+                                                     bias=False),
+                                            GammaActivation(activation=activation),
+                                            WSConv2d(mid_dim,
+                                                     mid_dim,
+                                                     kernel_size=3,
+                                                     padding=1,
+                                                     bias=False,
+                                                     groups=self.channel_per_group),
+                                            GammaActivation(activation=activation),
+                                            WSConv2d(mid_dim,
+                                                     out_dim,
+                                                     kernel_size=1,
+                                                     bias=False),
+                                            GammaActivation(activation=activation),
+                                            NFSEConvBlock(in_channels=out_dim,
+                                                          out_channels=out_dim),
+                                            StochasticDepth(probability=stochastic_probability))
+
+        self.down_skip_connection = WSConv2d(in_channels=in_dim,
+                                             out_channels=out_dim,
+                                             kernel_size=1,
+                                             stride=self.stride,
+                                             bias=False)
+
+        self.dim_equalizer = WSConv2d(in_channels=in_dim,
+                                      out_channels=out_dim,
+                                      kernel_size=1,
+                                      stride=self.stride,
+                                      bias=False)
+
+    def forward(self, x):
+        indentity = x
+        if self.stride == 2:
+            x = x * self.beta
+            down = self.down_skip_connection(indentity)
+            out = self.features(x)
+            out = out * self.alpha
+            out = out + down
+            return out
 
         else:
             x = x * self.beta
             out = self.features(x)
             out = out * self.alpha
+            if indentity.size() is not out.size():
+                indentity = self.dim_equalizer(indentity)
             out = out + indentity
             return out
 
@@ -1068,12 +1155,10 @@ class NFSeparableConv2d(torch.nn.Module):
                  kernel_size,
                  padding=1,
                  stride=1,
-                 bias=False,
-                 gamma=1.7139588594436646):
+                 activation='relu6',
+                 bias=False):
         super(NFSeparableConv2d, self).__init__()
 
-        self.gamma = gamma
-        #There is no experimental gamma value for relu6 so we used relu gamma value 1.7139588594436646
 
         self.depthwise = WSConv2d(in_channels,
                                   in_channels,
@@ -1089,15 +1174,15 @@ class NFSeparableConv2d(torch.nn.Module):
                                   bias=bias)
 
 
-        self.activation1 = torch.nn.ReLU6()
-        self.activation2 = torch.nn.ReLU6()
+        self.activation1 = GammaActivation(activation=activation)
+        self.activation2 = GammaActivation(activation=activation)
 
 
     def forward(self, x):
         out = self.depthwise(x)
-        out = self.activation1(out) * self.gamma
+        out = self.activation1(out)
         out = self.pointwise(out)
-        out = self.activation2(out) * self.gamma
+        out = self.activation2(out)
         return out
 
 #NFNet Normalization Free Module

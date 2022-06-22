@@ -1,6 +1,8 @@
 import torch
 from util.helper import WSConv2d
 from util.helper import NFBasicResidualBlock
+from util.helper import NFResidualBottleNeck
+from util.helper import GammaActivation
 
 
 class NFResNet(torch.nn.Module):
@@ -9,7 +11,8 @@ class NFResNet(torch.nn.Module):
                  block_args=[],
                  class_num=5,
                  groups=32,
-                 stochastic_probability=0.25):
+                 stochastic_probability=0.25,
+                 base_conv=NFBasicResidualBlock):
         super(NFResNet, self).__init__()
 
         self.class_num = class_num
@@ -20,7 +23,7 @@ class NFResNet(torch.nn.Module):
                      stride=2,
                      padding=3,
                      kernel_size=7),
-            torch.nn.ReLU(),
+            GammaActivation(activation='relu'),
             torch.nn.MaxPool2d(kernel_size=3,
                                padding=1,
                                stride=2)
@@ -29,17 +32,20 @@ class NFResNet(torch.nn.Module):
         alpha = 0.2
         expected_std = 1.0
         blocks = []
-
+        num_blocks = len(block_args)
+        final_channel = 0
         for block_index, (in_dim, mid_dim, out_dim, stride) in enumerate(block_args):
+            final_channel = out_dim
             beta = 1. / expected_std
-            blocks.append(NFBasicResidualBlock(in_dim=in_dim,
-                                               mid_dim=mid_dim,
-                                               out_dim=out_dim,
-                                               stride=stride,
-                                               beta=beta,
-                                               alpha=alpha,
-                                               groups=groups,
-                                               stochastic_probability=stochastic_probability))
+            block_stochastic_probability = stochastic_probability * (block_index + 1) / num_blocks
+            blocks.append(base_conv(in_dim=in_dim,
+                                    mid_dim=mid_dim,
+                                    out_dim=out_dim,
+                                    stride=stride,
+                                    beta=beta,
+                                    alpha=alpha,
+                                    groups=groups,
+                                    stochastic_probability=block_stochastic_probability))
             if block_index == 0:
                 expected_std = 1.0
             expected_std = (expected_std ** 2 + alpha ** 2) ** 0.5
@@ -47,7 +53,7 @@ class NFResNet(torch.nn.Module):
         self.body = torch.nn.Sequential(*blocks)
 
         self.gap = torch.nn.AdaptiveAvgPool2d(1)
-        self.fc = torch.nn.Conv2d(in_channels=512,
+        self.fc = torch.nn.Conv2d(in_channels=final_channel,
                                   out_channels=class_num,
                                   kernel_size=1)
 
@@ -73,5 +79,149 @@ def NFResNet18(class_num=5,
         (256, 512, 512, 2),
         (512, 512, 512, 1),
     )
-
     return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability, block_args=block_args)
+
+
+def NFResNet34(class_num=5,
+               stochastic_probability=0.25):
+    block_args = (
+        (64, 64, 64, 1),
+        (64, 64, 64, 1),
+        (64, 64, 64, 1),
+        (64, 128, 128, 2),
+        (128, 128, 128, 1),
+        (128, 128, 128, 1),
+        (128, 256, 256, 2),
+        (256, 256, 256, 1),
+        (256, 256, 256, 1),
+        (256, 256, 256, 1),
+        (256, 256, 256, 1),
+        (256, 256, 256, 1),
+        (256, 512, 512, 2),
+        (512, 512, 512, 1),
+        (512, 512, 512, 1),
+    )
+    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability, block_args=block_args)
+
+
+def NFResNet50(class_num=5,
+               stochastic_probability=0.25):
+    block_args = (
+        (64, 64, 256, 1),
+        (256, 64, 256, 1),
+        (256, 64, 256, 1),
+        (256, 128, 512, 2),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 256, 1024, 2),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 512, 2048, 2),
+        (2048, 512, 2048, 1),
+        (2048, 512, 2048, 1),
+    )
+    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability,
+                    block_args=block_args, base_conv=NFResidualBottleNeck)
+
+
+def NFResNet101(class_num=5,
+               stochastic_probability=0.25):
+    block_args = (
+        (64, 64, 256, 1),
+        (256, 64, 256, 1),
+        (256, 64, 256, 1),
+        (256, 128, 512, 2),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 256, 1024, 2),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 512, 2048, 2),
+        (2048, 512, 2048, 1),
+        (2048, 512, 2048, 1),
+    )
+    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability,
+                    block_args=block_args, base_conv=NFResidualBottleNeck)
+
+
+def NFResNet152(class_num=5,
+               stochastic_probability=0.25):
+    block_args = (
+        (64, 64, 256, 1),
+        (256, 64, 256, 1),
+        (256, 64, 256, 1),
+        (256, 128, 512, 2),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 128, 512, 1),
+        (512, 256, 1024, 2),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 256, 1024, 1),
+        (1024, 512, 2048, 2),
+        (2048, 512, 2048, 1),
+        (2048, 512, 2048, 1),
+    )
+    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability,
+                    block_args=block_args, base_conv=NFResidualBottleNeck)
