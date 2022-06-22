@@ -10,7 +10,6 @@ class ShuffleNet(torch.nn.Module):
 
         self.groups = groups
         self.class_num = class_num
-        self.stage_repeats = [3, 7, 3]
 
         self.preconv = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=3,
