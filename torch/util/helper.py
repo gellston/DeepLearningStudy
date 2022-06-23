@@ -168,11 +168,15 @@ class ResidualBottleNeck(torch.nn.Module):
             torch.nn.Conv2d(in_channels=in_channels,
                             out_channels=inner_channels,
                             kernel_size=1,
-                            stride=self.stride,
                             bias=False),
             torch.nn.BatchNorm2d(inner_channels),                  ##ex:128
             activation(),
-            torch.nn.Conv2d(inner_channels, inner_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            torch.nn.Conv2d(inner_channels,
+                            inner_channels,
+                            kernel_size=3,
+                            stride=self.stride,
+                            padding=1,
+                            bias=False),
             torch.nn.BatchNorm2d(inner_channels),
             activation(),
             torch.nn.Conv2d(inner_channels, out_channels, kernel_size=1, stride=1, bias=False),
@@ -218,7 +222,7 @@ class InvertedBottleNeck(torch.nn.Module):
                                                                   in_channels=self.in_channels,
                                                                   out_channels=self.expansion_out,
                                                                   bias=False,
-                                                                  stride=self.stride),
+                                                                  stride=1),
                                                   torch.nn.BatchNorm2d(self.expansion_out),
                                                   activation())
 
@@ -228,7 +232,7 @@ class InvertedBottleNeck(torch.nn.Module):
                                                                   groups=self.expansion_out,
                                                                   bias=False,
                                                                   padding=1,
-                                                                  stride=1),
+                                                                  stride=self.stride),
                                                   torch.nn.BatchNorm2d(self.expansion_out),
                                                   activation())
 
@@ -467,7 +471,7 @@ class SEInvertedBottleNect(torch.nn.Module):
                                                                   in_channels=self.in_channels,
                                                                   out_channels=self.expansion_out,
                                                                   bias=False,
-                                                                  stride=self.stride),
+                                                                  stride=1),
                                                   torch.nn.BatchNorm2d(self.expansion_out),
                                                   activation())
 
@@ -477,7 +481,7 @@ class SEInvertedBottleNect(torch.nn.Module):
                                                                   groups=self.expansion_out,
                                                                   bias=False,
                                                                   padding=1,
-                                                                  stride=1),
+                                                                  stride=self.stride),
                                                   torch.nn.BatchNorm2d(self.expansion_out),
                                                   activation())
 
@@ -705,7 +709,7 @@ class InvertedBottleNectV3(torch.nn.Module):
                                                                   in_channels=self.in_channels,
                                                                   out_channels=self.expansion_out,
                                                                   bias=False,
-                                                                  stride=self.stride),
+                                                                  stride=1),
                                                   torch.nn.BatchNorm2d(self.expansion_out),
                                                   activation())
 
@@ -715,7 +719,7 @@ class InvertedBottleNectV3(torch.nn.Module):
                                                                   groups=self.expansion_out,
                                                                   bias=False,
                                                                   padding=self.padding,
-                                                                  stride=1),
+                                                                  stride=self.stride),
                                                   torch.nn.BatchNorm2d(self.expansion_out),
                                                   activation())
 
@@ -865,7 +869,10 @@ class GammaActivation(torch.nn.Module):
                  inplace=False):
         super(GammaActivation, self).__init__()
 
-        self.activation = _nonlin_table[activation](inplace=inplace)
+        if activation == 'gelu':
+            self.activation = _nonlin_table[activation]()
+        else:
+            self.activation = _nonlin_table[activation](inplace=inplace)
         self.gamma = _nonlin_gamma[activation]
 
     def forward(self, x):
@@ -1008,9 +1015,9 @@ class NFSEConvBlock(torch.nn.Module):
         self.hidden_channels = max(1, int(in_channels * se_rate))
 
         self.fc = torch.nn.Sequential(
-            torch.nn.Conv2d(in_channels, self.hidden_channels, kernel_size=1, padding=0),
+            torch.nn.Conv2d(in_channels, self.hidden_channels, kernel_size=1),
             torch.nn.ReLU(inplace=True),
-            torch.nn.Conv2d(self.hidden_channels, out_channels, kernel_size=1, padding=0),
+            torch.nn.Conv2d(self.hidden_channels, out_channels, kernel_size=1),
             torch.nn.Sigmoid())
 
     def forward(self, x):
@@ -1097,26 +1104,26 @@ class NFResidualBottleNeck(torch.nn.Module):
         self.alpha = alpha
         self.beta = beta
         self.groups = groups
-        self.channel_per_group = max(1, int(mid_dim / self.groups))
         self.features = torch.nn.Sequential(WSConv2d(in_dim,
                                                      mid_dim,
                                                      kernel_size=1,
-                                                     stride=self.stride,
-                                                     bias=False),
+                                                     stride=1,
+                                                     bias=True),
                                             GammaActivation(activation=activation,
                                                             inplace=True),
                                             WSConv2d(mid_dim,
                                                      mid_dim,
                                                      kernel_size=3,
+                                                     stride=self.stride,
                                                      padding=1,
-                                                     bias=False,
-                                                     groups=self.channel_per_group),
+                                                     bias=True,
+                                                     groups=self.groups),
                                             GammaActivation(activation=activation,
                                                             inplace=True),
                                             WSConv2d(mid_dim,
                                                      out_dim,
                                                      kernel_size=1,
-                                                     bias=False),
+                                                     bias=True),
                                             GammaActivation(activation=activation,
                                                             inplace=True),
                                             NFSEConvBlock(in_channels=out_dim,
@@ -1127,13 +1134,13 @@ class NFResidualBottleNeck(torch.nn.Module):
                                              out_channels=out_dim,
                                              kernel_size=1,
                                              stride=self.stride,
-                                             bias=False)
+                                             bias=True)
 
         self.dim_equalizer = WSConv2d(in_channels=in_dim,
                                       out_channels=out_dim,
                                       kernel_size=1,
                                       stride=self.stride,
-                                      bias=False)
+                                      bias=True)
 
     def forward(self, x):
         indentity = x
@@ -1194,6 +1201,93 @@ class NFSeparableConv2d(torch.nn.Module):
         out = self.activation2(out)
         return out
 
+
+
+class NFNetBlock(torch.nn.Module):
+    def __init__(self,
+                 in_dim,
+                 mid_dim,
+                 out_dim,
+                 stride=1,
+                 groups=32,
+                 alpha=0.2,
+                 beta=1.0,
+                 activation='gelu',
+                 stochastic_probability=0.25):
+        super(NFNetBlock, self).__init__()
+
+        self.stride = stride
+        self.alpha = alpha
+        self.beta = beta
+        self.groups = groups
+
+
+        self.pre_activation = GammaActivation(activation=activation)
+
+        self.features = torch.nn.Sequential(WSConv2d(in_dim,
+                                                     mid_dim,
+                                                     kernel_size=1,
+                                                     bias=True),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
+                                            WSConv2d(mid_dim,
+                                                     mid_dim,
+                                                     kernel_size=3,
+                                                     padding=1,
+                                                     stride=self.stride,
+                                                     bias=True,
+                                                     groups=self.groups),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
+                                            WSConv2d(mid_dim,
+                                                     mid_dim,
+                                                     kernel_size=3,
+                                                     padding=1,
+                                                     stride=1,
+                                                     bias=True,
+                                                     groups=self.groups),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
+                                            WSConv2d(mid_dim,
+                                                     out_dim,
+                                                     kernel_size=1,
+                                                     bias=True),
+                                            NFSEConvBlock(in_channels=out_dim,
+                                                          out_channels=out_dim),
+                                            StochasticDepth(probability=stochastic_probability))
+
+
+        self.down_skip_connection = torch.nn.Sequential(
+            torch.nn.AvgPool2d(kernel_size=3,
+                               stride=2,
+                               padding=1),
+            WSConv2d(in_channels=in_dim,
+                     out_channels=out_dim,
+                     kernel_size=1,
+                     stride=1,
+                     bias=True)
+        )
+
+    def forward(self, x):
+        indentity = x
+        if self.stride == 2:
+            x = x * self.beta
+            x = self.pre_activation(x)
+            down = self.down_skip_connection(indentity)
+            out = self.features(x)
+            out = out * self.alpha
+            out = out + down
+            return out
+
+        else:
+            x = x * self.beta
+            x = self.pre_activation(x)
+            out = self.features(x)
+            out = out * self.alpha
+            out = out + indentity
+            return out
+
+
 #NFNet Normalization Free Module
 
 
@@ -1216,14 +1310,14 @@ class ResNextResidualBottleNeck(torch.nn.Module):
             torch.nn.Conv2d(in_channels=in_channels,
                             out_channels=inner_channels,
                             kernel_size=1,
-                            stride=self.stride,
+                            stride=1,
                             bias=False),
             torch.nn.BatchNorm2d(inner_channels),                  ##ex:128
             activation(),
             torch.nn.Conv2d(inner_channels,
                             inner_channels,
                             kernel_size=3,
-                            stride=1,
+                            stride=self.stride,
                             padding=1,
                             bias=False,
                             groups=self.channels_per_groups),
@@ -1269,6 +1363,7 @@ class StochasticDepth(torch.nn.Module):
         if self.training:
             pmask = torch.bernoulli(torch.tensor(self.probability))
             x = x * pmask
+            #x[:, :, :, :] = pmask
             return x
         else:
             return x

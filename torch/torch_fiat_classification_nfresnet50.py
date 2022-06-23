@@ -19,12 +19,13 @@ print("다음 기기로 학습합니다:", device)
 training_epochs = 30
 batch_size = 10
 target_accuracy = 0.99
-learning_rate = 0.0001
+learning_rate = 0.00001
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
 model = NFResNet50(class_num=4,
+                   gap_dropout_probability=0.25,
                    stochastic_probability=0.25).to(device)
 
 print('==== model info ====')

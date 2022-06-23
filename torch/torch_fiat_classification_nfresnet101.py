@@ -25,6 +25,7 @@ accuracy_threshold = 0.5
 
 
 model = NFResNet101(class_num=4,
+                    gap_dropout_probability=0.25,
                     stochastic_probability=0.25).to(device)
 
 print('==== model info ====')

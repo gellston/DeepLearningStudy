@@ -24,7 +24,9 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = NFMobileNetV1(class_num=4).to(device)
+model = NFMobileNetV1(class_num=4,
+                      gap_dropout_probability=0.25,
+                      dropblock_probability=0).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

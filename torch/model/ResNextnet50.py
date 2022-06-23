@@ -50,7 +50,8 @@ class ResNextnet50(torch.nn.Module):
             blocks.append(ResNextResidualBottleNeck(
                 in_channels=in_dim,
                 inner_channels=mid_dim,
-                out_channels=out_dim,                stride=stride,
+                out_channels=out_dim,
+                stride=stride,
                 groups=groups,
                 activation=activation
             ))

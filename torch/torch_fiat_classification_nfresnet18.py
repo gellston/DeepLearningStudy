@@ -17,7 +17,7 @@ print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 30
-batch_size = 37
+batch_size = 35
 target_accuracy = 0.99
 learning_rate = 0.0001
 accuracy_threshold = 0.5
@@ -25,6 +25,7 @@ accuracy_threshold = 0.5
 
 
 model = NFResNet18(class_num=4,
+                   gap_dropout_probability=0.25,
                    stochastic_probability=0.25).to(device)
 
 print('==== model info ====')

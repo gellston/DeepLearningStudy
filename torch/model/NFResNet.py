@@ -10,7 +10,8 @@ class NFResNet(torch.nn.Module):
     def __init__(self,
                  block_args=[],
                  class_num=5,
-                 groups=32,
+                 cardinality=32,
+                 gap_dropout_probability=0.25,
                  stochastic_probability=0.25,
                  base_conv=NFBasicResidualBlock):
         super(NFResNet, self).__init__()
@@ -22,7 +23,8 @@ class NFResNet(torch.nn.Module):
                      out_channels=64,
                      stride=2,
                      padding=3,
-                     kernel_size=7),
+                     kernel_size=7,
+                     bias=True),
             GammaActivation(activation='relu',
                             inplace=True),
             torch.nn.MaxPool2d(kernel_size=3,
@@ -45,7 +47,7 @@ class NFResNet(torch.nn.Module):
                                     stride=stride,
                                     beta=beta,
                                     alpha=alpha,
-                                    groups=groups,
+                                    groups=cardinality,
                                     stochastic_probability=block_stochastic_probability))
             if block_index == 0:
                 expected_std = 1.0
@@ -54,14 +56,17 @@ class NFResNet(torch.nn.Module):
         self.body = torch.nn.Sequential(*blocks)
 
         self.gap = torch.nn.AdaptiveAvgPool2d(1)
+        self.fc_dropout = torch.nn.Dropout2d(p=gap_dropout_probability)
         self.fc = torch.nn.Conv2d(in_channels=final_channel,
                                   out_channels=class_num,
                                   kernel_size=1)
+        torch.nn.init.normal_(self.fc.weight, mean=0, std=0.01)
 
     def forward(self, x):
         x = self.stem(x)
         x = self.body(x)
         x = self.gap(x)
+        x = self.fc_dropout(x)
         x = self.fc(x)
         x = x.view([-1, self.class_num])
         x = torch.softmax(x, dim=1)
@@ -69,6 +74,7 @@ class NFResNet(torch.nn.Module):
 
 
 def NFResNet18(class_num=5,
+               gap_dropout_probability=0.25,
                stochastic_probability=0.25):
     block_args = (
         (64, 64, 64, 1),
@@ -80,10 +86,15 @@ def NFResNet18(class_num=5,
         (256, 512, 512, 2),
         (512, 512, 512, 1),
     )
-    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability, block_args=block_args)
+    return NFResNet(class_num=class_num,
+                    cardinality=32,
+                    gap_dropout_probability=gap_dropout_probability,
+                    stochastic_probability=stochastic_probability,
+                    block_args=block_args)
 
 
 def NFResNet34(class_num=5,
+               gap_dropout_probability=0.25,
                stochastic_probability=0.25):
     block_args = (
         (64, 64, 64, 1),
@@ -102,13 +113,18 @@ def NFResNet34(class_num=5,
         (512, 512, 512, 1),
         (512, 512, 512, 1),
     )
-    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability, block_args=block_args)
+    return NFResNet(class_num=class_num,
+                    cardinality=32,
+                    gap_dropout_probability=gap_dropout_probability,
+                    stochastic_probability=stochastic_probability,
+                    block_args=block_args)
 
 
 def NFResNet50(class_num=5,
+               gap_dropout_probability=0.25,
                stochastic_probability=0.25):
     block_args = (
-        (64, 64, 256, 1),
+        (64, 64, 256, 2),
         (256, 64, 256, 1),
         (256, 64, 256, 1),
         (256, 128, 512, 2),
@@ -125,14 +141,19 @@ def NFResNet50(class_num=5,
         (2048, 512, 2048, 1),
         (2048, 512, 2048, 1),
     )
-    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability,
-                    block_args=block_args, base_conv=NFResidualBottleNeck)
+    return NFResNet(class_num=class_num,
+                    cardinality=32,
+                    gap_dropout_probability=gap_dropout_probability,
+                    stochastic_probability=stochastic_probability,
+                    block_args=block_args,
+                    base_conv=NFResidualBottleNeck)
 
 
 def NFResNet101(class_num=5,
-               stochastic_probability=0.25):
+                gap_dropout_probability=0.25,
+                stochastic_probability=0.25):
     block_args = (
-        (64, 64, 256, 1),
+        (64, 64, 256, 2),
         (256, 64, 256, 1),
         (256, 64, 256, 1),
         (256, 128, 512, 2),
@@ -166,14 +187,19 @@ def NFResNet101(class_num=5,
         (2048, 512, 2048, 1),
         (2048, 512, 2048, 1),
     )
-    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability,
-                    block_args=block_args, base_conv=NFResidualBottleNeck)
+    return NFResNet(class_num=class_num,
+                    cardinality=32,
+                    gap_dropout_probability=gap_dropout_probability,
+                    stochastic_probability=stochastic_probability,
+                    block_args=block_args,
+                    base_conv=NFResidualBottleNeck)
 
 
 def NFResNet152(class_num=5,
-               stochastic_probability=0.25):
+                gap_dropout_probability=0.25,
+                stochastic_probability=0.25):
     block_args = (
-        (64, 64, 256, 1),
+        (64, 64, 256, 2),
         (256, 64, 256, 1),
         (256, 64, 256, 1),
         (256, 128, 512, 2),
@@ -224,5 +250,9 @@ def NFResNet152(class_num=5,
         (2048, 512, 2048, 1),
         (2048, 512, 2048, 1),
     )
-    return NFResNet(class_num=class_num, stochastic_probability=stochastic_probability,
-                    block_args=block_args, base_conv=NFResidualBottleNeck)
+    return NFResNet(class_num=class_num,
+                    cardinality=32,
+                    gap_dropout_probability=gap_dropout_probability,
+                    stochastic_probability=stochastic_probability,
+                    block_args=block_args,
+                    base_conv=NFResidualBottleNeck)
