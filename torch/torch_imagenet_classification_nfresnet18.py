@@ -28,7 +28,7 @@ if device == 'cuda':
 ## Hyper parameter
 training_epochs = 30
 current_epoch = 0
-batch_size = 17
+batch_size = 12
 target_accuracy = 0.80
 learning_rate = 0.01
 num_class = 1000
@@ -37,6 +37,7 @@ pretrained = False
 
 
 model = NFResNet18(class_num=num_class,
+                   gap_dropout_probability=0.25,
                    stochastic_probability=0.25).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
@@ -69,7 +70,7 @@ transform = torchvision.transforms.Compose([
             ])
 
 trainDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
-                                                      split='train',
+                                                      split='val',
                                                       transform=transform)
 
 validationDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
@@ -140,7 +141,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
         current_batch += 1
         print('current train batch=', current_batch, '/', total_train_batch, 'epoch=', epoch, ' accuracy=', accuracy.item(), ' cost=', cost.item())
 
-
+    gc.collect()
     current_batch = 0
     for X, Y in validation_data_loader:
         gpu_X = X.to(device)
