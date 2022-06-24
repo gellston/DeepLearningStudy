@@ -140,6 +140,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
 
         current_batch += 1
         print('current train batch=', current_batch, '/', total_train_batch, 'epoch=', epoch, ' accuracy=', accuracy.item(), ' cost=', cost.item())
+        gc.collect()
 
     gc.collect()
     current_batch = 0
@@ -161,6 +162,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
 
         current_batch += 1
         print('current validation batch=', current_batch, '/', total_validation_batch, 'epoch=', epoch, ' accuracy=', accuracy.item(), ' cost=', cost.item())
+        gc.collect()
 
     avg_train_acc_graph.append(avg_train_acc)
     avg_train_cost_graph.append(avg_train_cost)
