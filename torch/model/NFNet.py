@@ -196,3 +196,5 @@ def NFNetF2(class_num=5,
                  stochastic_probability=stochastic_probability,
                  block_args=block_args)
 
+
+
