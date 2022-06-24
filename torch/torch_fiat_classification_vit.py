@@ -50,9 +50,18 @@ class PatchEmbedding(torch.nn.Module):
                             padding=0),
             Rearrange('b c (h) (w) -> b (h w) c')
         )
-
+        self.class_token = torch.nn.Parameter(torch.randn(1, 1, embedding_size))
     def forward(self, x):
+        #batch, C, H, W
+        b, _, _, _ = x.shape
         x = self.projection(x)
+
+        
+
+        class_tokens = repeat(self.class_token, '() n e -> b n e', b=b)
+        #append class token
+        x = torch.cat([])
+
         return x
 
 
