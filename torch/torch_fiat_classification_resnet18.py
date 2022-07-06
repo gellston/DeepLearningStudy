@@ -6,7 +6,7 @@ from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.Resnet18 import Resnet18
+from model.Resnet import ResNet18
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
@@ -32,7 +32,7 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = Resnet18(class_num=4, activation=torch.nn.ReLU).to(device)
+model = ResNet18(class_num=4, activation=torch.nn.ReLU).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

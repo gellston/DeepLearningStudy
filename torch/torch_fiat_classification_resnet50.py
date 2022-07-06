@@ -6,13 +6,14 @@ from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.Resnet50 import Resnet50
+from model.Resnet import ResNet50
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
 USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
 device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
 print("다음 기기로 학습합니다:", device)
+
 
 
 # for reproducibility
@@ -24,14 +25,14 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 30
-batch_size = 15
+batch_size = 50
 target_accuracy = 0.99
 learning_rate = 0.0001
 accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = Resnet50(class_num=4, activation=torch.nn.SiLU).to(device)
+model = ResNet50(class_num=4, activation=torch.nn.ReLU).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')
@@ -55,11 +56,11 @@ model.apply(init_weights)
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(Resnet50).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(ResNet50).pt")
 
 trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
-torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(Resnet50)_Trace.pt")
+torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(ResNet50)_Trace.pt")
 
 ## no Train Model Save
 
@@ -74,7 +75,7 @@ data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 model.train()
 criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
 
 
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
@@ -107,7 +108,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(Resnet50).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(ResNet50).pt")
 ## no Train Model Save
 
 print('Learning finished')
