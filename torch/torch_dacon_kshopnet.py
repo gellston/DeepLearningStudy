@@ -1,10 +1,11 @@
 import torch
-import torch.nn.functional as F
 import random
 import math
 
+
 from util.DaconKshopNetDataset import DaconKshopNetDataset
 from torch.utils.data import DataLoader
+from model.KShopNet import KShopNet
 
 USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
 device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
@@ -17,9 +18,6 @@ if device == 'cuda':
     torch.cuda.manual_seed_all(777)
 
 
-#Hyper parameter
-batch_size = 1
-#Hyper parameter
 
 
 # 0 store
@@ -39,7 +37,7 @@ datasets = DaconKshopNetDataset(train_root='C://Github//DeepLearningStudy//datas
                                 test_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//test.csv',
                                 ops='train',
                                 norm=False)
-data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
+data_loader = DataLoader(datasets, batch_size=1, shuffle=True)
 data_count = len(data_loader)
 
 eps = 100
@@ -52,21 +50,21 @@ avg_promotion5 = 0
 avg_unemployment = 0
 
 for X, Y in data_loader:
-    avg_fuel = (X[0][5].item() / data_count) + avg_fuel
-    avg_promotion1 = (X[0][6].item() / data_count) + avg_promotion1
-    avg_promotion2 = (X[0][7].item() / data_count) + avg_promotion2
-    avg_promotion3 = (X[0][8].item() / data_count) + avg_promotion3
-    avg_promotion4 = (X[0][9].item() / data_count) + avg_promotion4
-    avg_promotion5 = (X[0][10].item() / data_count) + avg_promotion5
-    avg_unemployment = (X[0][11].item() / data_count) + avg_unemployment
+    avg_fuel = (X[0][4].item() / data_count) + avg_fuel
+    avg_promotion1 = (X[0][5].item() / data_count) + avg_promotion1
+    avg_promotion2 = (X[0][6].item() / data_count) + avg_promotion2
+    avg_promotion3 = (X[0][7].item() / data_count) + avg_promotion3
+    avg_promotion4 = (X[0][8].item() / data_count) + avg_promotion4
+    avg_promotion5 = (X[0][9].item() / data_count) + avg_promotion5
+    avg_unemployment = (X[0][10].item() / data_count) + avg_unemployment
 
+    if eps > abs(X[0][4]) and abs(X[0][4]) != 0: eps = abs(X[0][4]).item()
     if eps > abs(X[0][5]) and abs(X[0][5]) != 0: eps = abs(X[0][5]).item()
     if eps > abs(X[0][6]) and abs(X[0][6]) != 0: eps = abs(X[0][6]).item()
     if eps > abs(X[0][7]) and abs(X[0][7]) != 0: eps = abs(X[0][7]).item()
     if eps > abs(X[0][8]) and abs(X[0][8]) != 0: eps = abs(X[0][8]).item()
     if eps > abs(X[0][9]) and abs(X[0][9]) != 0: eps = abs(X[0][9]).item()
     if eps > abs(X[0][10]) and abs(X[0][10]) != 0: eps = abs(X[0][10]).item()
-    if eps > abs(X[0][11]) and abs(X[0][11]) != 0: eps = abs(X[0][11]).item()
 
 eps = eps / 100
 print('epsilon = ', eps)
@@ -91,13 +89,13 @@ var_promotion5 = 0
 var_unemployment = 0
 
 for X, Y in data_loader:
-    var_fuel = (pow(X[0][5] - avg_fuel, 2) / data_count) + var_fuel
-    var_promotion1 = (pow(X[0][6] - avg_promotion1, 2) / data_count) + var_promotion1
-    var_promotion2 = (pow(X[0][7] - avg_promotion2, 2) / data_count) + var_promotion2
-    var_promotion3 = (pow(X[0][8] - avg_promotion3, 2) / data_count) + var_promotion3
-    var_promotion4 = (pow(X[0][9] - avg_promotion4, 2) / data_count) + var_promotion4
-    var_promotion5 = (pow(X[0][10] - avg_promotion5, 2) / data_count) + var_promotion5
-    var_unemployment = (pow(X[0][11] - avg_unemployment, 2) / data_count) + var_unemployment
+    var_fuel = (pow(X[0][4] - avg_fuel, 2) / data_count) + var_fuel
+    var_promotion1 = (pow(X[0][5] - avg_promotion1, 2) / data_count) + var_promotion1
+    var_promotion2 = (pow(X[0][6] - avg_promotion2, 2) / data_count) + var_promotion2
+    var_promotion3 = (pow(X[0][7] - avg_promotion3, 2) / data_count) + var_promotion3
+    var_promotion4 = (pow(X[0][8] - avg_promotion4, 2) / data_count) + var_promotion4
+    var_promotion5 = (pow(X[0][9] - avg_promotion5, 2) / data_count) + var_promotion5
+    var_unemployment = (pow(X[0][10] - avg_unemployment, 2) / data_count) + var_unemployment
 
 print('==== variance ====')
 print('var_fuel = ', var_fuel)
@@ -128,3 +126,106 @@ print('std_promotion4 = ', std_promotion4)
 print('std_promotion5 = ', std_promotion5)
 print('std_unemployment = ', std_unemployment)
 print('==================')
+
+
+
+
+
+
+
+#Norm parameter input
+#Data Checking
+stdlist = [std_fuel, std_promotion1, std_promotion2, std_promotion3, std_promotion4, std_promotion5, std_unemployment]
+avglist = [avg_fuel, avg_promotion1, avg_promotion2, avg_promotion3, avg_promotion4, avg_promotion5, avg_unemployment]
+
+datasets = DaconKshopNetDataset(train_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//train.csv',
+                                test_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//test.csv',
+                                ops='train',
+                                norm=True,
+                                d2shape=True,
+                                eps=eps,
+                                average=avglist,
+                                stdev=stdlist)
+
+data_loader = DataLoader(datasets, batch_size=1, shuffle=True)
+data_count = len(data_loader)
+
+
+#for X, Y in data_loader:
+#    print('x shape = ', X.shape)
+#    print('y shape = ', Y.shape)
+#    print('x = ', X[0])
+#    print('y = ', Y[0])
+
+# Data Checking
+
+
+
+#Training Start
+
+class RMSELoss(torch.nn.Module):
+    def __init__(self, eps=1e-6):
+        super().__init__()
+        self.mse = torch.nn.MSELoss()
+        self.eps = eps
+
+    def forward(self, yhat, y):
+        loss = torch.sqrt(self.mse(yhat, y) + self.eps)
+        return loss
+
+#Hyper parameter
+#batch_size = len(data_loader)
+#batch_size = 50
+batch_size = 1024
+training_epochs = 500
+#learning_rate = 0.3
+learning_rate = 0.3 / 2048 * batch_size
+print('final calculate learning rate =', learning_rate)
+#Hyper parameter
+
+
+datasets = DaconKshopNetDataset(train_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//train.csv',
+                                test_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//test.csv',
+                                ops='train',
+                                norm=True,
+                                d2shape=True,
+                                eps=eps,
+                                average=avglist,
+                                stdev=stdlist)
+
+data_loader = DataLoader(datasets,
+                         batch_size=batch_size,
+                         shuffle=True,
+                         drop_last=True)
+
+
+model = KShopNet(layer_length=6,
+                 inner_channel=64,
+                 activation=torch.nn.PReLU,
+                 se_rate=0.5,
+                 exapnd_rate=2,
+                 unit_channel_rate=1.2).to(device)
+model.train()
+loss = RMSELoss()
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
+for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
+
+    avg_cost = 0
+
+    ##dataset shuffle
+    datasets = torch.utils.data.Subset(datasets, torch.randperm(len(datasets)))
+    total_batch = len(data_loader)
+    for X, Y in data_loader:
+        gpu_X = X.to(device) #input
+        gpu_Y = Y.to(device) #output
+
+        model.train()
+        optimizer.zero_grad()
+        hypothesis = model(gpu_X)
+        cost = loss(hypothesis, gpu_Y)
+        cost.backward()
+        avg_cost += (cost / total_batch)
+        optimizer.step()
+
+
+    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))

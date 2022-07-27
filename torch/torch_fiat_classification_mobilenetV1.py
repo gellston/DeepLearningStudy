@@ -32,7 +32,7 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = MobileNetV1(class_num=4, activation=torch.nn.ReLU).to(device)
+model = MobileNetV1(class_num=4, activation=torch.nn.ReLU6).to(device)
 print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')

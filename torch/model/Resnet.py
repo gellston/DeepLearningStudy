@@ -21,7 +21,7 @@ class ResNet(torch.nn.Module):
                             stride=2,
                             padding=3,
                             kernel_size=7,
-                            bias=True),
+                            bias=False),
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=3,

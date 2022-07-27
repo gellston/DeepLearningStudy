@@ -1372,5 +1372,64 @@ class StochasticDepth(torch.nn.Module):
 
 
 
+class KShopSEBlock(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 se_rate=0.5):
+        super(KShopSEBlock, self).__init__()
+        self.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
+        self.hidden_channels = max(1, int(in_channels * se_rate))
+
+        self.fc = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels, self.hidden_channels, kernel_size=1),
+            torch.nn.ReLU(inplace=False),
+            torch.nn.Conv2d(self.hidden_channels, out_channels, kernel_size=1),
+            torch.nn.Sigmoid())
+
+    def forward(self, x):
+        y = self.fc(x)
+        return x * y
+
+
+class KShopResnet(torch.nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 expand_rate=0.5,
+                 se_rate=0.5,
+                 activation=torch.nn.SiLU):
+        super(KShopResnet, self).__init__()
+
+        self.conv = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=int(in_channels * expand_rate),
+                            kernel_size=1,
+                            bias=True),
+            torch.nn.BatchNorm2d(int(in_channels * expand_rate)),
+            activation(),
+
+            KShopSEBlock(in_channels=int(in_channels * expand_rate),
+                         out_channels=int(in_channels * expand_rate),
+                         se_rate=se_rate),
+
+            torch.nn.Conv2d(in_channels=int(in_channels * expand_rate),
+                            out_channels=out_channels,
+                            kernel_size=1,
+                            bias=True),
+            torch.nn.BatchNorm2d(out_channels),
+        )
+        #self.se_block =
+        self.final_activation = activation()
+
+    def forward(self, x):
+        skip = x
+        x = self.conv(x) + skip
+        #x = self.se_block(x)
+        #x = self.final_activation(x)
+
+        return x
+
+
 
 

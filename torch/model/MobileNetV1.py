@@ -5,7 +5,7 @@ from util.helper import SeparableActivationConv2d
 
 class MobileNetV1(torch.nn.Module):
 
-    def __init__(self, class_num=5, activation=torch.nn.ReLU):
+    def __init__(self, class_num=5, activation=torch.nn.ReLU6):
         super(MobileNetV1, self).__init__()
 
         self.class_num = class_num
