@@ -1,11 +1,14 @@
 import torch
 import random
 import math
-
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from util.DaconKshopNetDataset import DaconKshopNetDataset
 from torch.utils.data import DataLoader
 from model.KShopNet import KShopNet
+
+
 
 USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
 device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
@@ -173,13 +176,26 @@ class RMSELoss(torch.nn.Module):
         loss = torch.sqrt(self.mse(yhat, y) + self.eps)
         return loss
 
+
+class RMSELLoss(torch.nn.Module):
+    def __init__(self, eps=1e-6):
+        super().__init__()
+        self.mse = torch.nn.MSELoss()
+        #self.eps = eps
+
+    def forward(self, yhat, y):
+
+        yhat = torch.log1p(yhat)
+        y = torch.log1p(y)
+        loss = torch.sqrt(self.mse(yhat, y))
+        return loss
+
+
+
 #Hyper parameter
-#batch_size = len(data_loader)
-#batch_size = 50
-batch_size = 1024
-training_epochs = 500
-#learning_rate = 0.3
-learning_rate = 0.3 / 2048 * batch_size
+batch_size = 256
+training_epochs = 6000
+learning_rate = 0.3
 print('final calculate learning rate =', learning_rate)
 #Hyper parameter
 
@@ -187,7 +203,7 @@ print('final calculate learning rate =', learning_rate)
 datasets = DaconKshopNetDataset(train_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//train.csv',
                                 test_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//test.csv',
                                 ops='train',
-                                norm=True,
+                                norm=False,
                                 d2shape=True,
                                 eps=eps,
                                 average=avglist,
@@ -199,20 +215,29 @@ data_loader = DataLoader(datasets,
                          drop_last=True)
 
 
-model = KShopNet(layer_length=6,
-                 inner_channel=64,
+model = KShopNet(layer_length=3,
+                 inner_channel=6,
                  activation=torch.nn.PReLU,
                  se_rate=0.5,
-                 exapnd_rate=2,
-                 unit_channel_rate=1.2).to(device)
+                 exapnd_rate=6).to(device)
 model.train()
-loss = RMSELoss()
+rms = RMSELoss()
+rmsl = RMSELLoss()
 optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
+
+
+plt.rcParams["figure.figsize"] = (12, 8)
+figure, axis = plt.subplots(2)
+
+avg_total_graph = []
+avg_rms_graph = []
+epochs = []
+
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
 
-    avg_cost = 0
+    avg_total = 0
+    avg_rms = 0
 
-    ##dataset shuffle
     datasets = torch.utils.data.Subset(datasets, torch.randperm(len(datasets)))
     total_batch = len(data_loader)
     for X, Y in data_loader:
@@ -222,10 +247,76 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         model.train()
         optimizer.zero_grad()
         hypothesis = model(gpu_X)
-        cost = loss(hypothesis, gpu_Y)
-        cost.backward()
-        avg_cost += (cost / total_batch)
+
+        rms_cost = rms(hypothesis, gpu_Y)
+        rmsl_cost = rmsl(hypothesis, gpu_Y)
+
+        total_cost = rmsl_cost
+        total_cost.backward()
+
+        avg_total += (total_cost / total_batch)
         optimizer.step()
+        model.eval()
+
+        avg_rms += (rms_cost / total_batch)
 
 
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if avg_rms < 30000:
+        break
+
+    avg_total_graph.append(avg_total.cpu().detach().numpy())
+    avg_rms_graph.append(avg_rms.cpu().detach().numpy())
+    epochs.append(epoch)
+
+    plt.show(block=False)
+    plt.pause(0.001)
+    axis[0].plot(epochs, avg_total_graph)
+    axis[0].set_title("(RMSE / 100) + RMSEL")
+    axis[1].plot(epochs, avg_rms_graph)
+    axis[1].set_title("RMSE")
+
+    plt.show(block=False)
+    plt.pause(0.001)
+    plt.savefig('C://Github//DeepLearningStudy//trained_model//KShopNetResult.png')
+
+
+    print('Epoch:', '%04d' % (epoch + 1), '(RMSE / 100 + RMSEL) =', '{:.9f}'.format(avg_total), 'RMS =', '{:.9f}'.format(avg_rms))
+    #Model Save
+    model.eval()
+    compiled_model = torch.jit.script(model)
+    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KShopNet.pt")
+
+
+
+
+
+##Prediction Start!!!!!
+datasets = DaconKshopNetDataset(train_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//train.csv',
+                                test_root='C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//test.csv',
+                                ops='test',
+                                norm=False,
+                                d2shape=True,
+                                eps=eps,
+                                average=avglist,
+                                stdev=stdlist)
+
+data_loader = DataLoader(datasets,
+                         batch_size=1,
+                         shuffle=False,
+                         drop_last=False)
+
+submission_file = pd.read_csv("C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//sample_submission.csv")
+test_result = []
+for X, Y in data_loader:
+    gpu_X = X.to(device)  # input
+    gpu_Y = Y.to(device)  # output
+
+    model.eval()
+    hypothesis = model(gpu_X)
+
+    test_result.append(hypothesis[0].cpu().detach().numpy().item())
+    print('result =', hypothesis[0])
+
+submission_file["Weekly_Sales"] = test_result
+submission_file.to_csv("C://Github//DeepLearningStudy//dataset//dacon_shop_profit//dataset//sample_submission_result.csv")
+##Prediction Start!!!!!

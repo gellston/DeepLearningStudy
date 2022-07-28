@@ -11,8 +11,7 @@ class KShopNet(torch.nn.Module):
                  inner_channel=32,
                  exapnd_rate=1,
                  se_rate=0.5,
-                 layer_length=2,
-                 unit_channel_rate=1.2):
+                 layer_length=2):
         super(KShopNet,
               self).__init__()
 
@@ -22,46 +21,52 @@ class KShopNet(torch.nn.Module):
                             out_channels=inner_channel,
                             bias=False),
             torch.nn.BatchNorm2d(inner_channel),
-            activation(),
-            KShopSEBlock(in_channels=inner_channel,
-                         out_channels=inner_channel,
-                         se_rate=se_rate)
+
         )
 
-        blocks = []
 
-        unit_channel = int(inner_channel / layer_length)
-        temp_channel = inner_channel
 
+        block = []
         for i in range(layer_length):
-            blocks.append(KShopResnet(in_channels=temp_channel,
-                                      out_channels=temp_channel,
-                                      expand_rate=exapnd_rate,
-                                      se_rate=se_rate,
-                                      activation=activation))
+            block.append(KShopResnet(in_channels=inner_channel,
+                                       out_channels=inner_channel,
+                                       expand_rate=exapnd_rate,
+                                       activation=activation))
+        self.feature1 = torch.nn.Sequential(*block)
 
-            final_temp_channel = temp_channel - int(unit_channel / unit_channel_rate)
 
-            blocks.append(torch.nn.Conv2d(in_channels=temp_channel,
-                                          out_channels=final_temp_channel,
-                                          kernel_size=1,
-                                          bias=False))
-            blocks.append(torch.nn.BatchNorm2d(final_temp_channel))
-            blocks.append(activation())
-            blocks.append(KShopSEBlock(in_channels=final_temp_channel,
-                                       out_channels=final_temp_channel,
-                                       se_rate=se_rate))
+        block = []
+        for i in range(layer_length):
+            block.append(KShopResnet(in_channels=inner_channel,
+                                       out_channels=inner_channel,
+                                       expand_rate=exapnd_rate,
+                                       activation=activation))
+        self.feature2 = torch.nn.Sequential(*block)
 
-            temp_channel = final_temp_channel
 
-            print('decreasing channel number =', temp_channel)
 
-        self.feature = torch.nn.Sequential(*blocks)
+        block = []
+        for i in range(layer_length):
+            block.append(KShopResnet(in_channels=inner_channel,
+                                       out_channels=inner_channel,
+                                       expand_rate=exapnd_rate,
+                                       activation=activation))
+        self.feature3 = torch.nn.Sequential(*block)
+
+
+        block = []
+        for i in range(layer_length):
+            block.append(KShopResnet(in_channels=inner_channel,
+                                       out_channels=inner_channel,
+                                       expand_rate=exapnd_rate,
+                                       activation=activation))
+        self.feature4 = torch.nn.Sequential(*block)
+
 
 
         self.final = torch.nn.Sequential(
-            torch.nn.Conv2d(kernel_size=1,
-                            in_channels=temp_channel,
+            torch.nn.Conv2d(kernel_size=(4, 1),
+                            in_channels=inner_channel,
                             out_channels=1,
                             bias=False),
             torch.nn.ReLU()
@@ -78,7 +83,11 @@ class KShopNet(torch.nn.Module):
 
     def forward(self, x):
         x = self.stem(x)
-        x = self.feature(x)
+        x1 = self.feature1(x)
+        x2 = self.feature2(x)
+        x3 = self.feature3(x)
+        x4 = self.feature4(x)
+        x = torch.cat([x1, x2, x3, x4], dim=2)
         x = self.final(x)
         x = x.view([-1, 1])
 

@@ -1397,36 +1397,79 @@ class KShopResnet(torch.nn.Module):
                  in_channels,
                  out_channels,
                  expand_rate=0.5,
-                 se_rate=0.5,
-                 activation=torch.nn.SiLU):
+                 activation=torch.nn.SiLU,):
         super(KShopResnet, self).__init__()
 
-        self.conv = torch.nn.Sequential(
+        self.conv1 = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=in_channels,
                             out_channels=int(in_channels * expand_rate),
                             kernel_size=1,
                             bias=True),
             torch.nn.BatchNorm2d(int(in_channels * expand_rate)),
-            activation(),
+            activation()
+        )
 
-            KShopSEBlock(in_channels=int(in_channels * expand_rate),
-                         out_channels=int(in_channels * expand_rate),
-                         se_rate=se_rate),
+        self.conv2 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=int(in_channels * expand_rate),
+                            kernel_size=1,
+                            bias=True),
+            torch.nn.BatchNorm2d(int(in_channels * expand_rate)),
+            activation()
+        )
 
+        self.conv3 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=int(in_channels * expand_rate),
+                            kernel_size=1,
+                            bias=True),
+            torch.nn.BatchNorm2d(int(in_channels * expand_rate)),
+            activation()
+        )
+
+        self.conv4 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=int(in_channels * expand_rate),
+                            kernel_size=1,
+                            bias=True),
+            torch.nn.BatchNorm2d(int(in_channels * expand_rate)),
+            activation()
+        )
+
+        self.conv5 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=in_channels,
+                            out_channels=int(in_channels * expand_rate),
+                            kernel_size=1,
+                            bias=True),
+            torch.nn.BatchNorm2d(int(in_channels * expand_rate)),
+            activation()
+        )
+
+
+
+        self.feature = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=int(in_channels * expand_rate),
                             out_channels=out_channels,
-                            kernel_size=1,
+                            kernel_size=(5, 1),
                             bias=True),
             torch.nn.BatchNorm2d(out_channels),
         )
-        #self.se_block =
+
         self.final_activation = activation()
 
     def forward(self, x):
         skip = x
-        x = self.conv(x) + skip
-        #x = self.se_block(x)
-        #x = self.final_activation(x)
+
+        conv1 = self.conv1(x)
+        conv2 = self.conv2(x)
+        conv3 = self.conv3(x)
+        conv4 = self.conv4(x)
+        conv5 = self.conv5(x)
+
+        concat = torch.cat([conv1, conv2, conv3, conv4, conv5], dim=2)
+
+        x = self.feature(concat) + skip
+        x = self.final_activation(x)
 
         return x
 
