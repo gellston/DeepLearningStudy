@@ -105,7 +105,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         avg_train_total += (rms_cost / total_train_batch)
         optimizer.step()
 
-    if avg_train_total < 50000:
+    if avg_train_total < 290000:
         break
 
     avg_train_graph.append(avg_train_total.cpu().detach().numpy())
@@ -122,9 +122,11 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 #Model Save
 plt.savefig('C://Github//DeepLearningStudy//trained_model//KShopNetResult.png')
-model.eval()
-compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KShopNetV2.pt")
+
+
+#model.eval()
+#compiled_model = torch.jit.script(model)
+#torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KShopNetV2.pt")
 
 
 

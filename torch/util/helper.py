@@ -1376,7 +1376,8 @@ class KShopResnet(torch.nn.Module):
                  out_channels,
                  expand_rate=0.5,
                  dropout_rate=0.2,
-                 activation=torch.nn.SiLU):
+                 activation=torch.nn.SiLU,
+                 stochastic_probability=0.5):
         super(KShopResnet, self).__init__()
 
         self.feature = torch.nn.Sequential(
@@ -1399,6 +1400,7 @@ class KShopResnet(torch.nn.Module):
                                              kernel_size=1,
                                              bias=True)
         self.final_activation = activation()
+        self.probability = 1 - stochastic_probability
 
     def forward(self, x):
         skip = x
@@ -1406,5 +1408,11 @@ class KShopResnet(torch.nn.Module):
         if x.size() is not out.size():
             skip = self.dim_equalizer(x)
         x = out + skip
+
+        if self.training:
+            p = torch.bernoulli(torch.tensor(self.probability))
+            if p == 1:
+                return self.final_activation(skip)
+
         x = self.final_activation(x)
         return x

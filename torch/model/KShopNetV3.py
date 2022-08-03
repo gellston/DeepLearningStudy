@@ -18,34 +18,26 @@ class KShopNetV3(torch.nn.Module):
         self.stem = torch.nn.Sequential(
             torch.nn.BatchNorm2d(num_features=57),
             torch.nn.Conv2d(in_channels=57,
-                            out_channels=64,
+                            out_channels=16,
                             kernel_size=1,
                             bias=False),
-            torch.nn.BatchNorm2d(num_features=64),
+            torch.nn.BatchNorm2d(num_features=16),
             activation()
         )
 
         self.features = torch.nn.Sequential(
-            KShopResnet(in_channels=64,
-                        out_channels=32,
-                        expand_rate=expand_rate,
-                        activation=activation,
-                        dropout_rate=dropout_rate),
-            KShopResnet(in_channels=32,
-                        out_channels=16,
-                        expand_rate=expand_rate,
-                        activation=activation,
-                        dropout_rate=dropout_rate),
             KShopResnet(in_channels=16,
                         out_channels=8,
                         expand_rate=expand_rate,
                         activation=activation,
-                        dropout_rate=dropout_rate),
+                        dropout_rate=dropout_rate,
+                        stochastic_probability=0.125),
             KShopResnet(in_channels=8,
                         out_channels=4,
                         expand_rate=expand_rate,
                         activation=activation,
-                        dropout_rate=dropout_rate),
+                        dropout_rate=dropout_rate,
+                        stochastic_probability=0.25),
         )
 
         self.final_conv = torch.nn.Sequential(
