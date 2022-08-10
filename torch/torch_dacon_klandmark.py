@@ -33,7 +33,7 @@ if device == 'cuda':
 
 #Hyper parameter
 #batch_size = data_count
-batch_size = 25
+batch_size = 10
 training_epochs = 100
 learning_rate = 0.003
 target_accuracy = 0.95
@@ -41,9 +41,9 @@ target_accuracy = 0.95
 
 
 
-datasets = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
-                                 image_width=256,
-                                 image_height=256,
+datasets = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+                                 image_width=448,
+                                 image_height=448,
                                  ops='train')
 
 
@@ -54,15 +54,16 @@ data_loader = DataLoader(datasets,
 
 
 model = KLandMarkNet18(class_num=10,
-                       gap_dropout_probability=0.25,
-                       stochastic_probability=0.25).to(device)
+                       block_dropout_probability=0.3,
+                       gap_dropout_probability=0.3,
+                       stochastic_probability=0.3).to(device)
 print('==== model info ====')
-summary(model, (3, 256, 256))
+summary(model, (3, 448, 448))
 print('====================')
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
+torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
 
 model.train()
 criterion = torch.nn.BCELoss()
@@ -85,8 +86,15 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     total_batch = len(data_loader)
     datasets = torch.utils.data.Subset(datasets, torch.randperm(len(datasets)))
     for X, Y in data_loader:
-        gpu_X = X.to(device)
-        gpu_Y = Y.to(device)
+        gpu_X = X.to(device).detach()
+        gpu_Y = Y.to(device).detach()
+
+
+        #check_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        #cv2.namedWindow("input_image", cv2.WINDOW_NORMAL)
+        #cv2.resizeWindow('input_image', 448, 448)
+        #cv2.imshow('input_image', check_image)
+        #cv2.waitKey(10)
 
         model.train()
         optimizer.zero_grad()
@@ -119,25 +127,25 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
     if avg_acc > target_accuracy:
         break
 
-plt.savefig('C://Github//DeepLearningStudy//trained_model//KLandResult.png')
+plt.savefig('D://Github//DeepLearningStudy//trained_model//KLandResult.png')
 
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18_trained.pt")
+torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KLandMarkNet18_trained.pt")
 
 
 
-test_datasets = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
-                                      image_width=256,
-                                      image_height=256,
+test_datasets = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+                                      image_width=448,
+                                      image_height=448,
                                       ops='test')
 test_data_loader = DataLoader(test_datasets,
                               batch_size=1,
                               shuffle=False,
                               drop_last=False)
 
-submission_file = pd.read_csv("C://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission.csv")
+submission_file = pd.read_csv("D://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission.csv")
 test_result = []
 count = 0
 for X in test_data_loader:
@@ -151,4 +159,4 @@ for X in test_data_loader:
     print('result =', hypothesis[0])
 
 submission_file["label"] = test_result
-submission_file.to_csv("C://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission_result.csv", index=False)
+submission_file.to_csv("D://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission_result.csv", index=False)

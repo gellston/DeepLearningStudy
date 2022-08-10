@@ -41,15 +41,11 @@ class DaconKLandMarkDataset(data.Dataset):
 
         self.torchvision_transform = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Resize((self.image_width, self.image_height)),
-            transforms.RandomCrop(224),
             transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            transforms.RandomRotation(degrees=90),
-            transforms.RandomErasing(),
-            transforms.ColorJitter(),
-            transforms.GaussianBlur(kernel_size=3),
-            transforms.RandomPerspective(),
+            transforms.RandomRotation(degrees=(-10, 10)),
+            transforms.RandomErasing(p=0.8, scale=(0.02, 0.1), ratio=(0.3, 3.5)),
+            transforms.RandomPerspective(distortion_scale=0.3, p=0.3),
+            transforms.RandomResizedCrop(size=(448, 448), scale=(0.3, 1.5)),
         ])
 
 

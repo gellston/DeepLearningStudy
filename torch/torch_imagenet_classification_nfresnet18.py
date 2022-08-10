@@ -28,7 +28,7 @@ if device == 'cuda':
 ## Hyper parameter
 training_epochs = 30
 current_epoch = 0
-batch_size = 12
+batch_size = 10
 target_accuracy = 0.80
 learning_rate = 0.01
 num_class = 1000
@@ -74,8 +74,8 @@ trainDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet
                                                       transform=transform)
 
 validationDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
-                                                      split='val',
-                                                      transform=transform)
+                                                  split='val',
+                                                  transform=transform)
 
 # dataset loader
 train_data_loader = DataLoader(dataset=trainDataset,
@@ -84,7 +84,7 @@ train_data_loader = DataLoader(dataset=trainDataset,
                                drop_last=True)
 
 validation_data_loader = DataLoader(dataset=validationDataset,
-                                    batch_size=1,  # 배치 크기는 100
+                                    batch_size=batch_size,  # 배치 크기는 100
                                     shuffle=True,
                                     drop_last=True)
 
@@ -133,7 +133,6 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
         optimizer.step()
 
         model.eval()
-        hypothesis = model(gpu_X)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(gpu_Y, 1)
         accuracy = correct_prediction.float().mean()
         avg_train_acc += (accuracy / total_train_batch)
@@ -155,7 +154,6 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
         avg_validation_cost += (cost / total_validation_batch)
 
         model.eval()
-        hypothesis = model(gpu_X)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(gpu_Y, 1)
         accuracy = correct_prediction.float().mean()
         avg_validation_acc += (accuracy / total_validation_batch)

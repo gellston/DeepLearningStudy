@@ -1462,7 +1462,10 @@ class NFKLandMarkResidualBlock(torch.nn.Module):
                  alpha=0.2,
                  beta=1.0,
                  se_rate=0.07,
-                 activation='relu',
+                 activation='silu',
+                 kernel_size=3,
+                 dilation_rate=1,
+                 block_dropout_probability=0.25,
                  stochastic_probability=0.25):
         super(NFKLandMarkResidualBlock, self).__init__()
 
@@ -1470,17 +1473,21 @@ class NFKLandMarkResidualBlock(torch.nn.Module):
         self.alpha = alpha
         self.beta = beta
 
+
         self.features = torch.nn.Sequential(WSConv2d(in_dim,
                                                      mid_dim,
-                                                     kernel_size=3,
+                                                     kernel_size=kernel_size,
                                                      stride=self.stride,
-                                                     padding=1,
+                                                     padding=dilation_rate*(kernel_size-1) // 2,
+                                                     dilation=dilation_rate,
                                                      bias=True),
                                             GammaActivation(activation=activation,
                                                             inplace=True),
+                                            torch.nn.Dropout2d(p=block_dropout_probability),
                                             WSConv2d(mid_dim,
                                                      out_dim,
-                                                     kernel_size=3,
+                                                     kernel_size=kernel_size,
+                                                     dilation=dilation_rate,
                                                      padding='same',
                                                      bias=True),
                                             GammaActivation(activation=activation,
@@ -1488,7 +1495,8 @@ class NFKLandMarkResidualBlock(torch.nn.Module):
                                             NFCBAM(in_channels=out_dim,
                                                    channels=out_dim,
                                                    se_rate=se_rate),
-                                            StochasticDepth(probability=stochastic_probability))
+                                            StochasticDepth(probability=stochastic_probability),
+                                            torch.nn.Dropout2d(p=block_dropout_probability))
 
         self.down_skip_connection = WSConv2d(in_channels=in_dim,
                                              out_channels=out_dim,

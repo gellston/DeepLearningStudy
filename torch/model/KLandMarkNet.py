@@ -12,6 +12,7 @@ class KLandMarkNet(torch.nn.Module):
                  se_rate=0.07,
                  gap_dropout_probability=0.25,
                  stochastic_probability=0.25,
+                 block_dropout_probability=0.25,
                  base_conv=NFKLandMarkResidualBlock):
         super(KLandMarkNet, self).__init__()
 
@@ -20,11 +21,11 @@ class KLandMarkNet(torch.nn.Module):
         self.stem = torch.nn.Sequential(
             WSConv2d(in_channels=3,
                      out_channels=32,
-                     stride=2,
                      padding=1,
+                     stride=2,
                      kernel_size=3,
                      bias=True),
-            GammaActivation(activation='relu',
+            GammaActivation(activation='silu',
                             inplace=True)
         )
 
@@ -33,7 +34,7 @@ class KLandMarkNet(torch.nn.Module):
         blocks = []
         num_blocks = len(block_args)
         final_channel = 0
-        for block_index, (in_dim, mid_dim, out_dim, stride) in enumerate(block_args):
+        for block_index, (in_dim, mid_dim, out_dim, stride, kernel_size, dilation_rate) in enumerate(block_args):
             final_channel = out_dim
             beta = 1. / expected_std
             block_stochastic_probability = stochastic_probability * (block_index + 1) / num_blocks
@@ -44,6 +45,10 @@ class KLandMarkNet(torch.nn.Module):
                                     beta=beta,
                                     alpha=alpha,
                                     se_rate=se_rate,
+                                    activation='silu',
+                                    kernel_size=kernel_size,
+                                    dilation_rate=dilation_rate,
+                                    block_dropout_probability=block_dropout_probability,
                                     stochastic_probability=block_stochastic_probability))
             if block_index == 0:
                 expected_std = 1.0
@@ -70,51 +75,24 @@ class KLandMarkNet(torch.nn.Module):
 
 def KLandMarkNet18(class_num=5,
                    gap_dropout_probability=0.25,
+                   block_dropout_probability=0.25,
                    stochastic_probability=0.25):
     block_args = (
-        (32, 32, 32, 1),
-        (32, 32, 32, 1),
-        (32, 32, 32, 1),
-        (32, 64, 64, 2),
-        (64, 64, 64, 1),
-        (64, 64, 64, 1),
-        (64, 64, 64, 1),
-        (64, 80, 80, 2),
-        (80, 80, 80, 1),
-        (80, 80, 80, 1),
-        (80, 96, 96, 2),
-        (96, 96, 96, 1),
-        (96, 96, 96, 1),
+        (32, 32, 32, 1, 5, 2),
+        (32, 32, 32, 1, 5, 2),
+        (32, 64, 64, 2, 5, 2), #Stride 48
+        (64, 64, 64, 1, 5, 2),
+        (64, 128, 128, 2, 5, 2),
+        (128, 128, 128, 1, 5, 2),
+        (128, 256, 256, 2, 5, 1),
+        (256, 256, 256, 1, 5, 1),
+        (256, 512, 512, 2, 3, 1),
+        (512, 512, 512, 1, 3, 1),
     )
     return KLandMarkNet(class_num=class_num,
+                        block_dropout_probability=block_dropout_probability,
                         gap_dropout_probability=gap_dropout_probability,
                         stochastic_probability=stochastic_probability,
                         block_args=block_args)
 
-
-def KLandMarkNet34(class_num=5,
-                   gap_dropout_probability=0.25,
-                   stochastic_probability=0.25):
-    block_args = (
-        (64, 64, 64, 1),
-        (64, 64, 64, 1),
-        (64, 64, 64, 1),
-        (64, 128, 128, 2),
-        (128, 128, 128, 1),
-        (128, 128, 128, 1),
-        (128, 256, 256, 2),
-        (256, 256, 256, 1),
-        (256, 256, 256, 1),
-        (256, 256, 256, 1),
-        (256, 256, 256, 1),
-        (256, 256, 256, 1),
-        (256, 512, 512, 2),
-        (512, 512, 512, 1),
-        (512, 512, 512, 1),
-    )
-    return KLandMarkNet(class_num=class_num,
-                        cardinality=32,
-                        gap_dropout_probability=gap_dropout_probability,
-                        stochastic_probability=stochastic_probability,
-                        block_args=block_args)
 
