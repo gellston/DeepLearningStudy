@@ -1370,49 +1370,144 @@ class StochasticDepth(torch.nn.Module):
 
 
 
-class KShopResnet(torch.nn.Module):
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 expand_rate=0.5,
-                 dropout_rate=0.2,
-                 activation=torch.nn.SiLU,
-                 stochastic_probability=0.5):
-        super(KShopResnet, self).__init__()
 
-        self.feature = torch.nn.Sequential(
-            torch.nn.Conv2d(in_channels=in_channels,
-                            out_channels=int(in_channels * expand_rate),
-                            kernel_size=1,
-                            bias=False),
-            torch.nn.BatchNorm2d(num_features=int(in_channels * expand_rate)),
-            activation(),
-            torch.nn.Dropout(dropout_rate),
-            torch.nn.Conv2d(in_channels=int(in_channels * expand_rate),
-                            out_channels=out_channels,
-                            kernel_size=1,
-                            bias=False),
-            torch.nn.BatchNorm2d(num_features=out_channels),
-            torch.nn.Dropout(dropout_rate)
+
+class ChannelPool(torch.nn.Module):
+    def forward(self, x):
+        #Channel Wise Max pooling and Average pooling concat
+        return torch.cat((torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1).unsqueeze(1)), dim=1)
+
+class SpatialGate(torch.nn.Module):
+    def __init__(self):
+        super(SpatialGate, self).__init__()
+        kernel_size = 7
+        self.compress = ChannelPool()
+        self.spatial = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=2,
+                            out_channels=1,
+                            kernel_size=kernel_size,
+                            stride=1,
+                            padding=(kernel_size-1) // 2,
+                            bias=False,
+                            dilation=1),
+            torch.nn.BatchNorm2d(num_features=1),
+            torch.nn.ReLU(),
         )
-        self.dim_equalizer = torch.nn.Conv2d(in_channels=in_channels,
-                                             out_channels=out_channels,
+    def forward(self, x):
+        x_compress = self.compress(x)
+        x_out = self.spatial(x_compress)
+        scale = torch.sigmoid(x_out) # broadcasting
+        return x * scale
+
+
+
+class CBAM(torch.nn.Module):
+    def __init__(self, in_channels, channels, se_rate=0.5):
+        super(CBAM, self).__init__()
+        #Squeeze-and-excitiation
+        self.channel_wise_conv = SEConvBlock(in_channels=in_channels,
+                                             channels=channels,
+                                             se_rate=se_rate)
+        self.spatial_wise_conv = SpatialGate()
+    def forward(self, x):
+        x_out = self.channel_wise_conv(x)
+        x_out = self.spatial_wise_conv(x_out)
+        return x_out
+
+
+
+class NFSpatialGate(torch.nn.Module):
+    def __init__(self):
+        super(NFSpatialGate, self).__init__()
+        kernel_size = 7
+        self.compress = ChannelPool()
+        self.spatial = torch.nn.Sequential(
+            WSConv2d(in_channels=2,
+                     out_channels=1,
+                     kernel_size=kernel_size,
+                     stride=1,
+                     padding=(kernel_size-1) // 2,
+                     bias=True,
+                     dilation=1),
+            torch.nn.ReLU(),
+        )
+    def forward(self, x):
+        x_compress = self.compress(x)
+        x_out = self.spatial(x_compress)
+        scale = torch.sigmoid(x_out) # broadcasting
+        return x * scale
+
+
+
+class NFCBAM(torch.nn.Module):
+    def __init__(self, in_channels, channels, se_rate=0.5):
+        super(NFCBAM, self).__init__()
+        #Squeeze-and-excitiation
+        self.channel_wise_conv = NFSEConvBlock(in_channels=in_channels,
+                                               out_channels=channels,
+                                               se_rate=se_rate)
+        self.spatial_wise_conv = NFSpatialGate()
+    def forward(self, x):
+        x_out = self.channel_wise_conv(x)
+        x_out = self.spatial_wise_conv(x_out)
+        return x_out
+
+
+class NFKLandMarkResidualBlock(torch.nn.Module):
+    def __init__(self,
+                 in_dim,
+                 mid_dim,
+                 out_dim,
+                 stride=1,
+                 alpha=0.2,
+                 beta=1.0,
+                 se_rate=0.07,
+                 activation='relu',
+                 stochastic_probability=0.25):
+        super(NFKLandMarkResidualBlock, self).__init__()
+
+        self.stride = stride
+        self.alpha = alpha
+        self.beta = beta
+
+        self.features = torch.nn.Sequential(WSConv2d(in_dim,
+                                                     mid_dim,
+                                                     kernel_size=3,
+                                                     stride=self.stride,
+                                                     padding=1,
+                                                     bias=True),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
+                                            WSConv2d(mid_dim,
+                                                     out_dim,
+                                                     kernel_size=3,
+                                                     padding='same',
+                                                     bias=True),
+                                            GammaActivation(activation=activation,
+                                                            inplace=True),
+                                            NFCBAM(in_channels=out_dim,
+                                                   channels=out_dim,
+                                                   se_rate=se_rate),
+                                            StochasticDepth(probability=stochastic_probability))
+
+        self.down_skip_connection = WSConv2d(in_channels=in_dim,
+                                             out_channels=out_dim,
                                              kernel_size=1,
+                                             stride=self.stride,
                                              bias=True)
-        self.final_activation = activation()
-        self.probability = 1 - stochastic_probability
 
     def forward(self, x):
-        skip = x
-        out = self.feature(x)
-        if x.size() is not out.size():
-            skip = self.dim_equalizer(x)
-        x = out + skip
-
-        if self.training:
-            p = torch.bernoulli(torch.tensor(self.probability))
-            if p == 1:
-                return self.final_activation(skip)
-
-        x = self.final_activation(x)
-        return x
+        indentity = x
+        if self.stride == 2:
+            x = x * self.beta
+            down = self.down_skip_connection(indentity)
+            out = self.features(x)
+            out = out * self.alpha
+            out = out + down
+            return out
+        else:
+            x = x * self.beta
+            out = self.features(x)
+            out = out * self.alpha
+            out = out + indentity
+            return out

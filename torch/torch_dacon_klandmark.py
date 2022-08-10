@@ -6,12 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import torchvision
+from torchsummary import summary
+
 from torch.utils.data import Dataset
 
 
 from util.DaconKLandMarkDataset import DaconKLandMarkDataset
 from torch.utils.data import DataLoader
-from model.NFResNet import NFResNet18
+from model.KLandMarkNet import KLandMarkNet18
 from util.nf_helper import AGC
 
 
@@ -31,10 +33,10 @@ if device == 'cuda':
 
 #Hyper parameter
 #batch_size = data_count
-batch_size = 40
+batch_size = 25
 training_epochs = 100
 learning_rate = 0.003
-target_accuracy = 0.9
+target_accuracy = 0.95
 #Hyper parameter
 
 
@@ -51,11 +53,16 @@ data_loader = DataLoader(datasets,
                          drop_last=True)
 
 
-model = NFResNet18(class_num=10,
-                   gap_dropout_probability=0.25,
-                   stochastic_probability=0.25).to(device)
+model = KLandMarkNet18(class_num=10,
+                       gap_dropout_probability=0.25,
+                       stochastic_probability=0.25).to(device)
+print('==== model info ====')
+summary(model, (3, 256, 256))
+print('====================')
 
-
+model.eval()
+compiled_model = torch.jit.script(model)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
 
 model.train()
 criterion = torch.nn.BCELoss()
@@ -113,6 +120,11 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         break
 
 plt.savefig('C://Github//DeepLearningStudy//trained_model//KLandResult.png')
+
+
+model.eval()
+compiled_model = torch.jit.script(model)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18_trained.pt")
 
 
 
