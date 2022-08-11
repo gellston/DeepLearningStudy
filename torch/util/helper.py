@@ -1417,18 +1417,17 @@ class CBAM(torch.nn.Module):
 
 
 class NFSpatialGate(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, kernel_size=7, dilation=1):
         super(NFSpatialGate, self).__init__()
-        kernel_size = 7
         self.compress = ChannelPool()
         self.spatial = torch.nn.Sequential(
             WSConv2d(in_channels=2,
                      out_channels=1,
                      kernel_size=kernel_size,
                      stride=1,
-                     padding=(kernel_size-1) // 2,
+                     padding=dilation * (kernel_size-1) // 2,
                      bias=True,
-                     dilation=1),
+                     dilation=dilation),
             torch.nn.ReLU(),
         )
     def forward(self, x):
@@ -1440,13 +1439,14 @@ class NFSpatialGate(torch.nn.Module):
 
 
 class NFCBAM(torch.nn.Module):
-    def __init__(self, in_channels, channels, se_rate=0.5):
+    def __init__(self, in_channels, channels, se_rate=0.5, kernel_size=7, dilation=1):
         super(NFCBAM, self).__init__()
         #Squeeze-and-excitiation
         self.channel_wise_conv = NFSEConvBlock(in_channels=in_channels,
                                                out_channels=channels,
                                                se_rate=se_rate)
-        self.spatial_wise_conv = NFSpatialGate()
+        self.spatial_wise_conv = NFSpatialGate(kernel_size=kernel_size,
+                                               dilation=dilation)
     def forward(self, x):
         x_out = self.channel_wise_conv(x)
         x_out = self.spatial_wise_conv(x_out)
@@ -1494,7 +1494,9 @@ class NFKLandMarkResidualBlock(torch.nn.Module):
                                                             inplace=True),
                                             NFCBAM(in_channels=out_dim,
                                                    channels=out_dim,
-                                                   se_rate=se_rate),
+                                                   se_rate=se_rate,
+                                                   kernel_size=kernel_size,
+                                                   dilation=dilation_rate),
                                             StochasticDepth(probability=stochastic_probability),
                                             torch.nn.Dropout2d(p=block_dropout_probability))
 

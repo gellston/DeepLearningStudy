@@ -34,16 +34,18 @@ if device == 'cuda':
 #Hyper parameter
 #batch_size = data_count
 batch_size = 10
-training_epochs = 100
+training_epochs = 150
 learning_rate = 0.003
-target_accuracy = 0.95
+target_accuracy = 0.85
+image_width = 960
+image_height = 640
 #Hyper parameter
 
 
 
 datasets = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
-                                 image_width=448,
-                                 image_height=448,
+                                 image_width=image_width,
+                                 image_height=image_height,
                                  ops='train')
 
 
@@ -58,7 +60,7 @@ model = KLandMarkNet18(class_num=10,
                        gap_dropout_probability=0.3,
                        stochastic_probability=0.3).to(device)
 print('==== model info ====')
-summary(model, (3, 448, 448))
+summary(model, (3, image_height, image_width))
 print('====================')
 
 model.eval()
@@ -89,12 +91,10 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         gpu_X = X.to(device).detach()
         gpu_Y = Y.to(device).detach()
 
-
-        #check_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
-        #cv2.namedWindow("input_image", cv2.WINDOW_NORMAL)
-        #cv2.resizeWindow('input_image', 448, 448)
-        #cv2.imshow('input_image', check_image)
-        #cv2.waitKey(10)
+        check_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        cv2.namedWindow("input_image", cv2.WINDOW_NORMAL)
+        cv2.imshow('input_image', check_image)
+        cv2.waitKey(10)
 
         model.train()
         optimizer.zero_grad()
@@ -129,16 +129,18 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 
 plt.savefig('D://Github//DeepLearningStudy//trained_model//KLandResult.png')
 
-
 model.eval()
 compiled_model = torch.jit.script(model)
 torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KLandMarkNet18_trained.pt")
 
 
 
+
+
+
 test_datasets = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
-                                      image_width=448,
-                                      image_height=448,
+                                      image_width=image_width,
+                                      image_height=image_height,
                                       ops='test')
 test_data_loader = DataLoader(test_datasets,
                               batch_size=1,
@@ -150,6 +152,11 @@ test_result = []
 count = 0
 for X in test_data_loader:
     gpu_X = X.to(device)  # input
+
+    check_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+    cv2.namedWindow("input_image", cv2.WINDOW_NORMAL)
+    cv2.imshow('input_image', check_image)
+    cv2.waitKey(10)
 
     model.eval()
     hypothesis = model(gpu_X)

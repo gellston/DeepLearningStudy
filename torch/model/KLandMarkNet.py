@@ -20,7 +20,7 @@ class KLandMarkNet(torch.nn.Module):
 
         self.stem = torch.nn.Sequential(
             WSConv2d(in_channels=3,
-                     out_channels=32,
+                     out_channels=16,
                      padding=1,
                      stride=2,
                      kernel_size=3,
@@ -78,17 +78,35 @@ def KLandMarkNet18(class_num=5,
                    block_dropout_probability=0.25,
                    stochastic_probability=0.25):
     block_args = (
-        (32, 32, 32, 1, 5, 2),
-        (32, 32, 32, 1, 5, 2),
-        (32, 64, 64, 2, 5, 2), #Stride 48
+        (16, 16, 16, 1, 7, 2), #320x480
+        (16, 16, 16, 1, 7, 2),
+        (16, 32, 32, 2, 7, 2), #160x240
+        (32, 32, 32, 1, 7, 2),
+        (32, 64, 64, 2, 5, 2), #80x120
         (64, 64, 64, 1, 5, 2),
-        (64, 128, 128, 2, 5, 2),
+        (64, 128, 128, 2, 5, 1), #40x60
+        (128, 128, 128, 1, 5, 1),
+        (128, 256, 256, 2, 3, 1), #20x30
+        (256, 256, 256, 1, 3, 1),
+        (256, 256, 256, 2, 3, 1), #10x15
+        (256, 256, 256, 1, 3, 1),
+    )
+    """
+    block_args = (
+        (32, 32, 32, 1, 7, 2), #320x480
+        (32, 32, 32, 1, 7, 2),
+        (32, 64, 64, 2, 7, 2), #160x240
+        (64, 64, 64, 1, 7, 2),
+        (64, 128, 128, 2, 5, 2), #80x120
         (128, 128, 128, 1, 5, 2),
-        (128, 256, 256, 2, 5, 1),
+        (128, 256, 256, 2, 5, 1), #40x60
         (256, 256, 256, 1, 5, 1),
-        (256, 512, 512, 2, 3, 1),
+        (256, 512, 512, 2, 3, 1), #20x30
+        (512, 512, 512, 1, 3, 1),
+        (512, 512, 512, 2, 3, 1), #10x15
         (512, 512, 512, 1, 3, 1),
     )
+    """
     return KLandMarkNet(class_num=class_num,
                         block_dropout_probability=block_dropout_probability,
                         gap_dropout_probability=gap_dropout_probability,

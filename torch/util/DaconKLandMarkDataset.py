@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from torchvision import transforms
 
+
 class DaconKLandMarkDataset(data.Dataset):
     def __init__(self,
                  data_root,
@@ -42,11 +43,27 @@ class DaconKLandMarkDataset(data.Dataset):
         self.torchvision_transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(degrees=(-10, 10)),
-            transforms.RandomErasing(p=0.8, scale=(0.02, 0.1), ratio=(0.3, 3.5)),
-            transforms.RandomPerspective(distortion_scale=0.3, p=0.3),
-            transforms.RandomResizedCrop(size=(448, 448), scale=(0.3, 1.5)),
+
+            #transforms.RandomRotation(degrees=(-5, 5)),
+            #transforms.RandomErasing(p=0.5, scale=(0.02, 0.05), ratio=(0.3, 1.3)),
+            #transforms.RandomErasing(p=0.5, scale=(0.02, 0.05), ratio=(0.3, 1.3)),
+            #transforms.RandomErasing(p=0.5, scale=(0.02, 0.05), ratio=(0.3, 1.3)),
+            #transforms.RandomErasing(p=0.5, scale=(0.02, 0.05), ratio=(0.3, 1.3)),
+            #transforms.RandomErasing(p=0.5, scale=(0.02, 0.05), ratio=(0.3, 1.3)),
+            #transforms.RandomErasing(p=0.5, scale=(0.02, 0.05), ratio=(0.3, 1.3)),
+            #transforms.RandomPerspective(distortion_scale=0.2, p=0.2),
+            #transforms.RandomResizedCrop(size=(960, 640), scale=(0.3, 2.5), interpolation=transforms.InterpolationMode.BICUBIC),
+
+            transforms.Resize(size=(self.image_height, self.image_width)),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
+
+        self.torchvision_transform4test = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize(size=(self.image_height, self.image_width)),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
 
 
 
@@ -61,11 +78,14 @@ class DaconKLandMarkDataset(data.Dataset):
         imagePath = self.target_image_path + imagePath
 
         image = cv2.imread(imagePath, flags=cv2.IMREAD_COLOR)
-        image = cv2.resize(image, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA)
+        #image = cv2.resize(image, interpolation=cv2.INTER_LANCZOS4, dsize=(self.image_width, self.image_height))
+        if self.ops == 'test':
+            image = self.torchvision_transform4test(image)
+            return image
+
         image = self.torchvision_transform(image)
 
-        if self.ops == 'test':
-            return image
+
 
         if self.ops == 'train':
             outputIndex = self.outp[idx][0]
