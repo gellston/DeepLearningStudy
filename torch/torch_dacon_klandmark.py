@@ -33,39 +33,66 @@ if device == 'cuda':
 
 #Hyper parameter
 #batch_size = data_count
-batch_size = 10
-training_epochs = 150
-learning_rate = 0.003
-target_accuracy = 0.95
-image_width = 640
-image_height = 480
+batch_size = 15
+training_epochs = 100
+learning_rate = 0.006
+target_accuracy = 0.99
+image_width = 480
+image_height = 320
 #Hyper parameter
 
 
 
-datasets = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
-                                 image_width=image_width,
-                                 image_height=image_height,
-                                 ops='train')
+augmentation_dataset = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+                                             image_width=image_width,
+                                             image_height=image_height,
+                                             ops='train')
 
 
-data_loader = DataLoader(datasets,
-                         batch_size=batch_size,
-                         shuffle=True,
-                         drop_last=True)
+augmentation_data_loader = DataLoader(augmentation_dataset,
+                                      batch_size=batch_size,
+                                      shuffle=True,
+                                      drop_last=True)
+
+resize_augmentation_dataset = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+                                                    image_width=240,
+                                                    image_height=160,
+                                                    no_augmentation=True,
+                                                    ops='train')
+
+
+resize_augmentation_data_loader = DataLoader(resize_augmentation_dataset,
+                                             batch_size=batch_size,
+                                             shuffle=True,
+                                             drop_last=True)
+
+
+no_augmentation_dataset = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+                                                image_width=image_width,
+                                                image_height=image_height,
+                                                no_augmentation=True,
+                                                ops='train')
+
+
+no_augmentation_data_loader = DataLoader(no_augmentation_dataset,
+                                         batch_size=batch_size,
+                                         shuffle=True,
+                                         drop_last=True)
 
 
 model = KLandMarkNet18(class_num=10,
-                       gap_dropout_probability=0.3,
-                       block_dropout_probability=0.3,
-                       stochastic_probability=0.3).to(device)
+                       gap_dropout_probability=0.35,
+                       block_dropout_probability=0.35,
+                       stochastic_probability=0.35).to(device)
+
+
 print('==== model info ====')
 summary(model, (3, image_height, image_width))
 print('====================')
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
+torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
 
 model.train()
 criterion = torch.nn.BCELoss()
@@ -73,21 +100,40 @@ optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate * batch_size 
 optimizer = AGC(model.parameters(), optimizer, model=model, ignore_agc=['fc'], clipping=0.1)
 
 
-plt.rcParams["figure.figsize"] = (12, 8)
-figure, axis = plt.subplots(2)
+plt.rcParams["figure.figsize"] = (12, 12)
+figure, axis = plt.subplots(2, 4)
 
-avg_cost_graph = []
-avg_acc_graph = []
+
+augmentation_avg_cost_graph = []
+augmentation_avg_acc_graph = []
+
+no_augmentation_avg_cost_graph = []
+no_augmentation_avg_acc_graph = []
+
+resize_augmentation_avg_cost_graph = []
+resize_augmentation_avg_acc_graph = []
+
 epochs = []
 
 
-
 for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 지정함.
-    avg_cost = 0
-    avg_acc = 0
-    total_batch = len(data_loader)
-    datasets = torch.utils.data.Subset(datasets, torch.randperm(len(datasets)))
-    for X, Y in data_loader:
+
+    augmentation_avg_cost = 0
+    augmentation_avg_acc = 0
+
+    no_augmentation_avg_cost = 0
+    no_augmentation_avg_acc = 0
+
+    resize_augmentation_avg_cost = 0
+    resize_augmentation_avg_acc = 0
+
+    total_batch = len(augmentation_data_loader)
+    augmentation_dataset = torch.utils.data.Subset(augmentation_dataset, torch.randperm(len(augmentation_dataset)))
+    no_augmentation_dataset = torch.utils.data.Subset(no_augmentation_dataset, torch.randperm(len(no_augmentation_dataset)))
+    resize_augmentation_dataset = torch.utils.data.Subset(resize_augmentation_dataset, torch.randperm(len(resize_augmentation_dataset)))
+
+    print('augmentation dataset train start')
+    for X, Y in augmentation_data_loader:
         gpu_X = X.to(device).detach()
         gpu_Y = Y.to(device).detach()
 
@@ -101,44 +147,110 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         hypothesis = model(gpu_X)
         cost = criterion(hypothesis, gpu_Y)
         cost.backward()
-        avg_cost += (cost / total_batch)
+        augmentation_avg_cost += (cost / total_batch)
         optimizer.step()
 
         model.eval()
         prediction = model(gpu_X)
         correct_prediction = torch.argmax(prediction, 1) == torch.argmax(gpu_Y, 1)
         accuracy = correct_prediction.float().mean()
-        avg_acc += (accuracy / total_batch)
+        augmentation_avg_acc += (accuracy / total_batch)
+
+    print('no augmentation dataset train start')
+    for X, Y in no_augmentation_data_loader:
+        gpu_X = X.to(device).detach()
+        gpu_Y = Y.to(device).detach()
+
+        check_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        cv2.namedWindow("input_image", cv2.WINDOW_NORMAL)
+        cv2.imshow('input_image', check_image)
+        cv2.waitKey(10)
+
+        model.train()
+        optimizer.zero_grad()
+        hypothesis = model(gpu_X)
+        cost = criterion(hypothesis, gpu_Y)
+        cost.backward()
+        no_augmentation_avg_cost += (cost / total_batch)
+        optimizer.step()
+
+        model.eval()
+        prediction = model(gpu_X)
+        correct_prediction = torch.argmax(prediction, 1) == torch.argmax(gpu_Y, 1)
+        accuracy = correct_prediction.float().mean()
+        no_augmentation_avg_acc += (accuracy / total_batch)
+
+    print('resize augmentation dataset train start')
+    for X, Y in resize_augmentation_data_loader:
+        gpu_X = X.to(device).detach()
+        gpu_Y = Y.to(device).detach()
+
+        check_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        cv2.namedWindow("input_image", cv2.WINDOW_NORMAL)
+        cv2.imshow('input_image', check_image)
+        cv2.waitKey(10)
+
+        model.train()
+        optimizer.zero_grad()
+        hypothesis = model(gpu_X)
+        cost = criterion(hypothesis, gpu_Y)
+        cost.backward()
+        resize_augmentation_avg_cost += (cost / total_batch)
+        optimizer.step()
+
+        model.eval()
+        prediction = model(gpu_X)
+        correct_prediction = torch.argmax(prediction, 1) == torch.argmax(gpu_Y, 1)
+        accuracy = correct_prediction.float().mean()
+        resize_augmentation_avg_acc += (accuracy / total_batch)
 
 
-    avg_acc_graph.append(avg_acc.cpu().detach().numpy())
-    avg_cost_graph.append(avg_cost.cpu().detach().numpy())
+    augmentation_avg_acc_graph.append(augmentation_avg_acc.cpu().detach().numpy())
+    augmentation_avg_cost_graph.append(augmentation_avg_cost.cpu().detach().numpy())
+    no_augmentation_avg_acc_graph.append(no_augmentation_avg_acc.cpu().detach().numpy())
+    no_augmentation_avg_cost_graph.append(no_augmentation_avg_cost.cpu().detach().numpy())
+    resize_augmentation_avg_acc_graph.append(resize_augmentation_avg_acc.cpu().detach().numpy())
+    resize_augmentation_avg_cost_graph.append(resize_augmentation_avg_cost.cpu().detach().numpy())
+
     epochs.append(epoch)
 
 
-    axis[0].plot(epochs, avg_acc_graph)
-    axis[0].set_title("accuracy")
-    axis[1].plot(epochs, avg_cost_graph)
-    axis[1].set_title("cost")
+    axis[0, 0].plot(epochs, augmentation_avg_acc_graph)
+    axis[0, 0].set_title("augmentation accuracy")
+    axis[0, 1].plot(epochs, augmentation_avg_cost_graph)
+    axis[0, 1].set_title("augmentation cost")
+    axis[0, 2].plot(epochs, no_augmentation_avg_acc_graph)
+    axis[0, 2].set_title("no_augmentation accuracy")
+    axis[0, 3].plot(epochs, no_augmentation_avg_cost_graph)
+    axis[0, 3].set_title("no_augmentation cost")
+    axis[1, 0].plot(epochs, resize_augmentation_avg_acc_graph)
+    axis[1, 0].set_title("resize_augmentation accuracy")
+    axis[1, 1].plot(epochs, resize_augmentation_avg_cost_graph)
+    axis[1, 1].set_title("resize_augmentation cost")
     plt.show(block=False)
     plt.pause(0.001)
 
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
-    if avg_acc >= target_accuracy:
+    print('Epoch:', '%04d' % (epoch + 1), 'aug cost =', '{:.9f}'.format(augmentation_avg_cost),
+                                          'aug acc =', '{:.9f}'.format(augmentation_avg_acc),
+                                          'no aug cost =', '{:.9f}'.format(no_augmentation_avg_cost),
+                                          'no aug acc =', '{:.9f}'.format(no_augmentation_avg_acc),
+                                          'resize aug cost =', '{:.9f}'.format(resize_augmentation_avg_cost),
+                                          'resize aug acc =', '{:.9f}'.format(resize_augmentation_avg_acc))
+    if augmentation_avg_acc >= 0.95 and no_augmentation_avg_acc >= target_accuracy and resize_augmentation_avg_acc >= target_accuracy:
         break
 
-plt.savefig('C://Github//DeepLearningStudy//trained_model//KLandResult.png')
+plt.savefig('D://Github//DeepLearningStudy//trained_model//KLandResult.png')
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18_trained.pt")
+torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KLandMarkNet18_trained.pt")
 
 
 
 
 
 
-test_datasets = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+test_datasets = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
                                       image_width=image_width,
                                       image_height=image_height,
                                       ops='test')
@@ -147,7 +259,7 @@ test_data_loader = DataLoader(test_datasets,
                               shuffle=False,
                               drop_last=False)
 
-submission_file = pd.read_csv("C://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission.csv")
+submission_file = pd.read_csv("D://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission.csv")
 test_result = []
 count = 0
 for X in test_data_loader:
@@ -166,4 +278,4 @@ for X in test_data_loader:
     print('result =', hypothesis[0])
 
 submission_file["label"] = test_result
-submission_file.to_csv("C://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission_result.csv", index=False)
+submission_file.to_csv("D://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission_result.csv", index=False)
