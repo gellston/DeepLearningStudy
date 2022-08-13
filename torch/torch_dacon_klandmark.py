@@ -43,7 +43,7 @@ image_height = 320
 
 
 
-augmentation_dataset = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+augmentation_dataset = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
                                              image_width=image_width,
                                              image_height=image_height,
                                              ops='train')
@@ -54,7 +54,7 @@ augmentation_data_loader = DataLoader(augmentation_dataset,
                                       shuffle=True,
                                       drop_last=True)
 
-resize_augmentation_dataset = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+resize_augmentation_dataset = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
                                                     image_width=240,
                                                     image_height=160,
                                                     no_augmentation=True,
@@ -67,7 +67,7 @@ resize_augmentation_data_loader = DataLoader(resize_augmentation_dataset,
                                              drop_last=True)
 
 
-no_augmentation_dataset = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+no_augmentation_dataset = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
                                                 image_width=image_width,
                                                 image_height=image_height,
                                                 no_augmentation=True,
@@ -92,7 +92,7 @@ print('====================')
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
+torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KLandMarkNet18.pt")
 
 model.train()
 criterion = torch.nn.BCELoss()
@@ -250,7 +250,7 @@ torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//KL
 
 
 
-test_datasets = DaconKLandMarkDataset(data_root='C://Github//DeepLearningStudy//dataset//dacon_klandmark//',
+test_datasets = DaconKLandMarkDataset(data_root='D://Github//DeepLearningStudy//dataset//dacon_klandmark//',
                                       image_width=image_width,
                                       image_height=image_height,
                                       ops='test')
@@ -278,4 +278,4 @@ for X in test_data_loader:
     print('result =', hypothesis[0])
 
 submission_file["label"] = test_result
-submission_file.to_csv("C://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission_result.csv", index=False)
+submission_file.to_csv("D://Github//DeepLearningStudy//dataset//dacon_klandmark//sample_submission_result.csv", index=False)
