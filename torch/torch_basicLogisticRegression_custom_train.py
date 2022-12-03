@@ -4,6 +4,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 
+
+#hyperparaemter
+learnig_rate = 0.003
+nb_epochs = 1000
+#hyperparaemter
+
+
 x_data = [[1, 2], [2, 3], [3, 1], [4, 3], [5, 3], [6, 2]]
 y_data = [[0], [0], [0], [1], [1], [1]]
 x_train = torch.FloatTensor(x_data)
@@ -20,9 +27,9 @@ model = nn.Sequential(
 print(model(x_train))
 
 
-optimizer = optim.SGD(model.parameters(), lr=1)
+optimizer = optim.SGD(model.parameters(), lr=learnig_rate)
 
-nb_epochs = 1000
+
 for epoch in range(nb_epochs + 1):
 
     # Cost 계산

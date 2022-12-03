@@ -23,9 +23,9 @@ if device == 'cuda':
 
 # hyperparameters
 training_epochs = 100
-batch_size = 100
+batch_size = 100             ## Batch Size
 learning_rate = 0.003
-target_accuracy = 0.99
+target_accuracy = 0.97
 
 # MNIST dataset
 mnist_train = dsets.MNIST(root='MNIST_data/',
