@@ -3,21 +3,29 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
-
-model = nn.Linear(1,1)
-
-
-print(list(model.parameters()))
-
-x_train = torch.FloatTensor([[1], [2], [3]])
-y_train = torch.FloatTensor([[2], [4], [6]])
-
-
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-
-
+#Hyperparameter
+learning_rate = 0.001
 nb_epochs = 2000
+#Hyperparameter
+
+
+
+
+model = nn.Linear(1,1, bias=True)
+
+print('before training')
+print(list(model.named_parameters()))
+print('before training')
+
+
+x_train = torch.FloatTensor([[1], [2], [3]])  #내가 가지고 있는 입력
+y_train = torch.FloatTensor([[2], [4], [6]])  #내가 가지고 있는 정답
+
+
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+
+
+
 for epoch in range(nb_epochs+1):
 
     # H(x) 계산
@@ -38,6 +46,11 @@ for epoch in range(nb_epochs+1):
     # 100번마다 로그 출력
         print('Epoch {:4d}/{} Cost: {:.6f}'.format(epoch, nb_epochs, cost.item()))
 
+
+
+print('after training')
+print(list(model.named_parameters()))
+print('after training')
 
 new_var =  torch.FloatTensor([[4.0]])
 # 입력한 값 4에 대해서 예측값 y를 리턴받아서 pred_y에 저장
