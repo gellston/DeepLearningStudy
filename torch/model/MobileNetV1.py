@@ -11,7 +11,7 @@ class MobileNetV1(torch.nn.Module):
         self.class_num = class_num
 
         self.features = torch.nn.Sequential(
-            torch.nn.Conv2d(in_channels=3,
+            torch.nn.Conv2d(in_channels=1,
                             out_channels=32,
                             bias=False,
                             stride=2,
@@ -78,5 +78,5 @@ class MobileNetV1(torch.nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.view([-1, self.class_num])
-        x = torch.sigmoid(x)
+        x = torch.softmax(x, dim=1)
         return x
