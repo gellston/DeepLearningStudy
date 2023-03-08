@@ -8,7 +8,7 @@ from torchsummary import summary
 from torch.utils.data import DataLoader
 
 from model.MWNetV7_224_1 import MWNetV7_224_1
-from model.MobileNetV1 import MobileNetV1
+from model.SETrayNet import SETrayNet
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
@@ -33,14 +33,14 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = MobileNetV1(class_num=2, activation=torch.nn.Hardswish).to(device)
+model = SETrayNet(class_num=3, activation=torch.nn.SiLU).to(device)
 print('==== model info ====')
-summary(model, (1, 256, 256))
+summary(model, (1, 512, 512))
 print('====================')
 
 
 macs, params = get_model_complexity_info(model,
-                                         (1, 256, 256),
+                                         (1, 512, 512),
                                          as_strings=True,
                                          print_per_layer_stat=True, verbose=True)
 print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
@@ -58,11 +58,11 @@ model.apply(init_weights)
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MWNetV8_224_1).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MWNetV8_512_1).pt")
 
-trace_input = torch.rand(1, 1, 256, 256).to(device, dtype=torch.float32)
+trace_input = torch.rand(1, 1, 512, 512).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
-torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MWNetV8_224_1)_Trace.pt")
+torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(MWNetV8_512_1)_Trace.pt")
 
 ## no Train Model Save
 
@@ -110,7 +110,7 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(MWNetV8_224_1).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//TRAIN_FIAT(MWNetV8_512_1).pt")
 ## no Train Model Save
 
 print('Learning finished')
