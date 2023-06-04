@@ -365,6 +365,79 @@ class CSPResidualBlock(torch.nn.Module):
         return out
 
 
+
+class CBAMCSPResidualBlock(torch.nn.Module):
+
+    def __init__(self, in_dim, mid_dim, out_dim, stride=1, part_ratio=0.5, activation=torch.nn.SiLU, se_rate=2, cbam_kernel_size=3):
+        super(CBAMCSPResidualBlock, self).__init__()
+
+        self.part1_chnls = int(in_dim * part_ratio)
+        self.part2_chnls = in_dim - self.part1_chnls                ##Residual Layer Channel Calculation
+
+        self.part1_out_chnls = int(out_dim * part_ratio)
+        self.part2_out_chnls = out_dim - self.part1_out_chnls
+
+        self.stride = stride
+        self.se_rate = se_rate
+        self.residual_block = torch.nn.Sequential(torch.nn.Conv2d(self.part2_chnls,
+                                                                  mid_dim,
+                                                                  kernel_size=3,
+                                                                  stride=self.stride,
+                                                                  padding=1,
+                                                                  bias=False),
+                                                  torch.nn.BatchNorm2d(num_features=mid_dim),
+                                                  activation(),
+                                                  torch.nn.Conv2d(mid_dim,
+                                                                  self.part2_out_chnls,
+                                                                  kernel_size=3,
+                                                                  padding='same',
+                                                                  bias=False),
+                                                  torch.nn.BatchNorm2d(num_features=self.part2_out_chnls))
+
+        self.projection1 = torch.nn.Conv2d(in_channels=self.part2_chnls,            ##Residual Projection
+                                           out_channels=self.part2_out_chnls,
+                                           kernel_size=1,
+                                           stride=2)
+
+        self.projection2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
+                                           out_channels=self.part1_out_chnls,
+                                           kernel_size=1,
+                                           stride=2)
+
+        self.dim_equalizer1 = torch.nn.Conv2d(in_channels=self.part2_chnls,
+                                              out_channels=self.part2_out_chnls,
+                                              kernel_size=1)
+
+        self.dim_equalizer2 = torch.nn.Conv2d(in_channels=self.part1_chnls,
+                                              out_channels=self.part1_out_chnls,
+                                              kernel_size=1)
+
+        self.activation = activation()
+        self.cbam = CBAM(in_channels=out_dim, channels=out_dim, se_rate=se_rate, kernel_size=cbam_kernel_size)
+
+
+    def forward(self, x):
+
+        part1 = x[:, :self.part1_chnls, :, :] #part1 channel 자르기
+        part2 = x[:, self.part1_chnls:, :, :] #part2 channel 자르기
+        skip_connection = part2
+
+        if self.stride == 2:
+            skip_connection = self.projection1(skip_connection)
+            part1 = self.projection2(part1)
+        else:
+            if self.part1_chnls != self.part1_out_chnls:
+                skip_connection = self.dim_equalizer1(skip_connection)
+                part1 = self.dim_equalizer2(part1)
+
+        residual = self.residual_block(part2)  # F(x)
+        residual = torch.add(residual, skip_connection)
+        residual = self.activation(residual)
+        out = torch.cat((part1, residual), 1)
+        out = self.cbam(out)
+        return out
+
+
 class CSPDenseBlock(torch.nn.Module):
 
     def __init__(self, num_input_features, num_layers, expansion_rate, growth_rate, droprate, part_ratio=0.5, activation=torch.nn.ReLU):
@@ -406,9 +479,9 @@ class SEBlock(torch.nn.Module):
         super().__init__()
         self.squeeze = torch.nn.AdaptiveAvgPool2d((1, 1))
         self.excitation = torch.nn.Sequential(
-            torch.nn.Linear(in_channels, in_channels//reduction_ratio),
+            torch.nn.Linear(in_channels, (int)(in_channels/reduction_ratio)),
             activation(),
-            torch.nn.Linear(in_channels//reduction_ratio, in_channels),
+            torch.nn.Linear((int)(in_channels/reduction_ratio), in_channels),
             torch.nn.Sigmoid()
         )
 
@@ -421,7 +494,7 @@ class SEBlock(torch.nn.Module):
 
 
 class SESeparableActivationConv2d(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU):
+    def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False, activation=torch.nn.SiLU, reduction_rate=2):
         super(SESeparableActivationConv2d, self).__init__()
 
         self.depthwise = torch.nn.Conv2d(in_channels,
@@ -443,7 +516,7 @@ class SESeparableActivationConv2d(torch.nn.Module):
         self.bn2 = torch.nn.BatchNorm2d(out_channels)
         self.activation2 = activation()
 
-        self.seblock = SEBlock(in_channels=out_channels, activation=activation)
+        self.seblock = SEBlock(in_channels=out_channels, activation=activation, reduction_ratio=reduction_rate)
 
 
     def forward(self, x):
@@ -752,11 +825,12 @@ class SEConvBlock(torch.nn.Module):
     def __init__(self, in_channels, channels, se_rate=12):
         super(SEConvBlock, self).__init__()
         self.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
+        print('channel size chekc = ', (int)(channels / se_rate))
         self.fc = torch.nn.Sequential(
-            torch.nn.Conv2d(in_channels, channels // se_rate, kernel_size=1, padding=0),
-            torch.nn.BatchNorm2d(channels // se_rate),
+            torch.nn.Conv2d(in_channels, (int)(channels / se_rate), kernel_size=1, padding=0),
+            torch.nn.BatchNorm2d((int)(channels / se_rate)),
             torch.nn.ReLU(inplace=True),
-            torch.nn.Conv2d(channels // se_rate, channels, kernel_size=1, padding=0),
+            torch.nn.Conv2d((int)(channels / se_rate), channels, kernel_size=1, padding=0),
             torch.nn.Sigmoid()
         )
 
@@ -1378,16 +1452,16 @@ class ChannelPool(torch.nn.Module):
         return torch.cat((torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1).unsqueeze(1)), dim=1)
 
 class SpatialGate(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, kernel_size=7):
         super(SpatialGate, self).__init__()
-        kernel_size = 7
+        self.kernel_size =kernel_size
         self.compress = ChannelPool()
         self.spatial = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=2,
                             out_channels=1,
-                            kernel_size=kernel_size,
+                            kernel_size=self.kernel_size,
                             stride=1,
-                            padding=(kernel_size-1) // 2,
+                            padding=(self.kernel_size-1) // 2,
                             bias=False,
                             dilation=1),
             torch.nn.BatchNorm2d(num_features=1),
@@ -1402,13 +1476,13 @@ class SpatialGate(torch.nn.Module):
 
 
 class CBAM(torch.nn.Module):
-    def __init__(self, in_channels, channels, se_rate=0.5):
+    def __init__(self, in_channels, channels, se_rate=0.5, kernel_size=7):
         super(CBAM, self).__init__()
         #Squeeze-and-excitiation
         self.channel_wise_conv = SEConvBlock(in_channels=in_channels,
                                              channels=channels,
                                              se_rate=se_rate)
-        self.spatial_wise_conv = SpatialGate()
+        self.spatial_wise_conv = SpatialGate(kernel_size=kernel_size)
     def forward(self, x):
         x_out = self.channel_wise_conv(x)
         x_out = self.spatial_wise_conv(x_out)

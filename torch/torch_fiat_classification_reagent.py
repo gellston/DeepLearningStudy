@@ -8,7 +8,7 @@ from torchsummary import summary
 from torch.utils.data import DataLoader
 
 from model.MWNetV7_224_1 import MWNetV7_224_1
-from model.ReagentModelV1 import ReagentModelV1
+from model.ReagentModelV5 import ReagentModelV5
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
@@ -33,14 +33,14 @@ accuracy_threshold = 0.5
 ## Hyper parameter
 
 
-model = ReagentModelV1(class_num=3, activation=torch.nn.SiLU).to(device)
+model = ReagentModelV5(class_num=4, activation=torch.nn.SiLU).to(device)
 print('==== model info ====')
-summary(model, (1, 512, 288))
+summary(model, (1, 496, 176))
 print('====================')
 
 
 macs, params = get_model_complexity_info(model,
-                                         (1, 512, 288),
+                                         (1, 496, 176),
                                          as_strings=True,
                                          print_per_layer_stat=True, verbose=True)
 print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
@@ -58,18 +58,18 @@ model.apply(init_weights)
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(Reagent).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//FIAT(Reagentv5).pt")
 
-trace_input = torch.rand(1, 1, 512, 288).to(device, dtype=torch.float32)
+trace_input = torch.rand(1, 1, 496, 176).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
-torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(Reagent)_Trace.pt")
+torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//FIAT(Reagentv5)_Trace.pt")
 
 ## no Train Model Save
 
 
-datasets = FIATClassificationDataset('D://20221205//',
-                                     label_height=256,
-                                     label_width=256,
+datasets = FIATClassificationDataset('C://Github//DeepLearningStudy//dataset//FIAT_dataset_food//',
+                                     label_height=176,
+                                     label_width=496,
                                      isColor=False,
                                      isNorm=False)
 data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)

@@ -13,36 +13,40 @@ class ReagentModelV1(torch.nn.Module):
 
         self.features = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=1,
-                            out_channels=16,
-                            bias=False,
-                            stride=2,
-                            padding=1,
-                            kernel_size=3),
-            torch.nn.BatchNorm2d(16),
-            activation(),                          #256x144
-            torch.nn.Conv2d(in_channels=16,
                             out_channels=32,
                             bias=False,
                             stride=2,
                             padding=1,
                             kernel_size=3),
             torch.nn.BatchNorm2d(32),
-            activation(),                           #128x72
+            activation(),                           # 248x88
+
+
             CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=1, activation=activation),
-            CSPResidualBlock(in_dim=32, mid_dim=44, out_dim=44, stride=2, activation=activation),
-                                                    # 64x36
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=2, activation=activation),
+                                                    # 124x44
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=1, activation=activation),
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=1, activation=activation),
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=1, activation=activation),
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=2, activation=activation),
+                                                    # 64x22
 
-            CSPResidualBlock(in_dim=44, mid_dim=44, out_dim=44, stride=1, activation=activation),
-            CSPResidualBlock(in_dim=44, mid_dim=55, out_dim=55, stride=2, activation=activation),
-                                                    # 32x18
-
-            CSPResidualBlock(in_dim=55, mid_dim=55, out_dim=55, stride=1, activation=activation),
-            CSPResidualBlock(in_dim=55, mid_dim=66, out_dim=66, stride=2, activation=activation),
-                                                    # 16x9
-
-            torch.nn.Conv2d(in_channels=66, out_channels=77, kernel_size=1, stride=1, bias=False),
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=1, activation=activation),
+            CSPResidualBlock(in_dim=32, mid_dim=32, out_dim=32, stride=2, activation=activation),
+                                                    # 32x11
             torch.nn.AdaptiveAvgPool2d(1),
-            torch.nn.Conv2d(in_channels=77,
+            torch.nn.Dropout2d(p=0.25),
+            torch.nn.Conv2d(in_channels=32,
+                            out_channels=16,
+                            kernel_size=1,
+                            bias=True),
+            activation(),
+            torch.nn.Conv2d(in_channels=16,
+                            out_channels=8,
+                            kernel_size=1,
+                            bias=True),
+            activation(),
+            torch.nn.Conv2d(in_channels=8,
                             out_channels=self.class_num,
                             kernel_size=1,
                             bias=True)
