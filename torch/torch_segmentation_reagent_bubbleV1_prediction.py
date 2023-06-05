@@ -78,8 +78,7 @@ for X, Y in data_loader:
     cv2.resizeWindow('prediction', 160, 416)
     cv2.imshow('prediction', prediction_image)
 
-    cv2.waitKey(1)
+    cv2.waitKey(300)
 
-print('training finished')
 
 

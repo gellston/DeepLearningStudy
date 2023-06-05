@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class ConvBlock(torch.nn.Module):
+class conv(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, stride=2, padding=1):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
@@ -13,12 +13,12 @@ class ConvBlock(torch.nn.Module):
         x = self.conv1(input)
         return self.relu(self.bn(x))
 
-class Spatial_path(torch.nn.Module):
+class spatial_path(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.convblock1 = ConvBlock(in_channels=1, out_channels=32)
-        self.convblock2 = ConvBlock(in_channels=32, out_channels=40)
-        self.convblock3 = ConvBlock(in_channels=40, out_channels=48)
+        self.convblock1 = conv(in_channels=1, out_channels=32)
+        self.convblock2 = conv(in_channels=32, out_channels=40)
+        self.convblock3 = conv(in_channels=40, out_channels=48)
 
     def forward(self, input):
         x = self.convblock1(input)
@@ -26,7 +26,7 @@ class Spatial_path(torch.nn.Module):
         x = self.convblock3(x)
         return x
 
-class AttentionRefinementModule(torch.nn.Module):
+class ARM(torch.nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
@@ -47,15 +47,12 @@ class AttentionRefinementModule(torch.nn.Module):
         return x
 
 
-class FeatureFusionModule(torch.nn.Module):
+class FFM(torch.nn.Module):
     def __init__(self, num_classes, in_channels):
         super().__init__()
-        # self.in_channels = input_1.channels + input_2.channels
-        # resnet101 3328 = 256(from context path) + 1024(from spatial path) + 2048(from spatial path)
-        # resnet18  1024 = 256(from context path) + 256(from spatial path) + 512(from spatial path)
         self.in_channels = in_channels
 
-        self.convblock = ConvBlock(in_channels=self.in_channels, out_channels=num_classes, stride=1)
+        self.convblock = conv(in_channels=self.in_channels, out_channels=num_classes, stride=1)
         self.conv1 = nn.Conv2d(num_classes, num_classes, kernel_size=1)
         self.relu = nn.ReLU()
         self.conv2 = nn.Conv2d(num_classes, num_classes, kernel_size=1)
@@ -65,7 +62,7 @@ class FeatureFusionModule(torch.nn.Module):
 
     def forward(self, input_1, input_2):
         x = torch.cat((input_1, input_2), dim=1)
-        assert self.in_channels == x.size(1), 'in_channels of ConvBlock should be {}'.format(x.size(1))
+        assert self.in_channels == x.size(1), 'its invalid channel size'.format(x.size(1))
         feature = self.convblock(x)
         x = self.avgpool(feature)
 

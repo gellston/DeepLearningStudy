@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from torchsummary import summary
 from torch.utils.data import DataLoader
 from util.helper import IOU
-from util.losses import jaccard_loss
+from util.losses import modified_focal_loss
 
 from util.TorchSegmentationDatasetLoaderV2 import TorchSegmentationDatasetLoaderV2
 from model.BiSeNetMobileV2 import BiSeNetMobileV2
@@ -32,35 +32,37 @@ if device == 'cuda':
 
 
 training_epochs = 300
-batch_size = 30
+batch_size = 6
 target_accuracy = 0.95
-learning_rate = 0.0003
+learning_rate = 0.003
+classNum = 2
 
 
 
-datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//20230601_3cc 고무_크롭_Segmentation_전처리//",
-                                            image_height=416,
-                                            image_width=160,
-                                            classNum=2,
-                                            skipClass=[0],
+datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//세그먼테이션 후처리 병합//",
+                                            image_height=216,
+                                            image_width=920,
+                                            classNum=classNum,
+                                            skipClass=[],
                                             isColor=False,
                                             isNorm=False)
 
 data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 
-BiSegNet = BiSeNetMobileV2(class_num=1,
+BiSegNet = BiSeNetMobileV2(class_num=classNum,
                            activation=torch.nn.ReLU6).to(device)
 print('==== model info ====')
-summary(BiSegNet, (1, 416, 160))
+summary(BiSegNet, (1, 216, 920))
 BiSegNet.eval()
 compiled_model = torch.jit.script(BiSegNet)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV1)_no_train.pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV2)_no_train.pt")
 print('====================')
 
 
-loss_fn = nn.BCELoss().to(device)# 내부적으로 소프트맥스 함수를 포함하고 있음.
-optimizer = torch.optim.Adam(BiSegNet.parameters(), lr=learning_rate)
+
+loss_fn = nn.BCELoss().to(device)
+optimizer = torch.optim.RAdam(BiSegNet.parameters(), lr=learning_rate)
 
 total_batch = len(data_loader)
 print('total_batch=', total_batch)
@@ -110,9 +112,11 @@ for epoch in range(training_epochs):
         sum_cost += total_loss.item()
         sum_acc += accuracy
 
+        gc.collect()
+
     BiSegNet.eval()
     compiled_model = torch.jit.script(BiSegNet)
-    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV1)_step.pt")
+    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV2)_step.pt")
 
     average_cost = sum_cost / total_batch
     average_accuracy = sum_acc / total_batch
@@ -127,39 +131,55 @@ for epoch in range(training_epochs):
         top_accuracy = average_accuracy
         BiSegNet.eval()
         compiled_model = torch.jit.script(BiSegNet)
-        torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV1)_top.pt")
+        torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV2)_top.pt")
 
 
     if average_accuracy >= target_accuracy:
         BiSegNet.eval()
         compiled_model = torch.jit.script(BiSegNet)
-        torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV1)_final.pt")
+        torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV2)_final.pt")
         break
 
 
     original_image = X[0].permute(1, 2, 0).numpy().astype('uint8')
     original_image = original_image.squeeze(2)
 
-    label_image = Y[0].permute(1, 2, 0).detach().cpu().numpy()
-    label_image = np.where(label_image > 0.5, 255, 0).astype('uint8')
-    label_image = label_image.squeeze(2)
+    bubble = Y[0].permute(1, 2, 0).detach().cpu().numpy()
+    bubble = np.where(bubble > 0.5, 255, 0).astype('uint8')
+    bubble = bubble[:,:,0]
+
+    residue = Y[0].permute(1, 2, 0).detach().cpu().numpy()
+    residue = np.where(residue > 0.5, 255, 0).astype('uint8')
+    residue = residue[:,:,1]
 
 
-    prediction_image = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
-    prediction_image = np.where(prediction_image > 0.5, 255, 0).astype('uint8')
-    prediction_image = prediction_image.squeeze(2)
+    prediction_bubble = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
+    prediction_bubble = np.where(prediction_bubble > 0.5, 255, 0).astype('uint8')
+    prediction_bubble = prediction_bubble[:,:,0]
 
-    cv2.namedWindow("original", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('original', 160, 416)
+    prediction_residue = prediction[1].permute(1, 2, 0).detach().cpu().numpy()
+    prediction_residue = np.where(prediction_residue > 0.5, 255, 0).astype('uint8')
+    prediction_residue = prediction_residue[:, :, 0]
+
+    cv2.namedWindow("original", cv2.WINDOW_FREERATIO)
+    cv2.resizeWindow('original', 920, 216)
     cv2.imshow('original', original_image)
 
-    cv2.namedWindow("label", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('label', 160, 416)
-    cv2.imshow('label', label_image)
+    cv2.namedWindow("bubble", cv2.WINDOW_FREERATIO)
+    cv2.resizeWindow('bubble', 920, 216)
+    cv2.imshow('bubble', bubble)
+
+    cv2.namedWindow("residue", cv2.WINDOW_FREERATIO)
+    cv2.resizeWindow('residue', 920, 216)
+    cv2.imshow('residue', residue)
     
-    cv2.namedWindow("prediction", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('prediction', 160, 416)
-    cv2.imshow('prediction', prediction_image)
+    cv2.namedWindow("prediction_bubble", cv2.WINDOW_FREERATIO)
+    cv2.resizeWindow('prediction_bubble', 920, 216)
+    cv2.imshow('prediction_bubble', prediction_bubble)
+
+    cv2.namedWindow("prediction_residue", cv2.WINDOW_FREERATIO)
+    cv2.resizeWindow('prediction_residue', 920, 216)
+    cv2.imshow('prediction_residue', prediction_residue)
 
     cv2.waitKey(100)
 

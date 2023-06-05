@@ -5,9 +5,9 @@ import torch.nn.functional as F
 ## Backbone Helper
 from util.helper import InvertedBottleNeck
 ## BiSeNet Helper
-from util.BiSeNetHelper import Spatial_path
-from util.BiSeNetHelper import AttentionRefinementModule
-from util.BiSeNetHelper import FeatureFusionModule
+from util.BiSeNetHelper import spatial_path
+from util.BiSeNetHelper import ARM
+from util.BiSeNetHelper import FFM
 
 
 class BiSeNetMobileV2(torch.nn.Module):
@@ -50,13 +50,13 @@ class BiSeNetMobileV2(torch.nn.Module):
 
 
         ##BiSeNet
-        self.spatial_path = Spatial_path()
+        self.spatial_path = spatial_path()
 
-        self.attention_refinement_module1 = AttentionRefinementModule(32, 32)
-        self.attention_refinement_module2 = AttentionRefinementModule(40, 40)
+        self.attention_refinement_module1 = ARM(32, 32)
+        self.attention_refinement_module2 = ARM(40, 40)
         self.global_avg_pool_tail = torch.nn.AdaptiveAvgPool2d(1)
 
-        self.feature_fusion_module = FeatureFusionModule(num_classes=self.class_num, in_channels=48 + 32 + 40)
+        self.feature_fusion_module = FFM(num_classes=self.class_num, in_channels=48 + 32 + 40)
         self.final_conv = torch.nn.Conv2d(in_channels=self.class_num,
                                           out_channels=self.class_num,
                                           kernel_size=3,
