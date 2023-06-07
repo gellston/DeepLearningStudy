@@ -10,10 +10,10 @@ from util.BiSeNetHelper import ARM
 from util.BiSeNetHelper import FFM
 
 
-class BiSeNetMobileV2(torch.nn.Module):
+class BiSegNetMobileV1(torch.nn.Module):
 
     def __init__(self, class_num=5, activation=torch.nn.ReLU6):
-        super(BiSeNetMobileV2, self).__init__()
+        super(BiSegNetMobileV1, self).__init__()
 
         self.class_num = class_num
 
@@ -21,29 +21,29 @@ class BiSeNetMobileV2(torch.nn.Module):
         ##Back bone
         self.stem = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=1,
-                            out_channels=16,
+                            out_channels=8,
                             bias=False,
                             stride=2,
                             padding=1,
                             kernel_size=3),
-            torch.nn.BatchNorm2d(16),
+            torch.nn.BatchNorm2d(8),
             activation(),
         ) #2
 
         self.layer1 = torch.nn.Sequential(
-            InvertedBottleNeck(in_channels=16, out_channels=16, expansion_rate=1, stride=1, activation=activation),
-            InvertedBottleNeck(in_channels=16, out_channels=24, expansion_rate=6, stride=2, activation=activation)
+            InvertedBottleNeck(in_channels=8, out_channels=16, expansion_rate=6, stride=2, activation=activation),
+            InvertedBottleNeck(in_channels=16, out_channels=16, expansion_rate=6, stride=1, activation=activation)
         ) #4
 
         self.layer2 = torch.nn.Sequential(
-            InvertedBottleNeck(in_channels=24, out_channels=24, expansion_rate=6, stride=1, activation=activation),
-            InvertedBottleNeck(in_channels=24, out_channels=32, expansion_rate=6, stride=2, activation=activation)
+            InvertedBottleNeck(in_channels=16, out_channels=24, expansion_rate=6, stride=2, activation=activation),
+            InvertedBottleNeck(in_channels=24, out_channels=24, expansion_rate=6, stride=1, activation=activation)
         ) #8
 
         self.layer3 = torch.nn.Sequential(
-            InvertedBottleNeck(in_channels=32, out_channels=40, expansion_rate=6, stride=1, activation=activation),
-            InvertedBottleNeck(in_channels=40, out_channels=40, expansion_rate=6, stride=1, activation=activation),
-            InvertedBottleNeck(in_channels=40, out_channels=40, expansion_rate=6, stride=2, activation=activation)
+            InvertedBottleNeck(in_channels=24, out_channels=32, expansion_rate=6, stride=2, activation=activation),
+            InvertedBottleNeck(in_channels=32, out_channels=32, expansion_rate=6, stride=1, activation=activation),
+            InvertedBottleNeck(in_channels=32, out_channels=32, expansion_rate=6, stride=1, activation=activation)
         ) #16
 
         ##Back bone
@@ -52,11 +52,11 @@ class BiSeNetMobileV2(torch.nn.Module):
         ##BiSeNet
         self.spatial_path = spatial_path()
 
-        self.attention_refinement_module1 = ARM(32, 32)
-        self.attention_refinement_module2 = ARM(40, 40)
+        self.attention_refinement_module1 = ARM(24, 24)
+        self.attention_refinement_module2 = ARM(32, 32)
         self.global_avg_pool_tail = torch.nn.AdaptiveAvgPool2d(1)
 
-        self.feature_fusion_module = FFM(num_classes=self.class_num, in_channels=48 + 32 + 40)
+        self.feature_fusion_module = FFM(num_classes=self.class_num, in_channels=24 + 32 + 48)
         self.final_conv = torch.nn.Conv2d(in_channels=self.class_num,
                                           out_channels=self.class_num,
                                           kernel_size=3,
@@ -66,8 +66,8 @@ class BiSeNetMobileV2(torch.nn.Module):
 
 
         ##Super vision
-        self.super_vision1 = torch.nn.Conv2d(in_channels=32, out_channels=self.class_num, kernel_size=1)
-        self.super_vision2 = torch.nn.Conv2d(in_channels=40, out_channels=self.class_num, kernel_size=1)
+        self.super_vision1 = torch.nn.Conv2d(in_channels=24, out_channels=self.class_num, kernel_size=1)
+        self.super_vision2 = torch.nn.Conv2d(in_channels=32, out_channels=self.class_num, kernel_size=1)
         ##Super vision
 
 

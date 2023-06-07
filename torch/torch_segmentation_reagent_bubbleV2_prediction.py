@@ -13,7 +13,7 @@ from util.helper import IOU
 from util.losses import jaccard_loss
 
 from util.TorchSegmentationDatasetLoaderV2 import TorchSegmentationDatasetLoaderV2
-from model.BiSegNetMobileV1 import BiSegNetMobileV1
+from model.BiSegNetMobileV2 import BiSegNetMobileV2
 
 gc.collect()
 torch.cuda.set_per_process_memory_fraction(1.0)
@@ -32,7 +32,7 @@ if device == 'cuda':
 
 
 
-datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//20230601_3cc 고무_크롭_Segmentation_전처리//",
+datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//세그먼테이션 후처리 병합//",
                                             image_height=416,
                                             image_width=160,
                                             classNum=2,
@@ -43,9 +43,9 @@ datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약�
 data_loader = DataLoader(datasets, batch_size=1, shuffle=True)
 
 
-BiSegNet = BiSegNetMobileV1(class_num=1,
-                            activation=torch.nn.ReLU6).to(device)
-BiSegNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV1)_final.pt")
+BiSegNet = BiSegNetMobileV2(class_num=1,
+                           activation=torch.nn.ReLU6).to(device)
+BiSegNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV2)_top.pt")
 BiSegNet.load_state_dict(BiSegNetWeight.state_dict())
 
 
@@ -78,7 +78,7 @@ for X, Y in data_loader:
     cv2.resizeWindow('prediction', 160, 416)
     cv2.imshow('prediction', prediction_image)
 
-    cv2.waitKey(1)
+    cv2.waitKey(300)
 
 
 

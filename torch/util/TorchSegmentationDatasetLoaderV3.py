@@ -7,7 +7,7 @@ import random
 from torch.utils.data import Dataset
 
 
-class TorchSegmentationDatasetLoaderV2(Dataset):
+class TorchSegmentationDatasetLoaderV3(Dataset):
     def __init__(self,
                  root_path,
                  classNum,
@@ -17,7 +17,7 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
                  isColor,
                  isNorm=False):
 
-        super(TorchSegmentationDatasetLoaderV2, self).__init__()
+        super(TorchSegmentationDatasetLoaderV3, self).__init__()
         self.root_path = root_path
         self.classNum = classNum
         self.skipClass = skipClass
@@ -81,6 +81,8 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
 
 
         y_stack = []
+        background_mask = np.zeros((self.image_height, self.image_width, 1), dtype = "uint8")
+
         for index in range(self.classNum):
 
             skip_index_found = False
@@ -99,12 +101,20 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
 
             label = cv2.resize(label, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA)
             _, label = cv2.threshold(label, 128, 255, cv2.THRESH_BINARY)
+
+            background_mask = cv2.bitwise_or(background_mask, label)
+
             label = label / 255
             label = torch.FloatTensor(label)
             label = label.unsqueeze(dim=2).float()
             label = label.permute([2, 0, 1]).float()
             y_stack.append(label)
 
+        _, background_mask = cv2.threshold(background_mask, 128, 255, cv2.THRESH_BINARY_INV)
+        background_mask = torch.FloatTensor(background_mask)
+        background_mask = background_mask.unsqueeze(dim=2).float()
+        background_mask = background_mask.permute([2, 0, 1]).float()
+        y_stack.append(background_mask)
         y = torch.cat(y_stack)
 
         return x, y
