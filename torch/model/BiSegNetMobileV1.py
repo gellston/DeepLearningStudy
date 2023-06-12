@@ -50,7 +50,7 @@ class BiSegNetMobileV1(torch.nn.Module):
 
 
         ##BiSeNet
-        self.spatial_path = spatial_path()
+        self.spatial_path = spatial_path(in_channels=[32, 40, 48])
 
         self.attention_refinement_module1 = ARM(24, 24)
         self.attention_refinement_module2 = ARM(32, 32)

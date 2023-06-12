@@ -11,10 +11,10 @@ from util.BiSeNetHelper import ARM
 from util.BiSeNetHelper import FFM
 
 
-class BiSegNetMobileV2(torch.nn.Module):
+class BiSegNetMobileV4(torch.nn.Module):
 
     def __init__(self, class_num=5, activation=torch.nn.ReLU6):
-        super(BiSegNetMobileV2, self).__init__()
+        super(BiSegNetMobileV4, self).__init__()
 
         self.class_num = class_num
 
@@ -57,11 +57,27 @@ class BiSegNetMobileV2(torch.nn.Module):
         self.attention_refinement_module2 = ARM(32, 32)
         self.global_avg_pool_tail = torch.nn.AdaptiveAvgPool2d(1)
 
-        self.feature_fusion_module = FFM(num_classes=self.class_num, in_channels=24 + 32 + 32)
-        self.final_conv = torch.nn.Conv2d(in_channels=self.class_num,
-                                          out_channels=self.class_num,
+        self.feature_fusion_module = FFM(num_classes=24, in_channels=24 + 32 + 32)
+        self.final_conv = torch.nn.Conv2d(in_channels=24,
+                                          out_channels=12,
                                           kernel_size=3,
                                           padding='same')
+        self.final_conv1 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=24,
+                            out_channels=12,
+                            kernel_size=1,
+                            padding='same'),
+            torch.nn.BatchNorm2d(12),
+            activation(),
+        )
+
+        self.final_conv2 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=12,
+                            out_channels=self.class_num,
+                            kernel_size=3,
+                            padding='same'),
+        )
+
         ##BiSeNet
 
 
@@ -121,7 +137,8 @@ class BiSegNetMobileV2(torch.nn.Module):
         #Super vision path
 
         result = torch.nn.functional.interpolate(ffm, scale_factor=8.0, mode='bilinear')
-        result = self.final_conv(result)
+        result = self.final_conv1(result)
+        result = self.final_conv2(result)
         result = torch.sigmoid(result)
 
         return result, spv1, spv2

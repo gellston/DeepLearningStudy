@@ -13,7 +13,7 @@ from util.helper import IOU
 from util.losses import jaccard_loss
 
 from util.TorchSegmentationDatasetLoaderV2 import TorchSegmentationDatasetLoaderV2
-from model.BiSegNetMobileV2 import BiSegNetMobileV2
+from model.BiSegNetMobileV3 import BiSegNetMobileV3
 
 gc.collect()
 torch.cuda.set_per_process_memory_fraction(1.0)
@@ -32,9 +32,9 @@ if device == 'cuda':
 
 
 
-datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//세그먼테이션 후처리 병합//",
-                                            image_height=128,
-                                            image_width=512,
+datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//20230605 고무전 Crop 영상 후처리//",
+                                            image_height=320,
+                                            image_width=720,
                                             classNum=2,
                                             skipClass=[],
                                             isColor=False,
@@ -43,9 +43,9 @@ datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약�
 data_loader = DataLoader(datasets, batch_size=1, shuffle=True)
 
 
-BiSegNet = BiSegNetMobileV2(class_num=2,
+BiSegNet = BiSegNetMobileV3(class_num=2,
                            activation=torch.nn.ReLU6).to(device)
-BiSegNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV2)_top.pt")
+BiSegNetWeight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//BiSegNet(ReagentV3)_top.pt")
 BiSegNet.load_state_dict(BiSegNetWeight.state_dict())
 
 
@@ -80,23 +80,23 @@ for X, Y in data_loader:
     prediction_residue = prediction_residue[:, :, 1]
 
     cv2.namedWindow("original", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('original', 512, 128)
+    cv2.resizeWindow('original', 720, 320)
     cv2.imshow('original', original_image)
 
     cv2.namedWindow("bubble", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('bubble', 512, 128)
+    cv2.resizeWindow('bubble', 720, 320)
     cv2.imshow('bubble', bubble)
 
     cv2.namedWindow("residue", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('residue', 512, 128)
+    cv2.resizeWindow('residue', 720, 320)
     cv2.imshow('residue', residue)
 
     cv2.namedWindow("prediction_bubble", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('prediction_bubble', 512, 128)
+    cv2.resizeWindow('prediction_bubble', 720, 320)
     cv2.imshow('prediction_bubble', prediction_bubble)
 
     cv2.namedWindow("prediction_residue", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('prediction_residue', 512, 128)
+    cv2.resizeWindow('prediction_residue', 720, 320)
     cv2.imshow('prediction_residue', prediction_residue)
 
     cv2.waitKey(300)

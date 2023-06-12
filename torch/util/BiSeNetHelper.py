@@ -14,11 +14,11 @@ class conv(torch.nn.Module):
         return self.relu(self.bn(x))
 
 class spatial_path(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, in_channels=[32, 40, 48]):
         super().__init__()
-        self.convblock1 = conv(in_channels=1, out_channels=32)
-        self.convblock2 = conv(in_channels=32, out_channels=40)
-        self.convblock3 = conv(in_channels=40, out_channels=48)
+        self.convblock1 = conv(in_channels=1, out_channels=in_channels[0])
+        self.convblock2 = conv(in_channels=in_channels[0], out_channels=in_channels[1])
+        self.convblock3 = conv(in_channels=in_channels[1], out_channels=in_channels[2])
 
     def forward(self, input):
         x = self.convblock1(input)

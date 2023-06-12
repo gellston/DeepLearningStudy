@@ -4,6 +4,58 @@ import torch.nn.functional as F
 import torchvision
 
 
+class FocalTverskyLoss(nn.Module):
+    def __init__(self, alpha=0.2, beta=0.8, gamma=2, smooth=1):
+        super(FocalTverskyLoss, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.smooth = smooth
+        self.gamma = gamma
+
+    def forward(self, inputs, targets):
+        # comment out if your model contains a sigmoid or equivalent activation layer
+
+
+        # flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+
+        # True Positives, False Positives & False Negatives
+        TP = (inputs * targets).sum()
+        FP = ((1 - targets) * inputs).sum()
+        FN = (targets * (1 - inputs)).sum()
+
+        Tversky = (TP + self.smooth) / (TP + self.alpha * FP + self.beta * FN + self.smooth)
+        FocalTversky = (1 - Tversky) ** self.gamma
+
+        return FocalTversky
+
+
+
+class TverskyLoss(nn.Module):
+    def __init__(self, alpha=0.2, beta=0.8, smooth=1):
+        super(TverskyLoss, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.smooth = smooth
+
+    def forward(self, inputs, targets):
+        # comment out if your model contains a sigmoid or equivalent activation layer
+        #inputs = F.sigmoid(inputs)
+
+        # flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+
+        # True Positives, False Positives & False Negatives
+        TP = (inputs * targets).sum()
+        FP = ((1 - targets) * inputs).sum()
+        FN = (targets * (1 - inputs)).sum()
+
+        Tversky = (TP + self.smooth) / (TP + self.alpha * FP + self.beta * FN + self.smooth)
+
+        return 1 - Tversky
+
 
 class FocalLoss(nn.Module):
     def __init__(self, weight=None, size_average=True):

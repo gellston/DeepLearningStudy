@@ -11,10 +11,10 @@ from util.BiSeNetHelper import ARM
 from util.BiSeNetHelper import FFM
 
 
-class BiSegNetMobileV2(torch.nn.Module):
+class BiSegNetMobileV3(torch.nn.Module):
 
     def __init__(self, class_num=5, activation=torch.nn.ReLU6):
-        super(BiSegNetMobileV2, self).__init__()
+        super(BiSegNetMobileV3, self).__init__()
 
         self.class_num = class_num
 
