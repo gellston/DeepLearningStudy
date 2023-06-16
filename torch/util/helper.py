@@ -25,6 +25,91 @@ def channel_shuffle(x: Tensor, groups: int) -> Tensor:
     x = x.view(batchsize, -1, height, width)
     return x
 
+
+
+class SelfAttResBlock(torch.nn.Module):
+    def __init__(self, in_channel, out_channel, latent_dim_scale=8, stride=1, activation=torch.nn.ReLU):
+        super(SelfAttResBlock, self).__init__()
+
+
+
+        self.in_channel = in_channel
+        self.out_channel = out_channel
+        self.channel_latent = in_channel//latent_dim_scale
+
+
+        self.stride=stride
+
+
+        self.Query = torch.nn.Conv2d(in_channels=self.in_channel,
+                                     out_channels=self.channel_latent,
+                                     kernel_size=1,
+                                     bias=True)
+        self.Key = torch.nn.Conv2d(in_channels=self.in_channel,
+                                   out_channels=self.channel_latent,
+                                   kernel_size=1,
+                                   bias=True)
+
+        self.Value = torch.nn.Conv2d(in_channels=self.in_channel,
+                                     out_channels=self.channel_latent,
+                                     kernel_size=1,
+                                     bias=True)
+        self.gamma = torch.nn.Parameter(torch.zeros(1))
+
+
+        self.final_conv = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=self.channel_latent,
+                            out_channels=self.out_channel,
+                            kernel_size=1,
+                            bias=False,
+                            stride=self.stride),
+            torch.nn.BatchNorm2d(num_features=self.out_channel)
+        )
+
+        self.shortcut = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=self.in_channel,
+                            out_channels=self.out_channel,
+                            kernel_size=1,
+                            bias=False,
+                            stride=self.stride)
+        )
+
+    def forward(self, x):
+        """
+            inputs :
+                x : input feature maps(B X C X H X W)
+            returns :
+                out : self attention value + input feature
+                attention: B X N X N (N is Height * Width)
+        """
+        batchsize, C, height, width = x.size()
+        # proj_query: reshape to B x N x c, N = H x W
+        query = self.Query(x).view(batchsize, -1, height * width).permute(0, 2, 1)
+
+        # proj_query: reshape to B x c x N, N = H x W
+        key = self.Key(x).view(batchsize, -1, height * width)
+
+        # transpose check, energy: B x N x N, N = H x W
+        energy = torch.bmm(query, key)
+
+        # attention: B x N x N, N = H x W
+        attention = torch.softmax(energy, dim=-1)
+
+        # proj_value is normal convolution, B x C x N
+        value = self.Value(x).view(batchsize, -1, height * width)
+
+        # out: B x C x N
+        out = torch.bmm(value, attention.permute(0, 2, 1))
+        out = out.view(batchsize, self.channel_latent, height, width)
+        out = self.final_conv(out)
+
+        if self.stride == 2 or self.in_channel != self.out_channel:
+            x = self.shortcut(x)
+
+        out = self.gamma * out + x
+        return out
+
+
 class SeparableConv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, padding=1, stride=1, bias=False):
         super(SeparableConv2d, self).__init__()
