@@ -37,8 +37,8 @@ if device == 'cuda':
 training_epochs = 500
 batch_size = 35
 
-target_accuracy = 0.99
-learning_rate = 0.002
+target_accuracy = 0.95
+learning_rate = 0.0002
 final_learning_rate = learning_rate * batch_size / 64
 classNum = 2
 

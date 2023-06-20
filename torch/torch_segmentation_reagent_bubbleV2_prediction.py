@@ -32,7 +32,7 @@ if device == 'cuda':
 
 
 
-datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//세그먼테이션 후처리 병합//",
+datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//20230620 시약검사 테스트이미지//",
                                             image_height=128,
                                             image_width=512,
                                             classNum=2,
@@ -99,7 +99,7 @@ for X, Y in data_loader:
     cv2.resizeWindow('prediction_residue', 512, 128)
     cv2.imshow('prediction_residue', prediction_residue)
 
-    cv2.waitKey(300)
+    cv2.waitKey()
 
 
 
