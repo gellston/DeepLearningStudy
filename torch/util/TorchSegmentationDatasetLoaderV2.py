@@ -15,7 +15,8 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
                  image_height,
                  image_width,
                  isColor,
-                 isNorm=False):
+                 isNorm=False,
+                 side_offset=65):
 
         super(TorchSegmentationDatasetLoaderV2, self).__init__()
         self.root_path = root_path
@@ -27,6 +28,7 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
         self.image_width = image_width
         self.isColor = isColor
         self.isNorm = isNorm
+        self.side_offset = side_offset
 
         filelist = sorted(os.listdir(self.root_path))
 
@@ -73,7 +75,7 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
             image = image / 255
 
 
-
+        image = image[0:image.shape[0], self.side_offset:(image.shape[1] - self.side_offset)].copy()
         x = torch.FloatTensor(cv2.resize(image, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA))
         x = x.unsqueeze(dim=2).float()
         x = x.permute([2, 0, 1])
@@ -97,6 +99,7 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
             img_array = np.fromfile(label_image_name, np.uint8)  # 컴퓨터가 읽을수 있게 넘파이로 변환
             label = cv2.imdecode(img_array, cv2.IMREAD_GRAYSCALE).astype('uint8')
 
+            label = label[0:label.shape[0], self.side_offset:(label.shape[1] - self.side_offset)].copy()
             label = cv2.resize(label, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA)
             _, label = cv2.threshold(label, 128, 255, cv2.THRESH_BINARY)
             label = label / 255

@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import torch.nn.functional as F
+import math
 
 from torch import Tensor
 from typing import Optional, List, Tuple
@@ -25,7 +26,95 @@ def channel_shuffle(x: Tensor, groups: int) -> Tensor:
     x = x.view(batchsize, -1, height, width)
     return x
 
+class SqueezeExcite(torch.nn.Module):
+    def __init__(self, in_channels, se_ratio=0.25):
+        super(SqueezeExcite, self).__init__()
+        reduced_chs = int(in_channels * se_ratio)
+        self.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
+        self.conv_reduce = torch.nn.Conv2d(in_channels, reduced_chs, 1, bias=True)
+        self.act1 = torch.nn.ReLU(inplace=True)
+        self.conv_expand = torch.nn.Conv2d(reduced_chs, in_channels, 1, bias=True)
 
+    def forward(self, x):
+        x_se = self.avg_pool(x)
+        x_se = self.conv_reduce(x_se)
+        x_se = self.act1(x_se)
+        x_se = self.conv_expand(x_se)
+        x = x * torch.sigmoid(x_se)
+        return x
+
+class GhostModule(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=1, ratio=2, dw_size=3, stride=1, use_activation=True, activation=torch.nn.ReLU):
+        super(GhostModule, self).__init__()
+        self.oup = out_channels
+        init_channels = math.ceil(out_channels / ratio)
+        new_channels = init_channels*(ratio-1)
+
+        self.primary_conv = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels, init_channels, kernel_size, stride, kernel_size//2, bias=False),
+            torch.nn.BatchNorm2d(init_channels),
+            activation(inplace=True) if use_activation else torch.nn.Sequential(),
+        )
+
+        self.cheap_operation = torch.nn.Sequential(
+            torch.nn.Conv2d(init_channels, new_channels, dw_size, 1, dw_size//2, groups=init_channels, bias=False),
+            torch.nn.BatchNorm2d(new_channels),
+            activation(inplace=True) if use_activation else torch.nn.Sequential(),
+        )
+
+    def forward(self, x):
+        x1 = self.primary_conv(x)
+        x2 = self.cheap_operation(x1)
+        out = torch.cat([x1,x2], dim=1)
+        return out[:,:self.oup,:,:]
+
+
+class InvertedGhostBottleNeck(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, expansion_rate=4, stride=1, activation=torch.nn.ReLU6):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.expansion_rate = expansion_rate
+        self.stride = stride
+
+        self.expansion_out = int(self.in_channels * self.expansion_rate)
+
+        self.conv_expansion = torch.nn.Sequential(GhostModule(in_channels=in_channels,
+                                                              out_channels=self.expansion_out,
+                                                              activation=activation,
+                                                              use_activation=False),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.conv_depthwise = torch.nn.Sequential(torch.nn.Conv2d(kernel_size=3,
+                                                                  in_channels=self.expansion_out,
+                                                                  out_channels=self.expansion_out,
+                                                                  groups=self.expansion_out,
+                                                                  bias=False,
+                                                                  padding=1,
+                                                                  stride=self.stride),
+                                                  torch.nn.BatchNorm2d(self.expansion_out),
+                                                  activation())
+
+        self.se_conv = SqueezeExcite(in_channels=self.expansion_out)
+
+        self.conv_projection = torch.nn.Sequential(GhostModule(in_channels=self.expansion_out,
+                                                               out_channels=self.out_channels,
+                                                               activation=activation,
+                                                               use_activation=False),
+                                                  torch.nn.BatchNorm2d(self.out_channels))
+
+
+    def forward(self, x):
+        out = self.conv_expansion(x)
+        out = self.conv_depthwise(out)
+        out = self.se_conv(out)
+        out = self.conv_projection(out)
+
+        if self.stride != 2 and self.in_channels == self.out_channels:
+            out = out + x
+
+        return out
 
 class SelfAttResBlock(torch.nn.Module):
     def __init__(self, in_channel, out_channel, latent_dim_scale=8, stride=1, activation=torch.nn.ReLU):
