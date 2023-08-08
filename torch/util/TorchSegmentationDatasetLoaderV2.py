@@ -16,7 +16,8 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
                  image_width,
                  isColor,
                  isNorm=False,
-                 side_offset=65):
+                 side_offset=65,
+                 use_augmentation=False):
 
         super(TorchSegmentationDatasetLoaderV2, self).__init__()
         self.root_path = root_path
@@ -29,6 +30,7 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
         self.isColor = isColor
         self.isNorm = isNorm
         self.side_offset = side_offset
+        self.use_augmentation = use_augmentation
 
         filelist = sorted(os.listdir(self.root_path))
 
@@ -71,6 +73,23 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
 
         img_array = np.fromfile(original_image, np.uint8)  # 컴퓨터가 읽을수 있게 넘파이로 변환
         image = cv2.imdecode(img_array, color_flag).astype('uint8')
+
+
+        rand_number = random.randrange(1, 3)
+
+
+
+        if self.use_augmentation == True:
+            if rand_number == 1:
+                image = cv2.flip(image, 0)
+            elif rand_number == 2:
+                image = cv2.flip(image, 1)
+            elif rand_number == 3:
+                image = cv2.flip(image, 0)
+                image = cv2.flip(image, 1)
+
+
+
         if self.isNorm is True:
             image = image / 255
 
@@ -98,6 +117,15 @@ class TorchSegmentationDatasetLoaderV2(Dataset):
             label_image_name = self.root_path + self.image_name[idx][index + 1]
             img_array = np.fromfile(label_image_name, np.uint8)  # 컴퓨터가 읽을수 있게 넘파이로 변환
             label = cv2.imdecode(img_array, cv2.IMREAD_GRAYSCALE).astype('uint8')
+
+            if self.use_augmentation == True:
+                if rand_number == 1:
+                    label = cv2.flip(label, 0)
+                elif rand_number == 2:
+                    label = cv2.flip(label, 1)
+                elif rand_number == 3:
+                    label = cv2.flip(label, 0)
+                    label = cv2.flip(label, 1)
 
             label = label[0:label.shape[0], self.side_offset:(label.shape[1] - self.side_offset)].copy()
             label = cv2.resize(label, dsize=(self.image_width, self.image_height), interpolation=cv2.INTER_AREA)

@@ -32,33 +32,37 @@ if device == 'cuda':
     torch.cuda.manual_seed_all(777)
 
 training_epochs = 500
-batch_size = 8
+batch_size = 3
 
 target_accuracy = 0.99
-learning_rate = 0.02
+learning_rate = 0.003
 learning_rate_gamma = 0.5
 scheduler_step = 10
-classNum = 2
+classNum = 1
 
-datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//세그먼테이션 후처리 병합//",
-                                            image_height=256,
-                                            image_width=1024,
+datasets = TorchSegmentationDatasetLoaderV2(root_path="E://용액 검사 데이터셋//20230630_세그먼테이션 버블 대통합//",
+                                            image_height=400,
+                                            image_width=144,
                                             classNum=classNum,
-                                            skipClass=[],
+                                            skipClass=[1],
                                             isColor=False,
                                             isNorm=False,
-                                            side_offset=65)
+                                            side_offset=0,
+                                            use_augmentation=True)
 
 data_loader = DataLoader(datasets, batch_size=batch_size, shuffle=True)
 
 UNetGhostV2 = UNetGhostV2(class_num=classNum,
                           activation=torch.nn.Hardswish,
                           use_activation=True,
-                          expansion_rate=1).to(device)
+                          expansion_rate=2).to(device)
 #UNetGhostV2Weight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//UNetGhostV2(Reagent_UNetGhostV2)_top.pt")
 #UNetGhostV2.load_state_dict(UNetGhostV2Weight.state_dict())
+
+
+
 print('==== model info ====')
-summary(UNetGhostV2, (1, 1024, 256))
+summary(UNetGhostV2, (1, 144, 400))
 UNetGhostV2.eval()
 compiled_model = torch.jit.script(UNetGhostV2)
 torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//UNetGhostV2(Reagent_UNetGhostV2)_no_train.pt")
@@ -156,37 +160,37 @@ for epoch in range(training_epochs):
     bubble = np.where(bubble > 0.5, 255, 0).astype('uint8')
     bubble = bubble[:, :, 0]
 
-    residue = Y[0].permute(1, 2, 0).detach().cpu().numpy()
-    residue = np.where(residue > 0.5, 255, 0).astype('uint8')
-    residue = residue[:, :, 1]
+    #residue = Y[0].permute(1, 2, 0).detach().cpu().numpy()
+    #residue = np.where(residue > 0.5, 255, 0).astype('uint8')
+    #residue = residue[:, :, 1]
 
     prediction_bubble = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
     prediction_bubble = np.where(prediction_bubble > 0.5, 255, 0).astype('uint8')
     prediction_bubble = prediction_bubble[:, :, 0]
 
-    prediction_residue = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
-    prediction_residue = np.where(prediction_residue > 0.5, 255, 0).astype('uint8')
-    prediction_residue = prediction_residue[:, :, 1]
+    #prediction_residue = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
+    #prediction_residue = np.where(prediction_residue > 0.5, 255, 0).astype('uint8')
+    #prediction_residue = prediction_residue[:, :, 1]
 
     cv2.namedWindow("original", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('original', 1024, 256)
+    cv2.resizeWindow('original', 144, 400)
     cv2.imshow('original', original_image)
 
     cv2.namedWindow("bubble", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('bubble', 1024, 256)
+    cv2.resizeWindow('bubble', 144, 400)
     cv2.imshow('bubble', bubble)
 
-    cv2.namedWindow("residue", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('residue', 1024, 256)
-    cv2.imshow('residue', residue)
+    #cv2.namedWindow("residue", cv2.WINDOW_FREERATIO)
+    #cv2.resizeWindow('residue', 1024, 256)
+    #cv2.imshow('residue', residue)
 
     cv2.namedWindow("prediction_bubble", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('prediction_bubble', 1024, 256)
+    cv2.resizeWindow('prediction_bubble', 144, 400)
     cv2.imshow('prediction_bubble', prediction_bubble)
 
-    cv2.namedWindow("prediction_residue", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('prediction_residue', 1024, 256)
-    cv2.imshow('prediction_residue', prediction_residue)
+    #cv2.namedWindow("prediction_residue", cv2.WINDOW_FREERATIO)
+    #cv2.resizeWindow('prediction_residue', 1024, 256)
+    #cv2.imshow('prediction_residue', prediction_residue)
 
     cv2.waitKey(100)
 

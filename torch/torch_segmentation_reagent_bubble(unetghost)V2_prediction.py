@@ -32,20 +32,23 @@ if device == 'cuda':
 
 
 
-datasets = TorchSegmentationDatasetLoaderV2(root_path="D://프로젝트//시약검사//이미지//세그먼테이션 후처리 병합//",
-                                            image_height=128,
-                                            image_width=512,
-                                            classNum=2,
-                                            skipClass=[],
+datasets = TorchSegmentationDatasetLoaderV2(root_path="E://용액 검사 데이터셋//20230630_세그먼테이션 버블 대통합//",
+                                            image_height=400,
+                                            image_width=144,
+                                            classNum=1,
+                                            skipClass=[1],
                                             isColor=False,
-                                            isNorm=False)
+                                            isNorm=False,
+                                            side_offset=0,
+                                            use_augmentation=True)
 
 data_loader = DataLoader(datasets, batch_size=1, shuffle=True)
 
 
-UNetGhostV2 = UNetGhostV2(class_num=2,
-                          activation=torch.nn.ReLU,
-                          use_activation=True).to(device)
+UNetGhostV2 = UNetGhostV2(activation=torch.nn.Hardswish,
+                          use_activation=True,
+                          expansion_rate=1,
+                          class_num=1).to(device)
 UNetGhostV2Weight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//UNetGhostV2(Reagent_UNetGhostV2)_top.pt")
 UNetGhostV2.load_state_dict(UNetGhostV2Weight.state_dict())
 
@@ -68,39 +71,39 @@ for X, Y in data_loader:
     bubble = np.where(bubble > 0.5, 255, 0).astype('uint8')
     bubble = bubble[:, :, 0]
 
-    residue = Y[0].permute(1, 2, 0).detach().cpu().numpy()
-    residue = np.where(residue > 0.5, 255, 0).astype('uint8')
-    residue = residue[:, :, 1]
+    #residue = Y[0].permute(1, 2, 0).detach().cpu().numpy()
+    #residue = np.where(residue > 0.5, 255, 0).astype('uint8')
+    #residue = residue[:, :, 1]
 
     prediction_bubble = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
     prediction_bubble = np.where(prediction_bubble > 0.5, 255, 0).astype('uint8')
     prediction_bubble = prediction_bubble[:, :, 0]
 
-    prediction_residue = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
-    prediction_residue = np.where(prediction_residue > 0.5, 255, 0).astype('uint8')
-    prediction_residue = prediction_residue[:, :, 1]
+    #prediction_residue = prediction[0].permute(1, 2, 0).detach().cpu().numpy()
+    #prediction_residue = np.where(prediction_residue > 0.5, 255, 0).astype('uint8')
+    #prediction_residue = prediction_residue[:, :, 1]
 
     cv2.namedWindow("original", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('original', 512, 128)
+    cv2.resizeWindow('original', 144, 400)
     cv2.imshow('original', original_image)
 
     cv2.namedWindow("bubble", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('bubble', 512, 128)
+    cv2.resizeWindow('bubble', 144, 400)
     cv2.imshow('bubble', bubble)
 
-    cv2.namedWindow("residue", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('residue', 512, 128)
-    cv2.imshow('residue', residue)
+    #cv2.namedWindow("residue", cv2.WINDOW_FREERATIO)
+    #cv2.resizeWindow('residue', 512, 128)
+    #cv2.imshow('residue', residue)
 
     cv2.namedWindow("prediction_bubble", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('prediction_bubble', 512, 128)
+    cv2.resizeWindow('prediction_bubble', 144, 400)
     cv2.imshow('prediction_bubble', prediction_bubble)
 
-    cv2.namedWindow("prediction_residue", cv2.WINDOW_FREERATIO)
-    cv2.resizeWindow('prediction_residue', 512, 128)
-    cv2.imshow('prediction_residue', prediction_residue)
+    #cv2.namedWindow("prediction_residue", cv2.WINDOW_FREERATIO)
+    #cv2.resizeWindow('prediction_residue', 512, 128)
+    #cv2.imshow('prediction_residue', prediction_residue)
 
-    cv2.waitKey(3)
+    cv2.waitKey(300)
 
 
 

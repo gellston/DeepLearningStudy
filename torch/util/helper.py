@@ -12,7 +12,12 @@ def IOU(target, prediction):
     prediction = np.where(prediction > 0.5, 1, 0)
     intersection = np.logical_and(target, prediction)
     union = np.logical_or(target, prediction)
-    iou_score = np.sum(intersection) / np.sum(union)
+    summation = np.sum(union)
+
+    if summation == 0:
+        return 0
+
+    iou_score = np.sum(intersection) / summation
     return iou_score
 
 
