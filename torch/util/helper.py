@@ -310,6 +310,78 @@ class ResidualBlock(torch.nn.Module):
 
 
 
+class WideResidualBlock(torch.nn.Module):
+
+    def __init__(self, in_channels, out_channels, stride=1, activation=torch.nn.ReLU, droprate=0.2):
+        super(WideResidualBlock, self).__init__()
+
+        self.stride = stride
+        self.droprate = droprate
+
+        self.layer1 = torch.nn.Sequential(torch.nn.BatchNorm2d(num_features=in_channels),
+                                            activation(),
+                                            torch.nn.Conv2d(in_channels=in_channels,
+                                                            out_channels=out_channels,
+                                                            kernel_size=3,
+                                                            stride=stride,
+                                                            padding=1,
+                                                            bias=False))
+        
+        self.droplayer1 = torch.nn.Dropout2d(p=self.droprate)
+        
+        self.layer2 = torch.nn.Sequential(torch.nn.BatchNorm2d(num_features=out_channels),
+                                            activation(),
+                                            torch.nn.Conv2d(in_channels=out_channels,
+                                                            out_channels=out_channels,
+                                                            kernel_size=3,
+                                                            stride=1,
+                                                            padding=1,
+                                                            bias=False))
+        
+        self.droplayer2 = torch.nn.Dropout2d(p=self.droprate)
+
+        self.down_skip_connection = torch.nn.Conv2d(in_channels=in_channels,
+                                                    out_channels=out_channels,
+                                                    kernel_size=1,
+                                                    stride=self.stride,
+                                                    bias=False)
+        self.dim_equalizer = torch.nn.Conv2d(in_channels=in_channels,
+                                             out_channels=out_channels,
+                                             kernel_size=1,
+                                             bias=False)
+
+    def forward(self, x):
+        if self.stride == 2:
+            down = self.down_skip_connection(x)
+            out = self.layer1(x)
+            out = self.droplayer1(out)
+            out = self.layer2(out)
+            out = self.droplayer2(out)
+            out = out + down
+        else:
+            out = self.layer1(x)
+            out = self.droplayer1(out)
+            out = self.layer2(out)
+            out = self.droplayer2(out)
+            if x.size() is not out.size():
+                x = self.dim_equalizer(x)
+            out = out + x
+        return out
+    
+
+
+class WideResidualNetworkBlock(torch.nn.Module):
+    def __init__(self, nb_layers, in_channels, out_channels, block=WideResidualBlock, stride=1, dropRate=0.2, activation=torch.nn.ReLU):
+        super(WideResidualNetworkBlock, self).__init__()
+        self.layer = self._make_layer(block, in_channels, out_channels, nb_layers, stride, dropRate, activation)
+    def _make_layer(self, block, in_channels, out_channels, nb_layers, stride, dropRate, activation):
+        layers = []
+        for i in range(int(nb_layers)):
+            layers.append(block(in_channels if i == 0 else out_channels, out_channels, stride if i == 0 else 1, activation, dropRate))
+        return torch.nn.Sequential(*layers)
+    def forward(self, x):
+        return self.layer(x)
+
 
 
 class DenseBottleNeck(torch.nn.Module):
