@@ -84,7 +84,7 @@ transform = torchvision.transforms.Compose([
                 torchvision.transforms.ToTensor()
             ])
 
-classificationDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
+classificationDataset = torchvision.datasets.ImageNet(root="C://Dataset//ImageNet//",
                                                       split='train',
                                                       transform=transform)
 

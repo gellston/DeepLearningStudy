@@ -23,9 +23,9 @@ transform = transforms.Compose([
 ])
 
 # Load the ImageNet Object Localization Challenge dataset
-train_dataset = torchvision.datasets.ImageFolder(
-    root='C:\Dataset\ImageNet',
-    transform=transform,
+train_dataset = torchvision.datasets.ImageFolder(root='C://Dataset//ImageNet//',
+                                                 split='train',
+                                                 transform=transform,
 
 )
 
