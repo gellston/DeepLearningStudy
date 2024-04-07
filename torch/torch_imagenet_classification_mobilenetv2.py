@@ -31,11 +31,11 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 10
-batch_size = 3
+batch_size = 30
 target_accuracy = 0.70
 learning_rate = 0.003
 num_class = 1000
-save_step_batch_size = 100
+save_step_batch_size = 1000
 skip_batch_count = 0
 pretrained = False
 ## Hyper parameter
@@ -43,12 +43,12 @@ pretrained = False
 
 model = MobileNetV2(class_num=num_class, activation=torch.nn.ReLU6).to(device)
 print('==== model info ====')
-summary(model, (3, 640, 640))
+summary(model, (3, 224, 224))
 print('====================')
 
 
 macs, params = get_model_complexity_info(model,
-                                         (3, 640, 640),
+                                         (3, 224, 224),
                                          as_strings=True,
                                          print_per_layer_stat=True, verbose=True)
 print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
@@ -71,7 +71,7 @@ model.eval()
 compiled_model = torch.jit.script(model)
 torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(MobileNetV2).pt")
 
-trace_input = torch.rand(1, 3, 640, 640).to(device, dtype=torch.float32)
+trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
 torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(MobileNetV2)_Trace.pt")
 
