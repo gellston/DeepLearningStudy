@@ -84,9 +84,8 @@ transform = torchvision.transforms.Compose([
                 torchvision.transforms.ToTensor()
             ])
 
-classificationDataset = torchvision.datasets.ImageNet(root="C://Dataset//ImageNet//",
-                                                      split='train',
-                                                      transform=transform)
+classificationDataset = torchvision.datasets.ImageFolder(root="C://Dataset//ImageNet//train//",
+                                                         transform=transform)
 
 # dataset loader
 data_loader = DataLoader(dataset=classificationDataset,
@@ -116,13 +115,13 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         hypothesis = model(gpu_X)
         cost = criterion(hypothesis, gpu_Y)
         cost.backward()
-        avg_cost += (cost / total_batch)
+        avg_cost += (cost.item() / total_batch)
         optimizer.step()
 
         model.eval()
         hypothesis = model(gpu_X)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(gpu_Y, 1)
-        accuracy = correct_prediction.float().mean()
+        accuracy = correct_prediction.float().mean().item()
         avg_acc += (accuracy / total_batch)
 
         current_batch += 1
@@ -133,11 +132,8 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
             torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(MobileNetV2).pt")
             gc.collect()
             ## no Train Model Save
-        print('current batch=', current_batch, 'current accuracy=', accuracy.item())
+            print('current batch=', current_batch, 'current accuracy=', accuracy)
 
-        #input_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
-        #cv2.imshow('input', input_image)
-        #cv2.waitKey(10)
 
     model.eval()
     compiled_model = torch.jit.script(model)

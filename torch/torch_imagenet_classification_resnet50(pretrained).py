@@ -24,10 +24,7 @@ transform = transforms.Compose([
 
 # Load the ImageNet Object Localization Challenge dataset
 train_dataset = torchvision.datasets.ImageFolder(root='C://Dataset//ImageNet//',
-                                                 split='train',
-                                                 transform=transform,
-
-)
+                                                 transform=transform)
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
 
