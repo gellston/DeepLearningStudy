@@ -6,9 +6,9 @@ from util.helper import WideResidualNetworkBlock
 class WideResNet(torch.nn.Module):
 
     def __init__(self,
-                 depth=20,
+                 depth=16,
                  class_num=5,
-                 widen_factor=1,
+                 widen_factor=8,
                  activation=torch.nn.ReLU,
                  dropout_probability=0.25):
         super(WideResNet, self).__init__()

@@ -7,7 +7,7 @@ from ptflops import get_model_complexity_info
 from torchsummary import summary
 from torch.utils.data import DataLoader
 
-from model.WideResnet import WideResNet
+from model.WideResNet import WideResNet
 from util.FIATClassificationDataset import FIATClassificationDataset
 
 
