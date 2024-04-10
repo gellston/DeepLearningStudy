@@ -15,7 +15,7 @@ batch_size = 30
 target_accuracy = 0.70
 learning_rate = 0.003
 num_class = 1000
-save_step_batch_size = 1000
+save_step_batch_size = 1
 skip_batch_count = 0
 pretrained = False
 accuracy_threshold = 0.65
@@ -86,7 +86,7 @@ for epoch in range(training_epochs):
             ## no Train Model Save
             model.eval()
             compiled_model = torch.jit.script(model)
-            torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Batch_Step).pt")
+            torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Batch_Step).pt")
             gc.collect()
             ## no Train Model Save
             print('current batch=', current_batch, 'current accuracy=', avg_acc, 'current cost=', avg_cost)
@@ -99,7 +99,7 @@ for epoch in range(training_epochs):
         ## no Train Model Save
         model.eval()
         compiled_model = torch.jit.script(model)
-        torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_TOP).pt")
+        torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_TOP).pt")
         gc.collect()
         ## no Train Model Save
 
@@ -110,7 +110,7 @@ for epoch in range(training_epochs):
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Over).pt")
+torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Over).pt")
 gc.collect()
 ## no Train Model Save
 print('current batch=', current_batch, 'current accuracy=', avg_acc, 'current cost=', avg_cost)
