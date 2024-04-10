@@ -5,7 +5,9 @@ import torchvision.transforms as transforms
 from model.WideResNet import WideResNet
 
 # Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+USE_CUDA = torch.cuda.is_available() # GPU를 사용가능하면 True, 아니라면 False를 리턴
+device = torch.device("cuda" if USE_CUDA else "cpu") # GPU 사용 가능하면 사용하고 아니면 CPU 사용
+print("다음 기기로 학습합니다:", device)
 
 ## Hyper parameter
 training_epochs = 10
