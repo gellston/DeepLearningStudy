@@ -2,6 +2,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
+from torchsummary import summary
 from model.WideResNet import WideResNet
 
 # Set device
@@ -15,7 +16,7 @@ batch_size = 30
 target_accuracy = 0.70
 learning_rate = 0.003
 num_class = 1000
-save_step_batch_size = 1
+save_step_batch_size = 100
 skip_batch_count = 0
 pretrained = False
 accuracy_threshold = 0.65
@@ -23,10 +24,10 @@ accuracy_threshold = 0.65
 
 # Initialize transformations for data augmentation
 transform = transforms.Compose([
-    transforms.Resize(256),
+    transforms.Resize(224),
     transforms.RandomHorizontalFlip(),
     transforms.RandomVerticalFlip(),
-    transforms.CenterCrop(224),
+    transforms.CenterCrop(200),
     transforms.ToTensor(),
 ])
 
@@ -39,10 +40,14 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
 # Load the ResNet50 model
 model = WideResNet(class_num=num_class)
 
+
 # Parallelize training across multiple GPUs
 
 # Set the model to run on the device
 model = model.to(device)
+print('==== model info ====')
+summary(model, (3, 224, 224))
+print('====================')
 
 # Define the loss function and optimizer
 criterion = torch.nn.BCELoss()
@@ -56,6 +61,8 @@ for epoch in range(training_epochs):
     avg_cost = 0
     avg_acc = 0
     current_batch = 0
+    total_batch = len(data_loader)
+    print('total_batch = ', total_batch)
     for inputs, labels in train_loader:
         # Move input and label tensors to the device
         inputs = inputs.to(device)
@@ -87,7 +94,6 @@ for epoch in range(training_epochs):
             model.eval()
             compiled_model = torch.jit.script(model)
             torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Batch_Step).pt")
-            gc.collect()
             ## no Train Model Save
             print('current batch=', current_batch, 'current accuracy=', avg_acc, 'current cost=', avg_cost)
 
@@ -100,7 +106,6 @@ for epoch in range(training_epochs):
         model.eval()
         compiled_model = torch.jit.script(model)
         torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_TOP).pt")
-        gc.collect()
         ## no Train Model Save
 
     if avg_acc >= target_accuracy:
@@ -111,7 +116,6 @@ for epoch in range(training_epochs):
 model.eval()
 compiled_model = torch.jit.script(model)
 torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Over).pt")
-gc.collect()
 ## no Train Model Save
 print('current batch=', current_batch, 'current accuracy=', avg_acc, 'current cost=', avg_cost)
 
