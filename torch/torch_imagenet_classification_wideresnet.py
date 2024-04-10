@@ -1,0 +1,116 @@
+import torch
+import torchvision
+import torchvision.transforms as transforms
+import model.WideResNet as WideResnet
+
+# Set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+## Hyper parameter
+training_epochs = 10
+batch_size = 30
+target_accuracy = 0.70
+learning_rate = 0.003
+num_class = 1000
+save_step_batch_size = 1000
+skip_batch_count = 0
+pretrained = False
+accuracy_threshold = 0.65
+## Hyper parameter
+
+# Initialize transformations for data augmentation
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+])
+
+# Load the ImageNet Object Localization Challenge dataset
+train_dataset = torchvision.datasets.ImageFolder(root='D://training_image//imagenet//train//',
+                                                 transform=transform)
+
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+
+# Load the ResNet50 model
+model = WideResnet(num_class=num_class)
+
+# Parallelize training across multiple GPUs
+model = torch.nn.DataParallel(model)
+
+# Set the model to run on the device
+model = model.to(device)
+
+# Define the loss function and optimizer
+criterion = torch.nn.BCELoss()
+optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
+
+
+top_accuracy = 0
+
+# Train the model...
+for epoch in range(training_epochs):
+    avg_cost = 0
+    avg_acc = 0
+    current_batch = 0
+    for inputs, labels in train_loader:
+        # Move input and label tensors to the device
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+        labels = torch.nn.functional.one_hot(labels, num_classes=num_class).float()
+
+        # Zero out the optimizer
+        optimizer.zero_grad()
+
+        # Forward pass
+        model.train()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        avg_cost += (loss.item() / total_batch)
+
+        # Backward pass
+        loss.backward()
+        optimizer.step()
+
+        model.eval()
+        hypothesis = model(inputs)
+        correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(labels, 1)
+        accuracy = correct_prediction.float().mean().item()
+        avg_acc += (accuracy / total_batch)
+
+        current_batch += 1
+        if current_batch % save_step_batch_size == 0:
+            ## no Train Model Save
+            model.eval()
+            compiled_model = torch.jit.script(model)
+            torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Batch_Step).pt")
+            gc.collect()
+            ## no Train Model Save
+            print('current batch=', current_batch, 'current accuracy=', avg_acc, 'current cost=', avg_cost)
+
+
+    # Print the loss for every epoch
+    print(f'Epoch {epoch+1}/{num_class}, Loss: {avg_cost:.4f}, Accuracy: {avg_acc:.4f}')
+    if top_accuracy < avg_acc:
+        top_accuracy = avg_acc
+        ## no Train Model Save
+        model.eval()
+        compiled_model = torch.jit.script(model)
+        torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_TOP).pt")
+        gc.collect()
+        ## no Train Model Save
+
+    if avg_acc >= target_accuracy:
+        break
+
+
+## no Train Model Save
+model.eval()
+compiled_model = torch.jit.script(model)
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Over).pt")
+gc.collect()
+## no Train Model Save
+print('current batch=', current_batch, 'current accuracy=', avg_acc, 'current cost=', avg_cost)
+
+print(f'Finished Training, Loss: {loss.item():.4f}')
