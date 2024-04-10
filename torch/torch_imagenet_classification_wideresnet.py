@@ -1,7 +1,8 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
-import model.WideResNet as WideResnet
+
+from model.WideResNet import WideResNet
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -31,13 +32,12 @@ transform = transforms.Compose([
 train_dataset = torchvision.datasets.ImageFolder(root='D://training_image//imagenet//train//',
                                                  transform=transform)
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 # Load the ResNet50 model
-model = WideResnet(num_class=num_class)
+model = WideResNet(class_num=num_class)
 
 # Parallelize training across multiple GPUs
-model = torch.nn.DataParallel(model)
 
 # Set the model to run on the device
 model = model.to(device)
@@ -67,7 +67,7 @@ for epoch in range(training_epochs):
         model.train()
         outputs = model(inputs)
         loss = criterion(outputs, labels)
-        avg_cost += (loss.item() / total_batch)
+        avg_cost += (loss.item() / batch_size)
 
         # Backward pass
         loss.backward()
@@ -77,7 +77,7 @@ for epoch in range(training_epochs):
         hypothesis = model(inputs)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(labels, 1)
         accuracy = correct_prediction.float().mean().item()
-        avg_acc += (accuracy / total_batch)
+        avg_acc += (accuracy / batch_size)
 
         current_batch += 1
         if current_batch % save_step_batch_size == 0:
