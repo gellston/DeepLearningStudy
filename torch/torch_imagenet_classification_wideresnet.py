@@ -49,6 +49,11 @@ print('==== model info ====')
 summary(model, (3, 224, 224))
 print('====================')
 
+## no Train Model Save
+if pretrained == True:
+    WideResNetWeight = torch.jit.load("D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_TOP).pt")
+    model.load_state_dict(WideResNetWeight.state_dict())
+
 # Define the loss function and optimizer
 criterion = torch.nn.BCELoss()
 optimizer = torch.optim.RAdam(model.parameters(), lr=learning_rate)
@@ -61,7 +66,7 @@ for epoch in range(training_epochs):
     avg_cost = 0
     avg_acc = 0
     current_batch = 0
-    total_batch = len(data_loader)
+    total_batch = len(train_loader)
     print('total_batch = ', total_batch)
     for inputs, labels in train_loader:
         # Move input and label tensors to the device
@@ -76,7 +81,7 @@ for epoch in range(training_epochs):
         model.train()
         outputs = model(inputs)
         loss = criterion(outputs, labels)
-        avg_cost += (loss.item() / batch_size)
+        avg_cost += (loss.item() / total_batch)
 
         # Backward pass
         loss.backward()
@@ -86,7 +91,7 @@ for epoch in range(training_epochs):
         hypothesis = model(inputs)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(labels, 1)
         accuracy = correct_prediction.float().mean().item()
-        avg_acc += (accuracy / batch_size)
+        avg_acc += (accuracy / total_batch)
 
         current_batch += 1
         if current_batch % save_step_batch_size == 0:
