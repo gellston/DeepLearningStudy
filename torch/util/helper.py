@@ -7,6 +7,13 @@ from torch import Tensor
 from typing import Optional, List, Tuple
 
 
+def load_infinite(loader):
+    iterator = iter(loader)
+    while True:
+        try:
+            yield next(iterator)
+        except StopIteration:
+            iterator = iter(loader)
 
 def IOU(target, prediction):
     prediction = np.where(prediction > 0.5, 1, 0)
