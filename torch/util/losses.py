@@ -3,6 +3,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 
+def structureLoss(student, teacher, image, imagenet_iterator, channel_size=384, ):
+    with torch.no_grad():
+        t_pdn_out = teacher(image)
+    normal_t_out = (t_pdn_out - self.channel_mean) / self.channel_std
+    s_pdn_out = student(image)
+    s_pdn_out = s_pdn_out[:, :channel_size, :, :]
+    distance_s_t = torch.pow(normal_t_out - s_pdn_out, 2)
+    dhard = torch.quantile(distance_s_t[:8, :, :, :], 0.999)
+    hard_data = distance_s_t[distance_s_t >= dhard]
+    Lhard = torch.mean(hard_data)
+    image_p = next(imagenet_iterator)
+    s_imagenet_out = student(image_p[0].cuda())
+    N = torch.mean(torch.pow(s_imagenet_out[:, :channel_size, :, :], 2))
+    loss_st = Lhard + N
+    return loss_st
+
 
 class FocalTverskyLoss(nn.Module):
     def __init__(self, alpha=0.2, beta=0.8, gamma=2, smooth=1):
