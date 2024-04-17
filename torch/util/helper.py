@@ -15,6 +15,33 @@ def load_infinite(loader):
         except StopIteration:
             iterator = iter(loader)
 
+
+
+
+def teacher_normalization(teacher, train_loader):
+
+    mean_outputs = []
+    for train_image in train_loader:
+        train_image = train_image.cuda()
+        teacher_output = teacher(train_image)
+        mean_output = torch.mean(teacher_output, dim=[0, 2, 3])
+        mean_outputs.append(mean_output)
+    channel_mean = torch.mean(torch.stack(mean_outputs), dim=0)
+    channel_mean = channel_mean[None, :, None, None]
+
+    mean_distances = []
+    for train_image in train_loader:
+        train_image = train_image.cuda()
+        teacher_output = teacher(train_image)
+        distance = (teacher_output - channel_mean) ** 2
+        mean_distance = torch.mean(distance, dim=[0, 2, 3])
+        mean_distances.append(mean_distance)
+    channel_var = torch.mean(torch.stack(mean_distances), dim=0)
+    channel_var = channel_var[None, :, None, None]
+    channel_std = torch.sqrt(channel_var)
+    return channel_mean, channel_std
+
+
 def IOU(target, prediction):
     prediction = np.where(prediction > 0.5, 1, 0)
     intersection = np.logical_and(target, prediction)
