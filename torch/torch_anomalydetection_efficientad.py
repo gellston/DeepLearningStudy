@@ -28,7 +28,7 @@ image_width=256
 image_height=256
 target_accuracy=0.9
 channel_size=384
-best_loss = 0.1
+best_loss = 0.4
 #Hyper Parameter
 
 transform = transforms.Compose([
@@ -77,14 +77,20 @@ print('==== PDN info ====')
 summary(teacher, (3, 256, 256))
 print('====================')
 
+
 teacher_mean, teacher_std = teacher_normalization(teacher, mvtech_loader)
 
+
+total_batch = len(mvtech_loader)
+print('total batches=', total_batch)
+
 optimizer = torch.optim.Adam(student.parameters(),lr=learning_rate,weight_decay=weight_decay)
+scheduler = torch.optim.lr_scheduler.StepLR( optimizer, step_size=int(0.95 * training_epochs), gamma=0.1)
 
 for epoch in range(training_epochs):
     avg_loss = 0
     current_batch = 0
-    total_batch = len(mvtech_loader)
+    print('current learning rate=', optimizer.param_groups[0]['lr'])
     for inputs in mvtech_loader:
         # Move input and label tensors to the device
         inputs = inputs.to(device)
@@ -109,10 +115,12 @@ for epoch in range(training_epochs):
         optimizer.step()
 
         avg_loss += (loss_st.item() / total_batch)
-        
+
+    scheduler.step()
     print('current avg loss = ', avg_loss)
     if avg_loss < best_loss:
         break
+
 print("anomaly detection model training end.")
 student.eval()
 compiled_model = torch.jit.script(student)
