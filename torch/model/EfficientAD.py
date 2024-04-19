@@ -60,3 +60,25 @@ class Student(torch.nn.Module):
         x = imagenet_norm_batch(x) #Comments on Algorithm 3: We use the image normalization of the pretrained models of torchvision [44].
         x = self.pdn(x)
         return x
+
+
+
+class EfficientAD(torch.nn.Module):
+    def __init__(self, teacher=Teacher(), student=Student(), teacher_mean=torch.tensor, teacher_std=torch.tensor, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.teacher = teacher
+        self.student = student
+        self.teacher_mean = teacher_mean
+        self.teacher_std = teacher_std
+
+    def forward(self, x):
+        teacher_output = self.teacher(x)
+        teacher_output = (teacher_output - self.teacher_mean) / self.teacher_std
+        student_output = self.student(x)
+        square_map = (teacher_output - student_output) ** 2
+        map_st = torch.mean(square_map, dim=1, keepdim=True)
+        map_min = map_st.min()
+        map_max = map_st.max()
+        map_st = (map_st - map_min) / (map_max -map_min)
+        anomal_score = square_map.sum(3).sum(2).sum(1).sqrt()
+        return map_st, anomal_score
