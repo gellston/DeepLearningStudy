@@ -31,11 +31,11 @@ if device == 'cuda':
 
 ## Hyper parameter
 training_epochs = 10
-batch_size = 30
+batch_size = 3
 target_accuracy = 0.70
 learning_rate = 0.003
 num_class = 1000
-save_step_batch_size = 1000
+save_step_batch_size = 100
 skip_batch_count = 0
 pretrained = False
 ## Hyper parameter
@@ -43,12 +43,12 @@ pretrained = False
 
 model = MobileNetV2(class_num=num_class, activation=torch.nn.ReLU6).to(device)
 print('==== model info ====')
-summary(model, (3, 224, 224))
+summary(model, (3, 640, 640))
 print('====================')
 
 
 macs, params = get_model_complexity_info(model,
-                                         (3, 224, 224),
+                                         (3, 640, 640),
                                          as_strings=True,
                                          print_per_layer_stat=True, verbose=True)
 print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
@@ -71,7 +71,7 @@ model.eval()
 compiled_model = torch.jit.script(model)
 torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(MobileNetV2).pt")
 
-trace_input = torch.rand(1, 3, 224, 224).to(device, dtype=torch.float32)
+trace_input = torch.rand(1, 3, 640, 640).to(device, dtype=torch.float32)
 trace_model = torch.jit.trace(model, trace_input)
 torch.jit.save(trace_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(MobileNetV2)_Trace.pt")
 
@@ -84,8 +84,9 @@ transform = torchvision.transforms.Compose([
                 torchvision.transforms.ToTensor()
             ])
 
-classificationDataset = torchvision.datasets.ImageFolder(root="C://Dataset//ImageNet//train//",
-                                                         transform=transform)
+classificationDataset = torchvision.datasets.ImageNet(root="E://데이터셋//ImageNet//",
+                                                      split='val',
+                                                      transform=transform)
 
 # dataset loader
 data_loader = DataLoader(dataset=classificationDataset,
@@ -109,19 +110,19 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
         gpu_X = X.to(device)
         gpu_Y = Y.to(device)
         gpu_Y = torch.nn.functional.one_hot(gpu_Y, num_classes=num_class).float()
-
+        
         model.train()
         optimizer.zero_grad()
         hypothesis = model(gpu_X)
         cost = criterion(hypothesis, gpu_Y)
         cost.backward()
-        avg_cost += (cost.item() / total_batch)
+        avg_cost += (cost / total_batch)
         optimizer.step()
 
         model.eval()
         hypothesis = model(gpu_X)
         correct_prediction = torch.argmax(hypothesis, 1) == torch.argmax(gpu_Y, 1)
-        accuracy = correct_prediction.float().mean().item()
+        accuracy = correct_prediction.float().mean()
         avg_acc += (accuracy / total_batch)
 
         current_batch += 1
@@ -132,8 +133,11 @@ for epoch in range(training_epochs): # 앞서 training_epochs의 값은 15로 �
             torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(MobileNetV2).pt")
             gc.collect()
             ## no Train Model Save
-            print('current batch=', current_batch, 'current accuracy=', accuracy)
+        print('current batch=', current_batch, 'current accuracy=', accuracy.item())
 
+        #input_image = X[0].detach().permute(1, 2, 0).squeeze(0).cpu().numpy().astype(np.float32)
+        #cv2.imshow('input', input_image)
+        #cv2.waitKey(10)
 
     model.eval()
     compiled_model = torch.jit.script(model)

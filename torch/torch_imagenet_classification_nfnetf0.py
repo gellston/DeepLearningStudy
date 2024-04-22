@@ -54,12 +54,12 @@ print('{:<30}  {:<8}'.format('Number of parameters: ', params))
 
 ## no Train Model Save
 if pretrained == True:
-    CSPMobileNetV2Weight = torch.jit.load("D://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
+    CSPMobileNetV2Weight = torch.jit.load("C://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
     model.load_state_dict(CSPMobileNetV2Weight.state_dict())
 
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
 ## no Train Model Save
 
 
@@ -69,11 +69,11 @@ transform = torchvision.transforms.Compose([
                 torchvision.transforms.ToTensor()
             ])
 
-trainDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
+trainDataset = torchvision.datasets.ImageNet(root="E://데이터셋//ImageNet//",
                                                       split='val',
                                                       transform=transform)
 
-validationDataset = torchvision.datasets.ImageNet(root="D://학습이미지//imagenet//",
+validationDataset = torchvision.datasets.ImageNet(root="E://데이터셋//ImageNet//",
                                                       split='val',
                                                       transform=transform)
 
@@ -170,7 +170,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
 
     model.eval()
     compiled_model = torch.jit.script(model)
-    torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
+    torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
     print('Train Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), 'acc =', '{:.9f}'.format(avg_acc))
     print('Validation Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_validation_cost), 'acc =', '{:.9f}'.format(avg_validation_acc))
 
@@ -191,7 +191,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
     axis[1, 1].set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     plt.show(block=False)
     plt.pause(0.001)
-    plt.savefig('D://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).png')
+    plt.savefig('C://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).png')
 
     if avg_validation_acc > target_accuracy:
         break
@@ -199,7 +199,7 @@ for epoch in range(current_epoch, training_epochs): # 앞서 training_epochs의 
 ## no Train Model Save
 model.eval()
 compiled_model = torch.jit.script(model)
-torch.jit.save(compiled_model, "D://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
+torch.jit.save(compiled_model, "C://Github//DeepLearningStudy//trained_model//ImageNet(NFNetF0).pt")
 ## no Train Model Save
 
 print('Learning finished')
