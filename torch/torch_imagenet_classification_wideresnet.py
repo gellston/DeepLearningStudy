@@ -21,7 +21,7 @@ if __name__ == '__main__':
     num_class = 1000
     save_step_batch_size = 100
     skip_batch_count = 0
-    pretrained = False
+    pretrained = True
     accuracy_threshold = 0.65
     ## Hyper parameter
 
@@ -35,10 +35,10 @@ if __name__ == '__main__':
     ])
 
     # Load the ImageNet Object Localization Challenge dataset
-    train_dataset = torchvision.datasets.ImageFolder(root='D://training_image//imagenet//train//',
+    train_dataset = torchvision.datasets.ImageFolder(root='D://training_image//imagenet//val//',
                                                      transform=transform)
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=10)
 
     # Load the ResNet50 model
     model = WideResNet(class_num=num_class)
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     ## no Train Model Save
     if pretrained == True:
-        WideResNetWeight = torch.jit.load("D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_TOP).pt")
+        WideResNetWeight = torch.jit.load("D://Github//DeepLearningStudy//trained_model//ImageNet(WideResnet_Batch_Step).pt")
         model.load_state_dict(WideResNetWeight.state_dict())
 
     # Define the loss function and optimizer
